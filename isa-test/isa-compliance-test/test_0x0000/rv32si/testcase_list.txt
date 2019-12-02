@@ -1,0 +1,6 @@
+csr
+dirty
+ma_fetch
+sbreak
+scall
+wfi

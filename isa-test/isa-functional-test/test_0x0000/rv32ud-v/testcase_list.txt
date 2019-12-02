@@ -1,0 +1,10 @@
+rv32ud-v-fadd
+rv32ud-v-fclass
+rv32ud-v-fcmp
+rv32ud-v-fcvt
+rv32ud-v-fcvt_w
+rv32ud-v-fdiv
+rv32ud-v-fmadd
+rv32ud-v-fmin
+rv32ud-v-ldst
+rv32ud-v-recoding

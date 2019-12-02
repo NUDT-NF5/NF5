@@ -1,0 +1,8 @@
+rv32um-v-div
+rv32um-v-divu
+rv32um-v-mul
+rv32um-v-mulh
+rv32um-v-mulhsu
+rv32um-v-mulhu
+rv32um-v-rem
+rv32um-v-remu

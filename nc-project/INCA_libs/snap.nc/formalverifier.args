@@ -1,0 +1,15 @@
+//
+// File created by:  ncverilog
+// Do not modify this file
+//
+-NOWARN
+CUNGL1
+-NOWARN
+NONPRT
+-INPUT
+test.tcl
+-COVOVERWRITE
+-COVTEST
+xor_salsa8
+-MESSAGES
+-COVERAGE

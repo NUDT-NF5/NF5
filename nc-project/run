@@ -1,0 +1,2 @@
+#!/bin/bash
+cd nc-project && ./run_nc && cd -

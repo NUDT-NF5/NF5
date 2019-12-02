@@ -1,0 +1,12 @@
+rv32i
+rv32im
+rv32imc
+rv32mi
+rv32si
+rv32ua
+rv32uc
+rv32ud
+rv32uf
+rv32ui
+rv64i
+rv64im

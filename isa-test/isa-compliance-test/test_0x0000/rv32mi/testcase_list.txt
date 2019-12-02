@@ -1,0 +1,8 @@
+csr
+illegal
+ma_addr
+ma_fetch
+mcsr
+sbreak
+scall
+shamt

@@ -1,0 +1,10 @@
+//
+// File created by:  ncverilog
+// Do not modify this file
+//
++NoArgsToLog
+-NOWARN
+CUNGL1
+-NOWARN
+NONPRT
+-COVERAGE

@@ -1,0 +1,10 @@
+#!/bin/sh
+#time:        2019.08.07
+#author:      sue
+#mail:        460967729@qq.com
+#description: this script will check all verilog file and find the "`include *.v" setences then change them to "include ../dir/*.v"
+# s1 = "`include \"define.v\""
+# s2 = "\`include \"\.\.\/common\/define\.v\""
+#find -name "*.v" | xargs sed -i 's/`include \"ctrl_encode_def.v\"/`include \"\.\/common\/ctrl_encode_def\.v\"/' 2>err.log
+#find -name "*.v" | xargs sed -i 's/`include \"instruction_def.v\"/`include \"\.\/common\/instruction_def\.v\"/' 2>err.log
+find -name "*.v" | xargs sed -i 's/`include \"..\/src\/Common\/Define.v\"/`include \"..\/src\/common\/Define.v\"/' 2>err.log

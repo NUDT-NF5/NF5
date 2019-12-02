@@ -1,0 +1,302 @@
+
+/home/ubuntu/Desktop/riscv-compliance-master/work/rv32i/I-LH-01.elf：     文件格式 elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	04c0006f          	j	4c <reset_vector>
+
+00000004 <trap_vector>:
+   4:	34202f73          	csrr	t5,mcause
+   8:	00800f93          	li	t6,8
+   c:	03ff0a63          	beq	t5,t6,40 <write_tohost>
+  10:	00900f93          	li	t6,9
+  14:	03ff0663          	beq	t5,t6,40 <write_tohost>
+  18:	00b00f93          	li	t6,11
+  1c:	03ff0263          	beq	t5,t6,40 <write_tohost>
+  20:	00000f17          	auipc	t5,0x0
+  24:	fe0f0f13          	addi	t5,t5,-32 # 0 <_start>
+  28:	000f0463          	beqz	t5,30 <trap_vector+0x2c>
+  2c:	000f0067          	jr	t5
+  30:	34202f73          	csrr	t5,mcause
+  34:	000f5463          	bgez	t5,3c <handle_exception>
+  38:	0040006f          	j	3c <handle_exception>
+
+0000003c <handle_exception>:
+  3c:	5391e193          	ori	gp,gp,1337
+
+00000040 <write_tohost>:
+  40:	00001f17          	auipc	t5,0x1
+  44:	fc3f2023          	sw	gp,-64(t5) # 1000 <tohost>
+  48:	ff9ff06f          	j	40 <write_tohost>
+
+0000004c <reset_vector>:
+  4c:	f1402573          	csrr	a0,mhartid
+  50:	00051063          	bnez	a0,50 <reset_vector+0x4>
+  54:	00000297          	auipc	t0,0x0
+  58:	01028293          	addi	t0,t0,16 # 64 <reset_vector+0x18>
+  5c:	30529073          	csrw	mtvec,t0
+  60:	18005073          	csrwi	satp,0
+  64:	00000297          	auipc	t0,0x0
+  68:	01c28293          	addi	t0,t0,28 # 80 <reset_vector+0x34>
+  6c:	30529073          	csrw	mtvec,t0
+  70:	fff00293          	li	t0,-1
+  74:	3b029073          	csrw	pmpaddr0,t0
+  78:	01f00293          	li	t0,31
+  7c:	3a029073          	csrw	pmpcfg0,t0
+  80:	00000297          	auipc	t0,0x0
+  84:	01828293          	addi	t0,t0,24 # 98 <reset_vector+0x4c>
+  88:	30529073          	csrw	mtvec,t0
+  8c:	30205073          	csrwi	medeleg,0
+  90:	30305073          	csrwi	mideleg,0
+  94:	30405073          	csrwi	mie,0
+  98:	00000193          	li	gp,0
+  9c:	00000297          	auipc	t0,0x0
+  a0:	f6828293          	addi	t0,t0,-152 # 4 <trap_vector>
+  a4:	30529073          	csrw	mtvec,t0
+  a8:	00100513          	li	a0,1
+  ac:	01f51513          	slli	a0,a0,0x1f
+  b0:	00054863          	bltz	a0,c0 <reset_vector+0x74>
+  b4:	0ff0000f          	fence
+  b8:	00100193          	li	gp,1
+  bc:	00000073          	ecall
+  c0:	00000297          	auipc	t0,0x0
+  c4:	f4028293          	addi	t0,t0,-192 # 0 <_start>
+  c8:	00028e63          	beqz	t0,e4 <reset_vector+0x98>
+  cc:	10529073          	csrw	stvec,t0
+  d0:	0000b2b7          	lui	t0,0xb
+  d4:	10928293          	addi	t0,t0,265 # b109 <_end+0x8f05>
+  d8:	30229073          	csrw	medeleg,t0
+  dc:	30202373          	csrr	t1,medeleg
+  e0:	f4629ee3          	bne	t0,t1,3c <handle_exception>
+  e4:	30005073          	csrwi	mstatus,0
+  e8:	00002537          	lui	a0,0x2
+  ec:	80050513          	addi	a0,a0,-2048 # 1800 <fromhost+0x700>
+  f0:	30052073          	csrs	mstatus,a0
+  f4:	00000297          	auipc	t0,0x0
+  f8:	01428293          	addi	t0,t0,20 # 108 <begin_testcode>
+  fc:	34129073          	csrw	mepc,t0
+ 100:	f1402573          	csrr	a0,mhartid
+ 104:	30200073          	mret
+
+00000108 <begin_testcode>:
+ 108:	00002f97          	auipc	t6,0x2
+ 10c:	ef8f8f93          	addi	t6,t6,-264 # 2000 <test_A1_data>
+ 110:	00002117          	auipc	sp,0x2
+ 114:	f3010113          	addi	sp,sp,-208 # 2040 <begin_signature>
+ 118:	000f9183          	lh	gp,0(t6)
+ 11c:	002f9203          	lh	tp,2(t6)
+ 120:	00312023          	sw	gp,0(sp)
+ 124:	00412223          	sw	tp,4(sp)
+ 128:	00002c17          	auipc	s8,0x2
+ 12c:	eddc0c13          	addi	s8,s8,-291 # 2005 <test_A2_data+0x1>
+ 130:	00002297          	auipc	t0,0x2
+ 134:	f1828293          	addi	t0,t0,-232 # 2048 <test_A2_res>
+ 138:	fffc1c83          	lh	s9,-1(s8)
+ 13c:	001c1d03          	lh	s10,1(s8)
+ 140:	0192a023          	sw	s9,0(t0)
+ 144:	01a2a223          	sw	s10,4(t0)
+ 148:	00002397          	auipc	t2,0x2
+ 14c:	ebf38393          	addi	t2,t2,-321 # 2007 <test_A2_data+0x3>
+ 150:	00002417          	auipc	s0,0x2
+ 154:	f0040413          	addi	s0,s0,-256 # 2050 <test_A3_res>
+ 158:	00139f03          	lh	t5,1(t2)
+ 15c:	00339f83          	lh	t6,3(t2)
+ 160:	01e42023          	sw	t5,0(s0)
+ 164:	01f42223          	sw	t6,4(s0)
+ 168:	00002517          	auipc	a0,0x2
+ 16c:	6a450513          	addi	a0,a0,1700 # 280c <_end+0x608>
+ 170:	00002597          	auipc	a1,0x2
+ 174:	ee858593          	addi	a1,a1,-280 # 2058 <test_A4_res>
+ 178:	80051603          	lh	a2,-2048(a0)
+ 17c:	80251683          	lh	a3,-2046(a0)
+ 180:	00c5a023          	sw	a2,0(a1)
+ 184:	00d5a223          	sw	a3,4(a1)
+ 188:	00001697          	auipc	a3,0x1
+ 18c:	68b68693          	addi	a3,a3,1675 # 1813 <fromhost+0x713>
+ 190:	00002717          	auipc	a4,0x2
+ 194:	ed070713          	addi	a4,a4,-304 # 2060 <test_A5_res>
+ 198:	7fd69783          	lh	a5,2045(a3)
+ 19c:	7ff69803          	lh	a6,2047(a3)
+ 1a0:	00f72023          	sw	a5,0(a4)
+ 1a4:	01072223          	sw	a6,4(a4)
+ 1a8:	00002817          	auipc	a6,0x2
+ 1ac:	e7080813          	addi	a6,a6,-400 # 2018 <test_B_data>
+ 1b0:	00002897          	auipc	a7,0x2
+ 1b4:	eb888893          	addi	a7,a7,-328 # 2068 <test_B_res>
+ 1b8:	ffc81903          	lh	s2,-4(a6)
+ 1bc:	ffe81983          	lh	s3,-2(a6)
+ 1c0:	00081a03          	lh	s4,0(a6)
+ 1c4:	00281a83          	lh	s5,2(a6)
+ 1c8:	00481b03          	lh	s6,4(a6)
+ 1cc:	00681b83          	lh	s7,6(a6)
+ 1d0:	0128a023          	sw	s2,0(a7)
+ 1d4:	0138a223          	sw	s3,4(a7)
+ 1d8:	0148a423          	sw	s4,8(a7)
+ 1dc:	0158a623          	sw	s5,12(a7)
+ 1e0:	0168a823          	sw	s6,16(a7)
+ 1e4:	0178aa23          	sw	s7,20(a7)
+ 1e8:	00002a97          	auipc	s5,0x2
+ 1ec:	e38a8a93          	addi	s5,s5,-456 # 2020 <test_C_data>
+ 1f0:	00002b17          	auipc	s6,0x2
+ 1f4:	e90b0b13          	addi	s6,s6,-368 # 2080 <test_C_res>
+ 1f8:	000a9003          	lh	zero,0(s5)
+ 1fc:	000b2023          	sw	zero,0(s6)
+ 200:	00002a97          	auipc	s5,0x2
+ 204:	e24a8a93          	addi	s5,s5,-476 # 2024 <test_D_data>
+ 208:	00002b17          	auipc	s6,0x2
+ 20c:	e7cb0b13          	addi	s6,s6,-388 # 2084 <test_D_res>
+ 210:	000aab83          	lw	s7,0(s5)
+ 214:	000b9c03          	lh	s8,0(s7)
+ 218:	000c0c93          	mv	s9,s8
+ 21c:	019b2023          	sw	s9,0(s6)
+ 220:	00002c97          	auipc	s9,0x2
+ 224:	e0cc8c93          	addi	s9,s9,-500 # 202c <test_E1_data>
+ 228:	00002d17          	auipc	s10,0x2
+ 22c:	e60d0d13          	addi	s10,s10,-416 # 2088 <test_E1_res>
+ 230:	000c9c83          	lh	s9,0(s9)
+ 234:	019d2023          	sw	s9,0(s10)
+ 238:	00002d97          	auipc	s11,0x2
+ 23c:	df9d8d93          	addi	s11,s11,-519 # 2031 <test_E2_data+0x1>
+ 240:	00002e17          	auipc	t3,0x2
+ 244:	e4ce0e13          	addi	t3,t3,-436 # 208c <test_E2_res>
+ 248:	fffd9d83          	lh	s11,-1(s11)
+ 24c:	01be2023          	sw	s11,0(t3)
+ 250:	0ff0000f          	fence
+ 254:	00100193          	li	gp,1
+ 258:	00000073          	ecall
+
+0000025c <end_testcode>:
+ 25c:	c0001073          	unimp
+	...
+
+Disassembly of section .tohost:
+
+00001000 <tohost>:
+	...
+
+00001100 <fromhost>:
+	...
+
+Disassembly of section .data:
+
+00002000 <test_A1_data>:
+    2000:	f222                	fsw	fs0,36(sp)
+    2002:	11f1                	addi	gp,gp,-4
+
+00002004 <test_A2_data>:
+    2004:	44f4                	lw	a3,76(s1)
+    2006:	          	0xf666f333
+
+00002008 <test_A3_data>:
+    2008:	f666                	fsw	fs9,44(sp)
+    200a:	55f5                	li	a1,-3
+
+0000200c <test_A4_data>:
+    200c:	88f8                	0x88f8
+    200e:	          	0xaaaf777
+
+00002010 <test_A5_data>:
+    2010:	0aaa                	slli	s5,s5,0xa
+    2012:	9909                	andi	a0,a0,-30
+    2014:	cc0c                	sw	a1,24(s0)
+    2016:	          	0xeee0bbb
+
+00002018 <test_B_data>:
+    2018:	0eee                	slli	t4,t4,0x1b
+    201a:	dd0d                	beqz	a0,1f54 <fromhost+0xe54>
+    201c:	00f0                	addi	a2,sp,76
+    201e:	0fff                	0xfff
+
+00002020 <test_C_data>:
+    2020:	5678                	lw	a4,108(a2)
+    2022:	1234                	addi	a3,sp,296
+
+00002024 <test_D_data>:
+    2024:	2028                	fld	fa0,64(s0)
+	...
+
+00002028 <test_D_data2_label>:
+    2028:	def0                	sw	a2,124(a3)
+    202a:	9abc                	0x9abc
+
+0000202c <test_E1_data>:
+    202c:	3210                	fld	fa2,32(a2)
+    202e:	7654                	flw	fa3,44(a2)
+
+00002030 <test_E2_data>:
+    2030:	ba98                	fsd	fa4,48(a3)
+    2032:	fedc                	fsw	fa5,60(a3)
+	...
+
+00002040 <begin_signature>:
+    2040:	ffff                	0xffff
+    2042:	ffff                	0xffff
+    2044:	ffff                	0xffff
+    2046:	ffff                	0xffff
+
+00002048 <test_A2_res>:
+    2048:	ffff                	0xffff
+    204a:	ffff                	0xffff
+    204c:	ffff                	0xffff
+    204e:	ffff                	0xffff
+
+00002050 <test_A3_res>:
+    2050:	ffff                	0xffff
+    2052:	ffff                	0xffff
+    2054:	ffff                	0xffff
+    2056:	ffff                	0xffff
+
+00002058 <test_A4_res>:
+    2058:	ffff                	0xffff
+    205a:	ffff                	0xffff
+    205c:	ffff                	0xffff
+    205e:	ffff                	0xffff
+
+00002060 <test_A5_res>:
+    2060:	ffff                	0xffff
+    2062:	ffff                	0xffff
+    2064:	ffff                	0xffff
+    2066:	ffff                	0xffff
+
+00002068 <test_B_res>:
+    2068:	ffff                	0xffff
+    206a:	ffff                	0xffff
+    206c:	ffff                	0xffff
+    206e:	ffff                	0xffff
+    2070:	ffff                	0xffff
+    2072:	ffff                	0xffff
+    2074:	ffff                	0xffff
+    2076:	ffff                	0xffff
+    2078:	ffff                	0xffff
+    207a:	ffff                	0xffff
+    207c:	ffff                	0xffff
+    207e:	ffff                	0xffff
+
+00002080 <test_C_res>:
+    2080:	ffff                	0xffff
+    2082:	ffff                	0xffff
+
+00002084 <test_D_res>:
+    2084:	ffff                	0xffff
+    2086:	ffff                	0xffff
+
+00002088 <test_E1_res>:
+    2088:	ffff                	0xffff
+    208a:	ffff                	0xffff
+
+0000208c <test_E2_res>:
+    208c:	ffff                	0xffff
+    208e:	ffff                	0xffff
+
+00002090 <end_signature>:
+	...
+
+00002100 <begin_regstate>:
+    2100:	0080                	addi	s0,sp,64
+	...
+
+00002200 <end_regstate>:
+    2200:	0004                	0x4
+	...

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+    rm -r INCA_libs
+    rm -r cov_work
+	rm -rf mySim.log
+	#perl filelist_gen *.v
+	#source code_include_check
+	#find . -regex '.*\.v\|.*\.sv' | xargs perl filelist_gen
+    ncverilog -f run_nc.f |tee nc.log
+    #gedit mySim.log
+    echo "----Simulation of $curvar finished !----"

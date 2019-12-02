@@ -1,0 +1,13 @@
+//
+// File created by:  ncverilog
+// Do not modify this file
+//
+-ACCESS
++rw
+-NOSPECIFY
+-COVERAGE
+all
+-COVDUT
+TbAll
+-COVFILE
+test.tcl
