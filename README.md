@@ -21,8 +21,6 @@ NF5 has implemented 56 instructions of RISC-V ISA:
 |**Memory Access**|LB、LH、LW、LBU、LHU、SB、SH、SW|
 |**Privilege**|ECALL、MRET、EBREAK、WFI、FENCE、FENCE.I、CSRRW、CSRRS、CSRRC、CSRRWI、CSRRSI、CSRRCI|
 
-## Contact Us
-NUDT_NF5@outlook.com
 
 ## Datapath Diagram
 
@@ -183,6 +181,13 @@ Command|Description
    - **make sim_gui_nc**
     If you simulate with NC-Verilog, you should enter `make sim_gui_nc` in the terminal, the new NC-Verilog window will be opened, and you can find waveforms of every signal in the simvision window. If you want to know how to use NC-Verilog, you can see https://www.cadence.com/content/cadence-www/global/en_US/home.html. 
 
+### <a name="DesignCompiler"></a>Synthesizing the Core
+- (to be done)
+### <a name="FPGA"></a>Mapping the NF5 down to FPGA
+- (to be done)
+### <a name="Debug"></a>Debug with GDB
+- (to be done)
+
 ### <a name="Assert"></a>External Assertion Test
 If you want to debug NF5 with single testcase, you may need to add some assertions in testbench. You will find this in the next steps:
  (Note: Adding assertions to testbench only applies to simulate with NC-Verilog and it only applies to function test at the same time.)
@@ -192,14 +197,6 @@ If you want to debug NF5 with single testcase, you may need to add some assertio
     You can add yourself assertions in `TbAll_self_assert.txt`. You should not modify any other code existed in this testbench.
 3. **Run single test**
     After adding assert, you can run single test according to the steps listed in `gui`as before. 
-
-### <a name="DesignCompiler"></a>Synthesizing the Core
-- (to be done)
-### <a name="FPGA"></a>Mapping the NF5 down to FPGA
-- (to be done)
-### <a name="Debug"></a>Debug with GDB
-- (to be done)
-
 ### <a name="Issue"></a>Known Issues
 - Multiplier and divider uints are not totally finished.
 - The storage system we design is not Cache but a memory.
