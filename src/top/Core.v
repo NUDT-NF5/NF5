@@ -22,6 +22,7 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr;
+	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm;
 	wire	[2 - 1 : 0]						Decode_Stall;
 	wire	[4 - 1 : 0]						Decode_Flush;
 	wire									Decode_16BitFlag;
@@ -153,6 +154,7 @@ module Core(
 		.Decode_CsrAddr(Decode_CsrAddr),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
 		.Decode_Rs2Addr(Decode_Rs2Addr),
+        .Decode_Rm(Decode_Rm),
 		.Decode_Stall(Decode_Stall),
 		.Decode_Flush(Decode_Flush),
 		.Decode_16BitFlag(Decode_16BitFlag),
