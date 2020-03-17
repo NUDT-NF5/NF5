@@ -65,7 +65,7 @@ end
 	initial begin
 		fd = $fopen ("mySim.log", "w");
 		//$fdisplay(fd,"====== NF5 sim start ======");
-		#1500
+		#3000
 		for (dxx=begin_signature;dxx<end_signature;dxx=dxx+1)begin
             $fdisplay(fd,"%h",i_Core.i_Dcache.data[dxx]);
             end        

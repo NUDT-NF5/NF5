@@ -8,10 +8,10 @@
 module adder32 (
     input      [31:0] a,
     input      [31:0] b, 
+    input             ci,
     output     [31:0] s
 );
-    //output co;
-    wire              ci = 1'b0;          
+    //output co;         
     cla_32  cla   (a, b, ci,/*g_out,p_out,*/ s); // 向下调用
 endmodule
 

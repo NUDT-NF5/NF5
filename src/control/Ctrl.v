@@ -18,6 +18,7 @@ module Ctrl(
     input  wire          Csr_ExcpFlag   ,
     input  wire          Csr_WFIClrFlag	,//clr wfi_stall
 	input  wire			 Decode_16BitFlag ,
+    input  wire          EX_StallReq    ,
     output    [3:0]	 Flush,
 input  wire	Csr_Memflush             
     );
@@ -41,15 +42,17 @@ assign Flush=ctrl_flush|stage_flush ;
 /////////////stall_last ////////
  always @ (*) begin
 	if(WFI_Req) 
-       Ctrl_Stall = 5'b11111;
+        Ctrl_Stall = 5'b11111;
     else if(DecodeHazard_Stall)
-       Ctrl_Stall = 5'b00011;
+        Ctrl_Stall = 5'b00011;
     else if(Dcache_StallReq |Idfence_MemReq)
-       Ctrl_Stall = 5'b00111;
+        Ctrl_Stall = 5'b00111;
     else if(Idfence_ExReq)
-       Ctrl_Stall = 5'b00011;
+        Ctrl_Stall = 5'b00011;
     else if(Icache_StallReq)
-       Ctrl_Stall = 5'b00001; 
+        Ctrl_Stall = 5'b00001; 
+    else if(EX_StallReq)
+        Ctrl_Stall = 5'b00111;
     else 
 	   Ctrl_Stall = 5'b0;
   end
@@ -63,6 +66,8 @@ always @ (*) begin//wb-mem ex-mem id-ex if-id
         stage_flush = 4'b0010; 
     else if(Icache_StallReq)
         stage_flush = 4'b0001; 
+    else if(EX_StallReq)
+        stage_flush = 4'b0100;
     else 
 	  stage_flush = 4'b0;
   end

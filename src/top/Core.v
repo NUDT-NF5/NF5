@@ -61,6 +61,7 @@ module Core(
     wire           							EX_LdStFlag;
 	wire									EX_BranchFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
+	wire									EX_StallReq;
 	
     wire    [31:0] 							EXMem_AluData;
     wire    [31:0] 							EXMem_Rs2Data;
@@ -107,11 +108,12 @@ module Core(
 		.EX_LdStFlag    (EX_LdStFlag),
 		.Ctrl_Stall     (Ctrl_Stall),
 		.EX_BranchFlag  (EX_BranchFlag),
+		.EX_StallReq	(EX_StallReq),
 		.Csr_ExcpFlag   (Csr_ExcpFlag),
 		.Decode_16BitFlag(Decode_16BitFlag),
 		.Flush			(Flush) ,
         .Csr_WFIClrFlag (Csr_WFIClrFlag ) ,
-        .Csr_Memflush(Csr_Memflush)       
+        .Csr_Memflush(Csr_Memflush)  
     );
 	
 //wire Fetchaddr_Invalid;
@@ -264,10 +266,13 @@ module Core(
 		.IDEX_StType(IDEX_StType),
 		.Mem_DcacheEN(Mem_DcacheEn),
 		.IDEX_16BitFlag(IDEX_16BitFlag),
+		.clk(clk),
+		.rst_n(rst_n),
 		.EX_AluData(EX_AluData),
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),
-		.EX_LdStFlag(EX_LdStFlag)
+		.EX_LdStFlag(EX_LdStFlag),
+		.EX_StallReq(EX_StallReq)
 	);
 wire [31:0] EXMEM_NowPC;	
 	Csr i_Csr (

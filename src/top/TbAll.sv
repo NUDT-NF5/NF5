@@ -57,7 +57,7 @@ end
     reg  [31:0] end_signature_in;
     initial begin
 	//input compliance data start
- begin_signature_in = 32'h00002000;end_signature_in = 32'h00002070;
+ begin_signature_in = 32'h00002000;end_signature_in = 32'h000020d0;
     end
     assign begin_signature = begin_signature_in[13:2];
     assign end_signature   = end_signature_in[13:2];	
@@ -65,7 +65,7 @@ end
 	initial begin
 		fd = $fopen ("mySim.log", "w");
 		//$fdisplay(fd,"====== NF5 sim start ======");
-		#1500
+		#3000
 		for (dxx=begin_signature;dxx<end_signature;dxx=dxx+1)begin
             $fdisplay(fd,"%h",i_Core.i_Dcache.data[dxx]);
             end        
