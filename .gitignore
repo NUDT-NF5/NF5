@@ -3,3 +3,4 @@
 *.txt
 iverilog-project/filelist.v
 src/top/TbAll.sv
+/output
