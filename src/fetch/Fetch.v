@@ -22,7 +22,7 @@ module Fetch(
 	input								EX_BranchFlag,
 	input		[`ADDR_WIDTH - 1 : 0]	EX_BranchPC,
 	//Decode -> Fetch
-	input								Decode_16BitFlag
+	input		[2 - 1 : 0]				Decode_NextPC
 
 );
 		
@@ -36,8 +36,10 @@ module Fetch(
 			Fetch_NextPC <= EX_BranchPC;
         else if(Ctrl_ExcpFlag)
 			Fetch_NextPC <= Ctrl_ExcpPC;
-		else if(Decode_16BitFlag)
-			Fetch_NextPC <= IFID_NowPC + 4; //fetch 2 16-bit instr
+		else if(Decode_NextPC == `PC_Plus_8)
+			Fetch_NextPC <= IFID_NowPC + 8;
+		else if(Decode_NextPC == `PC_Plus_4)
+			Fetch_NextPC <= IFID_NowPC + 4;
 		else
-			Fetch_NextPC <= Fetch_NextPC + 8; //fetch 2 32-bit instr
+			Fetch_NextPC <= Fetch_NextPC + 2; //the most safe way
 endmodule

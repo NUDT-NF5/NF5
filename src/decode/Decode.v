@@ -54,8 +54,10 @@ module Decode(
 	output 									Decode_16BitFlag_1,
 	
 	//Decode ->DecodeHazard
-	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType_1
+	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType_1,
 	
+	//select next pc
+	output	reg [2 - 1 : 0]					Decode_NextPC
 );
 	//32 bit
 	//part 1
@@ -260,6 +262,15 @@ module Decode(
 
 	assign Decode_16BitFlag_0 = xlenSel32_0 ? 1'b0 : xlenSel16_0;
 	assign Decode_16BitFlag_1 = xlenSel32_1 ? 1'b0 : xlenSel16_1;
+
+	always @(*) begin : selectNextPC_
+		if(xlenSel32_1 && xlenSel32_0)
+			Decode_NextPC = `PC_Plus_8; // 32/32
+		else if((xlenSel32_1 == 1'b0 && xlenSel32_0) || (xlenSel16_1 && xlenSel16_0))
+			Decode_NextPC = `PC_Plus_4; // 16/16/32 16/16/16/16 32/16/16
+		else 
+			Decode_NextPC = `PC_Plus_2; // 16/32/16
+	end
 
 	//instr 0
 	always @(*)

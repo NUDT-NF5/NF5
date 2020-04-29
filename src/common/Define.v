@@ -41,6 +41,10 @@
 `define	RS_SEL_Wb			`RS_SEL_WIDTH'd4
 
 /*----------Decode.v---------*/
+`define PC_Plus_2			2'b00
+`define PC_Plus_4			2'b01
+`define PC_Plus_8			2'b10
+
 //opcode type
 `define OPCODE_WIDTH		7
 `define	OP_LUI				`OPCODE_WIDTH'b011_0111

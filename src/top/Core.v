@@ -43,6 +43,8 @@ module Core(
 	wire									Decode_16BitFlag_1;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType_1;
 
+	wire 	[2 - 1 : 0]						Decode_NextPC;
+
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
 	wire	     							DecodeHazard_StallReq;
@@ -145,7 +147,7 @@ module Core(
 		.EX_BranchFlag(1'b0),//need to edit ex
              //.EX_BranchFlag(nomisalign_Br),
 		.EX_BranchPC(32'h0000_000b),//need to edit ex
-		.Decode_16BitFlag(Decode_16BitFlag_0)//the low 16bit of IFID_Instr is 16-bit instr
+		.Decode_NextPC(Decode_NextPC)//the low 16bit of IFID_Instr is 16-bit instr
 
 	);
 
@@ -163,7 +165,11 @@ module Core(
 	);
 
 	Decode i_Decode(
-		// .IFID_Instr(64'h00000013_00000013), //for test
+		// .IFID_Instr(64'h00000013_00000013), // 32/32
+		// .IFID_Instr(64'h57c157c1_00000013), // 16/16/32
+		// .IFID_Instr(64'h57c157c1_57c157c1), // 16/16/16/16
+		// .IFID_Instr(64'h00000013_57c157c1), // 32/16/16
+		// .IFID_Instr(64'h57c10000_001357c1), // 16/32/16
 		.IFID_Instr(IFID_Instr),
 		//part 0
 		.Decode_AllCtr_0(Decode_AllCtr_0),
@@ -190,7 +196,8 @@ module Core(
 		.Decode_Stall_1(Decode_Stall_1),
 		.Decode_Flush_1(Decode_Flush_1),
 		.Decode_16BitFlag_1(Decode_16BitFlag_1),
-		.Decode_LdType_1(Decode_LdType_1)
+		.Decode_LdType_1(Decode_LdType_1),
+		.Decode_NextPC(Decode_NextPC)
 	);
 	
 	// RegFile i_RegFile(
