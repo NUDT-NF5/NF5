@@ -1,9 +1,0 @@
-fadd
-fclass
-fcmp
-fcvt
-fdiv
-fmadd
-fmin
-ldst
-recoding

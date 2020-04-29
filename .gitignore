@@ -1,4 +1,5 @@
 *.list
+*.vcd
+*.txt
 iverilog-project/filelist.v
-*.log
-output
+src/top/TbAll.sv
