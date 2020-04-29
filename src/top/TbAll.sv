@@ -55,9 +55,9 @@ end
 		end
 //Test Program  Chek
 //pass_pc_addr
-  parameter pass_pc=32'h000002f4 ;
+  parameter pass_pc=32'h00000224 ;
 //fail_pc_addr
-  parameter fail_pc=32'h000002e0 ;
+  parameter fail_pc=32'h00000210 ;
 
 wire [31:0] ifidpc=i_Core.IFID_NowPC;
 reg  [31:0] count_pass;

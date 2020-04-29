@@ -1,0 +1,4 @@
+*.list
+iverilog-project/filelist.v
+*.log
+output
