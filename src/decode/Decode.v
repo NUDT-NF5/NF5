@@ -11,168 +11,340 @@
 module Decode(
 	//IFID -> Decode
 	input	[`INSTR_WIDTH - 1 : 0]		IFID_Instr,
-	
+
+	//part 1
 	//Decode -> IDEX
-	output	reg	[`All_CTRL_WIDTH - 1 : 0]	Decode_AllCtr,
-	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_RdAddr,
-	output	reg	[`DATA_WIDTH - 1 : 0]		Decode_Imm,
-	output	reg	[`IMM_SEL_WIDTH - 1 : 0]	Decode_ImmSel,
-	output	reg	[`CSR_ADDR_WIDTH - 1 : 0]	Decode_CsrAddr,
+	output	reg	[`All_CTRL_WIDTH - 1 : 0]	Decode_AllCtr_0,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_RdAddr_0,
+	output	reg	[`DATA_WIDTH - 1 : 0]		Decode_Imm_0,
+	output	reg	[`IMM_SEL_WIDTH - 1 : 0]	Decode_ImmSel_0,
+	output	reg	[`CSR_ADDR_WIDTH - 1 : 0]	Decode_CsrAddr_0,
 		
 	//Decode -> RegFile and IDEX
-	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr,
-	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr,
-	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr_0,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr_0,
+	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm_0,
     
 	//Decode -> Ctrl	
-	output	reg [2 - 1 : 0]					Decode_Stall,
-	output	reg [4 - 1 : 0]					Decode_Flush,
+	output	reg [2 - 1 : 0]					Decode_Stall_0,
+	output	reg [4 - 1 : 0]					Decode_Flush_0,
 	//Decode ->Fetch
-	output 									Decode_16BitFlag,
+	output 									Decode_16BitFlag_0,
 	
 	//Decode ->DecodeHazard
-	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType
+	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType_0,
+
+	//part 2
+	//Decode -> IDEX
+	output	reg	[`All_CTRL_WIDTH - 1 : 0]	Decode_AllCtr_1,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_RdAddr_1,
+	output	reg	[`DATA_WIDTH - 1 : 0]		Decode_Imm_1,
+	output	reg	[`IMM_SEL_WIDTH - 1 : 0]	Decode_ImmSel_1,
+	output	reg	[`CSR_ADDR_WIDTH - 1 : 0]	Decode_CsrAddr_1,
+		
+	//Decode -> RegFile and IDEX
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr_1,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr_1,
+	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm_1,
+    
+	//Decode -> Ctrl	
+	output	reg [2 - 1 : 0]					Decode_Stall_1,
+	output	reg [4 - 1 : 0]					Decode_Flush_1,
+	//Decode ->Fetch
+	output 									Decode_16BitFlag_1,
+	
+	//Decode ->DecodeHazard
+	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType_1
 	
 );
 	//32 bit
-	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32;// for all device control info need to be piped
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32;
-	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32;
-	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32;
-	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32;
-	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag32;
-	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag32;	
-	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel32;
-	wire	[`DATA_WIDTH - 1 : 0] 			imm32;
-	
+	//part 1
+	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32_0;// for all device control info need to be piped
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32_0;
+	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32_0;
+	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32_0;
+	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32_0;
+	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag32_0;
+	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag32_0;	
+	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel32_0;
+	wire	[`DATA_WIDTH - 1 : 0] 			imm32_0;
+
+	//part 2
+	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32_1;// for all device control info need to be piped
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32_1;
+	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32_1;
+	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32_1;
+	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32_1;
+	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag32_1;
+	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag32_1;	
+	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel32_1;
+	wire	[`DATA_WIDTH - 1 : 0] 			imm32_1;
+
 	//16 bit
-	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode16;// for all device control info need to be piped
-	wire 	[`RF_ADDR_TYPE_SEL - 1 : 0]		rfSel;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr16;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr16;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr16;
-	//wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr16;
-	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr16;
-	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel16;
-	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag16;
-	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag16;	
-	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel16;
-	wire	[`DATA_WIDTH - 1 : 0] 			imm16;
-	
-	wire	[`A_SEL_WIDTH - 1 : 0 ]			A_sel;
-	wire	[`B_SEL_WIDTH - 1 : 0 ]			B_sel;
-	wire	[`ALU_OP_WIDTH - 1 : 0 ]		aluOp;
-	wire	[`ST_TYPE_WIDTH - 1 : 0 ]		stType;
-	wire	[`LD_TYPE_WIDTH - 1 : 0 ]		ldType;
-	wire	[`WB_SEL_WIDTH - 1 : 0 ]		wbSel;
-	wire	[`BOOL_WIDTH - 1 : 0 ]			wbRdEn;
-	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		csrCmd;
-	wire	[`BOOL_WIDTH - 1 : 0 ]			illegal;
+	//part 3
+	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode16_0;// for all device control info need to be piped
+	wire 	[`RF_ADDR_TYPE_SEL - 1 : 0]		rfSel_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr16_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr16_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr16_0;
+	//wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr16_0;
+	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr16_0;
+	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel16_0;
+	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag16_0;
+	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag16_0;	
+	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel16_0;
+	wire	[`DATA_WIDTH - 1 : 0] 			imm16_0;
 
-    wire    [`FUNCT3_WIDTH - 1 : 0] 		rm;	
-	InstrTypeDecode32 i_InstrTypeDecode32(
-		.instr(IFID_Instr),
-		.iEncode(iEncode32),
-		.rdAddr(rdAddr32),
-		.rs1Addr(rs1Addr32),
-		.rs2Addr(rs2Addr32),
-		.csrAddr(csrAddr32),
-        .funct3(rm)
+	//part 4
+	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode16_1;// for all device control info need to be piped
+	wire 	[`RF_ADDR_TYPE_SEL - 1 : 0]		rfSel_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr16_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr16_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr16_1;
+	//wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr16_1;
+	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr16_1;
+	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel16_1;
+	wire	[`DECODE_STALL_WIDTH - 1 : 0]	stallFlag16_1;
+	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag16_1;	
+	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel16_1;
+	wire	[`DATA_WIDTH - 1 : 0] 			imm16_1;
+
+	//instr 0
+	wire	[`A_SEL_WIDTH - 1 : 0 ]			A_sel_0;
+	wire	[`B_SEL_WIDTH - 1 : 0 ]			B_sel_0;
+	wire	[`ALU_OP_WIDTH - 1 : 0 ]		aluOp_0;
+	wire	[`ST_TYPE_WIDTH - 1 : 0 ]		stType_0;
+	wire	[`LD_TYPE_WIDTH - 1 : 0 ]		ldType_0;
+	wire	[`WB_SEL_WIDTH - 1 : 0 ]		wbSel_0;
+	wire	[`BOOL_WIDTH - 1 : 0 ]			wbRdEn_0;
+	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		csrCmd_0;
+	wire	[`BOOL_WIDTH - 1 : 0 ]			illegal_0;
+
+	//instr 1
+	wire	[`A_SEL_WIDTH - 1 : 0 ]			A_sel_1;
+	wire	[`B_SEL_WIDTH - 1 : 0 ]			B_sel_1;
+	wire	[`ALU_OP_WIDTH - 1 : 0 ]		aluOp_1;
+	wire	[`ST_TYPE_WIDTH - 1 : 0 ]		stType_1;
+	wire	[`LD_TYPE_WIDTH - 1 : 0 ]		ldType_1;
+	wire	[`WB_SEL_WIDTH - 1 : 0 ]		wbSel_1;
+	wire	[`BOOL_WIDTH - 1 : 0 ]			wbRdEn_1;
+	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		csrCmd_1;
+	wire	[`BOOL_WIDTH - 1 : 0 ]			illegal_1;
+
+    wire    [`FUNCT3_WIDTH - 1 : 0] 		rm_0;	
+    wire    [`FUNCT3_WIDTH - 1 : 0] 		rm_1;
+
+    //decode part 1
+	InstrTypeDecode32 i_InstrTypeDecode32_0(
+		.instr(IFID_Instr[32 - 1 : 0]),
+		.iEncode(iEncode32_0),
+		.rdAddr(rdAddr32_0),
+		.rs1Addr(rs1Addr32_0),
+		.rs2Addr(rs2Addr32_0),
+		.csrAddr(csrAddr32_0),
+        .funct3(rm_0)
 	);
-	
-	ControlDecode32 i_ControlDecode32(
-		.iEncode(iEncode32),
-		.allCtr(allCtr32),
-		.immSel(immSel32),
-		.stallFlag(stallFlag32),
-		.flushFlag(flushFlag32),
-		.xlenSel(xlenSel32)
+
+	ControlDecode32 i_ControlDecode32_0(
+		.iEncode(iEncode32_0),
+		.allCtr(allCtr32_0),
+		.immSel(immSel32_0),
+		.stallFlag(stallFlag32_0),
+		.flushFlag(flushFlag32_0),
+		.xlenSel(xlenSel32_0)
 	);
-	
-	ImmGenMux32 i_ImmGenMux32
+
+	ImmGenMux32 i_ImmGenMux32_0
 	(
-		.io_inst(IFID_Instr),
-		.io_sel(immSel32),
-		.io_out(imm32)
-	);
-	
-	InstrTypeDecode16 i_InstrTypeDecode16(
-		.instr(IFID_Instr[15:0]),
-		.iEncode(iEncode16)
-	);
-	
-	RFaddrMux16 i_RFaddrMux16(
-		.instr(IFID_Instr[15:0]),
-		.iEncode(iEncode16),
-		.rfSel(rfSel),
-		.rdAddr(rdAddr16),
-		.rs1Addr(rs1Addr16),
-		.rs2Addr(rs2Addr16)	
-	);
-	
-	ControlDecode16 i_ControlDecode16(
-		.iEncode(iEncode16),
-		.allCtr(allCtr16),
-		.immSel(immSel16),
-		.rfSel(rfSel),
-		.stallFlag(stallFlag16),
-		.flushFlag(flushFlag16),
-		.xlenSel(xlenSel16)
+		.io_inst(IFID_Instr[32 - 1 : 0]),
+		.io_sel(immSel32_0),
+		.io_out(imm32_0)
 	);
 
-	ImmGenMux16 i_ImmGenMux16
+	//decode part 2
+	InstrTypeDecode32 i_InstrTypeDecode32_1(
+		.instr(IFID_Instr[64 - 1 : 32]),
+		.iEncode(iEncode32_1),
+		.rdAddr(rdAddr32_1),
+		.rs1Addr(rs1Addr32_1),
+		.rs2Addr(rs2Addr32_1),
+		.csrAddr(csrAddr32_1),
+        .funct3(rm_1)
+	);
+
+	ControlDecode32 i_ControlDecode32_1(
+		.iEncode(iEncode32_1),
+		.allCtr(allCtr32_1),
+		.immSel(immSel32_1),
+		.stallFlag(stallFlag32_1),
+		.flushFlag(flushFlag32_1),
+		.xlenSel(xlenSel32_1)
+	);
+
+	ImmGenMux32 i_ImmGenMux32_1
+	(
+		.io_inst(IFID_Instr[64 - 1 : 32]),
+		.io_sel(immSel32_1),
+		.io_out(imm32_1)
+	);
+
+	//decode part 3
+	InstrTypeDecode16 i_InstrTypeDecode16_0(
+		.instr(IFID_Instr[15:0]),
+		.iEncode(iEncode16_0)
+	);
+	
+	RFaddrMux16 i_RFaddrMux16_0(
+		.instr(IFID_Instr[15:0]),
+		.iEncode(iEncode16_0),
+		.rfSel(rfSel_0),
+		.rdAddr(rdAddr16_0),
+		.rs1Addr(rs1Addr16_0),
+		.rs2Addr(rs2Addr16_0)	
+	);
+	
+	ControlDecode16 i_ControlDecode16_0(
+		.iEncode(iEncode16_0),
+		.allCtr(allCtr16_0),
+		.immSel(immSel16_0),
+		.rfSel(rfSel_0),
+		.stallFlag(stallFlag16_0),
+		.flushFlag(flushFlag16_0),
+		.xlenSel(xlenSel16_0)
+	);
+
+	ImmGenMux16 i_ImmGenMux16_0
 	(
 		.instr(IFID_Instr[15:0]),
-		.iEncode(iEncode16),
-		.immSel(immSel16),
-		.imm(imm16)
+		.iEncode(iEncode16_0),
+		.immSel(immSel16_0),
+		.imm(imm16_0)
 	);
 
-	assign Decode_16BitFlag = xlenSel32 ? 1'b0 : xlenSel16;
-						
+	//decode part 4
+	InstrTypeDecode16 i_InstrTypeDecode16_1(
+		.instr(IFID_Instr[32 - 1 : 16]),
+		.iEncode(iEncode16_1)
+	);
+	
+	RFaddrMux16 i_RFaddrMux16_1(
+		.instr(IFID_Instr[32 - 1 : 16]),
+		.iEncode(iEncode16_1),
+		.rfSel(rfSel_1),
+		.rdAddr(rdAddr16_1),
+		.rs1Addr(rs1Addr16_1),
+		.rs2Addr(rs2Addr16_1)	
+	);
+	
+	ControlDecode16 i_ControlDecode16_1(
+		.iEncode(iEncode16_1),
+		.allCtr(allCtr16_1),
+		.immSel(immSel16_1),
+		.rfSel(rfSel_1),
+		.stallFlag(stallFlag16_1),
+		.flushFlag(flushFlag16_1),
+		.xlenSel(xlenSel16_1)
+	);
+
+	ImmGenMux16 i_ImmGenMux16_1
+	(
+		.instr(IFID_Instr[32 - 1 : 16]),
+		.iEncode(iEncode16_1),
+		.immSel(immSel16_1),
+		.imm(imm16_1)
+	);
+
+	assign Decode_16BitFlag_0 = xlenSel32_0 ? 1'b0 : xlenSel16_0;
+	assign Decode_16BitFlag_1 = xlenSel32_1 ? 1'b0 : xlenSel16_1;
+
+	//instr 0
 	always @(*)
-		if(Decode_16BitFlag)
+		if(Decode_16BitFlag_0)
 			begin
-				Decode_AllCtr	 = allCtr16;
-				Decode_RdAddr	 = rdAddr16;
-				Decode_Imm		 = imm16;
-				Decode_ImmSel	 = immSel16;
-				Decode_CsrAddr	 = 12'b0;
-				Decode_Rs1Addr   = rs1Addr16;
-				Decode_Rs2Addr   = rs2Addr16;
-                Decode_Rm        = 3'b0;   
-				Decode_Stall     = stallFlag16;
-				Decode_Flush     = flushFlag16;
+				Decode_AllCtr_0	 = allCtr16_0;
+				Decode_RdAddr_0	 = rdAddr16_0;
+				Decode_Imm_0     = imm16_0;
+				Decode_ImmSel_0	 = immSel16_0;
+				Decode_CsrAddr_0 = 12'b0;
+				Decode_Rs1Addr_0 = rs1Addr16_0;
+				Decode_Rs2Addr_0 = rs2Addr16_0;
+                Decode_Rm_0      = 3'b0;   
+				Decode_Stall_0   = stallFlag16_0;
+				Decode_Flush_0   = flushFlag16_0;
 			end
 		else
 			begin
-				Decode_AllCtr	 = allCtr32;
-				Decode_RdAddr	 = rdAddr32;
-				Decode_Imm		 = imm32;
-				Decode_ImmSel	 = immSel32;
-				Decode_CsrAddr	 = csrAddr32;
-				Decode_Rs1Addr   = rs1Addr32;
-				Decode_Rs2Addr   = rs2Addr32;
-                Decode_Rm        = rm;
-				Decode_Stall     = stallFlag32;
-				Decode_Flush     = flushFlag32;
+				Decode_AllCtr_0	 = allCtr32_0;
+				Decode_RdAddr_0	 = rdAddr32_0;
+				Decode_Imm_0     = imm32_0;
+				Decode_ImmSel_0	 = immSel32_0;
+				Decode_CsrAddr_0 = csrAddr32_0;
+				Decode_Rs1Addr_0 = rs1Addr32_0;
+				Decode_Rs2Addr_0 = rs2Addr32_0;
+                Decode_Rm_0      = rm_0;
+				Decode_Stall_0   = stallFlag32_0;
+				Decode_Flush_0   = flushFlag32_0;
+			end
+
+	//instr 1
+	always @(*)
+		if(Decode_16BitFlag_1)
+			begin
+				Decode_AllCtr_1	 = allCtr16_1;
+				Decode_RdAddr_1	 = rdAddr16_1;
+				Decode_Imm_1	 = imm16_1;
+				Decode_ImmSel_1	 = immSel16_1;
+				Decode_CsrAddr_1 = 12'b0;
+				Decode_Rs1Addr_1 = rs1Addr16_1;
+				Decode_Rs2Addr_1 = rs2Addr16_1;
+                Decode_Rm_1      = 3'b0;   
+				Decode_Stall_1   = stallFlag16_1;
+				Decode_Flush_1   = flushFlag16_1;
+			end
+		else
+			begin
+				Decode_AllCtr_1	 = allCtr32_1;
+				Decode_RdAddr_1	 = rdAddr32_1;
+				Decode_Imm_1	 = imm32_1;
+				Decode_ImmSel_1	 = immSel32_1;
+				Decode_CsrAddr_1 = csrAddr32_1;
+				Decode_Rs1Addr_1 = rs1Addr32_1;
+				Decode_Rs2Addr_1 = rs2Addr32_1;
+                Decode_Rm_1      = rm_1;
+				Decode_Stall_1   = stallFlag32_1;
+				Decode_Flush_1   = flushFlag32_1;
 			end
 
 	assign	{
-				A_sel,
-				B_sel,
-				aluOp,
-				stType,
-				ldType,
-				wbSel,
-				wbRdEn,
-				csrCmd,
-				illegal
-				} = Decode_AllCtr;
-	
-	assign Decode_LdType = ldType;
+				A_sel_0,
+				B_sel_0,
+				aluOp_0,
+				stType_0,
+				ldType_0,
+				wbSel_0,
+				wbRdEn_0,
+				csrCmd_0,
+				illegal_0
+				} = Decode_AllCtr_0;
+
+	assign	{
+				A_sel_1,
+				B_sel_1,
+				aluOp_1,
+				stType_1,
+				ldType_1,
+				wbSel_1,
+				wbRdEn_1,
+				csrCmd_1,
+				illegal_1
+				} = Decode_AllCtr_1;
+
+	assign Decode_LdType_0 = ldType_0;
+	assign Decode_LdType_1 = ldType_1;
 
 endmodule
 
@@ -478,7 +650,7 @@ module InstrTypeDecode16(
 endmodule
 
 module InstrTypeDecode32(
-	input		[`INSTR_WIDTH - 1 : 0]			instr,
+	input		[`INSTR_WIDTH/2 - 1 : 0]		instr,
 	output	reg [`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr,

@@ -9,7 +9,7 @@
 `define X_LEN				32
 `define	ADDR_WIDTH			`X_LEN
 `define	DATA_WIDTH			`X_LEN
-`define	INSTR_WIDTH			`X_LEN
+`define	INSTR_WIDTH			64
 `define	INSTR_WIDTH_16		16
 
 /*----------Mux.v---------*/
@@ -463,7 +463,7 @@
 `define CSR_DSCRATCH      12'h7b2
 
 /*----------Core.v---------*/
-`define PIPE_IFID_LEN 	`ADDR_WIDTH + `DATA_WIDTH
+`define PIPE_IFID_LEN 	`ADDR_WIDTH + `INSTR_WIDTH //2 instructions
 `define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`DATA_WIDTH + `DATA_WIDTH + 1 + `ADDR_WIDTH
 `define PIPE_EXMem_LEN 	32 + 32 + `RF_ADDR_WIDTH + `DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH
 `define PIPE_MemWb_LEN 	5 + 1 + 32 + 32 + 1

@@ -21,7 +21,7 @@ module Dcache(
   output wire  [`DATA_WIDTH-1  	:0]      	Dcache_DataRd,
   //Icache	
   input  wire  [`ADDR_WIDTH-1  	:0]      	Icache_NextPC,
-  output wire  [`DATA_WIDTH-1  	:0]      	Icache_Instr
+  output wire  [`INSTR_WIDTH-1  	:0]      	Icache_Instr
 );
 
 wire [11:0]     addr;  //12bit address  4KB 
@@ -42,8 +42,9 @@ assign      sel_byte  = Mem_DcacheAddr[1:0] << 'd3;       //choose start addr of
 //read to Icache
 wire   [11:0]  Icache_addr;
 assign Icache_addr  = Icache_NextPC[13:2];
-assign data_tmp     = {data[Icache_addr+1][15:0],data[Icache_addr][31:16]};
-assign Icache_Instr = (Icache_NextPC[1]==1)? data_tmp: data[Icache_addr];
+assign data_tmp     = {data[Icache_addr+2][15:0], data[Icache_addr+1],data[Icache_addr][31:16]};
+// assign Icache_Instr = (Icache_NextPC[1]==1)? data_tmp: data[Icache_addr];
+assign Icache_Instr = (Icache_NextPC[1]==1)? data_tmp: {data[Icache_addr+1], data[Icache_addr]};
 
 //read
 assign sel_data_rd = data[addr];

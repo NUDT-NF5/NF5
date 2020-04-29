@@ -1,4 +1,4 @@
-/*
+	/*
  * @Author: Sue
  * @Date:   2019-10-28 8:29
  * @Last Modified by: Sue
@@ -37,7 +37,7 @@ module Fetch(
         else if(Ctrl_ExcpFlag)
 			Fetch_NextPC <= Ctrl_ExcpPC;
 		else if(Decode_16BitFlag)
-			Fetch_NextPC <= IFID_NowPC + 2;
+			Fetch_NextPC <= IFID_NowPC + 4; //fetch 2 16-bit instr
 		else
-			Fetch_NextPC <= Fetch_NextPC + 4;
+			Fetch_NextPC <= Fetch_NextPC + 8; //fetch 2 32-bit instr
 endmodule
