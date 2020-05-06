@@ -22,11 +22,13 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs3Addr;
 	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm;
 	wire	[2 - 1 : 0]						Decode_Stall;
 	wire	[4 - 1 : 0]						Decode_Flush;
 	wire									Decode_16BitFlag;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
+	wire	[2 - 1 : 0]						Decode_Fmt;
 	
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
@@ -156,11 +158,13 @@ module Core(
 		.Decode_CsrAddr(Decode_CsrAddr),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
 		.Decode_Rs2Addr(Decode_Rs2Addr),
+		.Decode_Rs3Addr(Decode_Rs3Addr),
         .Decode_Rm(Decode_Rm),
 		.Decode_Stall(Decode_Stall),
 		.Decode_Flush(Decode_Flush),
 		.Decode_16BitFlag(Decode_16BitFlag),
-		.Decode_LdType(Decode_LdType)
+		.Decode_LdType(Decode_LdType),
+		.Decode_Fmt(Decode_Fmt)
 	);
 	
 	RegFile i_RegFile(

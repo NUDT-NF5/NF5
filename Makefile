@@ -29,7 +29,7 @@ sim_default:
 sim:	
 	make gen_filelist	
 	./isa_run.sh
- 	
+
 sim_gui_nc:
 	make gen_filelist
 	cd $(nc_dir) && bash $(nc_dir)/set_gui && cd -
@@ -38,12 +38,13 @@ sim_gui_nc:
 sim_gui_gtk:
 	make gen_filelist
 	gtkwave $(iverilog_dir)/test.vcd
-	
+
+debug:
+	cd iverilog-project && iverilog -o test filelist.v  && vvp test && cat mySim.log
+
 hardclean:
-	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work
+	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work output/* ./iverilog-project/test ./iverilog-project/*.vcd
 
 clean: hardclean
 
 all: compile sim
-
-.PHONY:gen_filelist compile sim_gui hardclean clean all

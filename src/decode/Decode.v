@@ -22,6 +22,7 @@ module Decode(
 	//Decode -> RegFile and IDEX
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr,
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs3Addr,
 	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm,
     
 	//Decode -> Ctrl	
@@ -31,14 +32,17 @@ module Decode(
 	output 									Decode_16BitFlag,
 	
 	//Decode ->DecodeHazard
-	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType
-	
+	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType,
+
+	//Decode ->FPU
+	output	reg	[2 - 1 : 0]					Decode_Fmt
 );
 	//32 bit
 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32;// for all device control info need to be piped
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr32;
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32;
 	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32;
 	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32;
@@ -46,6 +50,7 @@ module Decode(
 	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag32;	
 	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel32;
 	wire	[`DATA_WIDTH - 1 : 0] 			imm32;
+	wire	[2 - 1 : 0]						fmt;
 	
 	//16 bit
 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode16;// for all device control info need to be piped
@@ -78,8 +83,10 @@ module Decode(
 		.rdAddr(rdAddr32),
 		.rs1Addr(rs1Addr32),
 		.rs2Addr(rs2Addr32),
+		.rs3Addr(rs3Addr32),
 		.csrAddr(csrAddr32),
-        .funct3(rm)
+        .funct3(rm),
+        .fmt(fmt)
 	);
 	
 	ControlDecode32 i_ControlDecode32(
@@ -142,6 +149,8 @@ module Decode(
 				Decode_CsrAddr	 = 12'b0;
 				Decode_Rs1Addr   = rs1Addr16;
 				Decode_Rs2Addr   = rs2Addr16;
+				Decode_Rs3Addr   = 5'b0;
+				Decode_Fmt		 = 2'b0;
                 Decode_Rm        = 3'b0;   
 				Decode_Stall     = stallFlag16;
 				Decode_Flush     = flushFlag16;
@@ -155,6 +164,8 @@ module Decode(
 				Decode_CsrAddr	 = csrAddr32;
 				Decode_Rs1Addr   = rs1Addr32;
 				Decode_Rs2Addr   = rs2Addr32;
+				Decode_Rs3Addr   = rs3Addr32;
+				Decode_Fmt		 = fmt;
                 Decode_Rm        = rm;
 				Decode_Stall     = stallFlag32;
 				Decode_Flush     = flushFlag32;
@@ -483,14 +494,18 @@ module InstrTypeDecode32(
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr,
+	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr,
 	output	 	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr,
-    output	    [`FUNCT3_WIDTH - 1 : 0] 		funct3
+    output	    [`FUNCT3_WIDTH - 1 : 0] 		funct3,
+    output	    [2 - 1 : 0] 					fmt
+
 );
 	wire	[`FUNCT7_WIDTH - 1 : 0] 		funct7;
 	wire 	[`OPCODE_WIDTH - 1 : 0] 		opCode;
 
 	assign	{funct7,rs2Addr,rs1Addr,funct3,rdAddr,opCode} = instr;
 	assign	csrAddr = {funct7,rs2Addr};
+	assign  {rs3Addr, fmt} = funct7;
 
 	always @(*)
 		case(opCode)
