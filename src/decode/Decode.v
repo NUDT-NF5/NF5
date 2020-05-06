@@ -23,6 +23,7 @@ module Decode(
 	//Decode -> RegFile and IDEX
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr_0,
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr_0,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs3Addr_0,
 	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm_0,
     
 	//Decode -> Ctrl	
@@ -45,6 +46,7 @@ module Decode(
 	//Decode -> RegFile and IDEX
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr_1,
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr_1,
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs3Addr_1,
 	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm_1,
     
 	//Decode -> Ctrl	
@@ -65,6 +67,7 @@ module Decode(
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32_0;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32_0;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr32_0;
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32_0;
 	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32_0;
 	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32_0;
@@ -78,6 +81,7 @@ module Decode(
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32_1;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32_1;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr32_1;
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32_1;
 	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32_1;
 	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32_1;
@@ -147,6 +151,7 @@ module Decode(
 		.rdAddr(rdAddr32_0),
 		.rs1Addr(rs1Addr32_0),
 		.rs2Addr(rs2Addr32_0),
+		.rs3Addr(rs3Addr32_0),
 		.csrAddr(csrAddr32_0),
         .funct3(rm_0)
 	);
@@ -174,6 +179,7 @@ module Decode(
 		.rdAddr(rdAddr32_1),
 		.rs1Addr(rs1Addr32_1),
 		.rs2Addr(rs2Addr32_1),
+		.rs3Addr(rs3Addr32_1),
 		.csrAddr(csrAddr32_1),
         .funct3(rm_1)
 	);
@@ -283,6 +289,7 @@ module Decode(
 				Decode_CsrAddr_0 = 12'b0;
 				Decode_Rs1Addr_0 = rs1Addr16_0;
 				Decode_Rs2Addr_0 = rs2Addr16_0;
+				Decode_Rs3Addr_0 = 5'b0;
                 Decode_Rm_0      = 3'b0;   
 				Decode_Stall_0   = stallFlag16_0;
 				Decode_Flush_0   = flushFlag16_0;
@@ -296,6 +303,7 @@ module Decode(
 				Decode_CsrAddr_0 = csrAddr32_0;
 				Decode_Rs1Addr_0 = rs1Addr32_0;
 				Decode_Rs2Addr_0 = rs2Addr32_0;
+				Decode_Rs3Addr_0 = rs3Addr32_0;
                 Decode_Rm_0      = rm_0;
 				Decode_Stall_0   = stallFlag32_0;
 				Decode_Flush_0   = flushFlag32_0;
@@ -312,6 +320,7 @@ module Decode(
 				Decode_CsrAddr_1 = 12'b0;
 				Decode_Rs1Addr_1 = rs1Addr16_1;
 				Decode_Rs2Addr_1 = rs2Addr16_1;
+				Decode_Rs3Addr_1 = 5'b0;
                 Decode_Rm_1      = 3'b0;   
 				Decode_Stall_1   = stallFlag16_1;
 				Decode_Flush_1   = flushFlag16_1;
@@ -325,6 +334,7 @@ module Decode(
 				Decode_CsrAddr_1 = csrAddr32_1;
 				Decode_Rs1Addr_1 = rs1Addr32_1;
 				Decode_Rs2Addr_1 = rs2Addr32_1;
+				Decode_Rs3Addr_1 = rs3Addr32_1;
                 Decode_Rm_1      = rm_1;
 				Decode_Stall_1   = stallFlag32_1;
 				Decode_Flush_1   = flushFlag32_1;
@@ -666,6 +676,7 @@ module InstrTypeDecode32(
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr,
+	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr,
 	output	 	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr,
     output	    [`FUNCT3_WIDTH - 1 : 0] 		funct3
 );
@@ -674,6 +685,7 @@ module InstrTypeDecode32(
 
 	assign	{funct7,rs2Addr,rs1Addr,funct3,rdAddr,opCode} = instr;
 	assign	csrAddr = {funct7,rs2Addr};
+	assign  rs3Addr = funct7[6 : 2];
 
 	always @(*)
 		case(opCode)

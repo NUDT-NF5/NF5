@@ -23,6 +23,7 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr_0;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr_0;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr_0;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs3Addr_0;
 	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm_0;
 	wire	[2 - 1 : 0]						Decode_Stall_0;
 	wire	[4 - 1 : 0]						Decode_Flush_0;
@@ -37,6 +38,7 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr_1;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr_1;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr_1;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs3Addr_1;
 	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm_1;
 	wire	[2 - 1 : 0]						Decode_Stall_1;
 	wire	[4 - 1 : 0]						Decode_Flush_1;
@@ -179,6 +181,7 @@ module Core(
 		.Decode_CsrAddr_0(Decode_CsrAddr_0),
 		.Decode_Rs1Addr_0(Decode_Rs1Addr_0),
 		.Decode_Rs2Addr_0(Decode_Rs2Addr_0),
+		.Decode_Rs3Addr_0(Decode_Rs3Addr_0),
         .Decode_Rm_0(Decode_Rm_0),
 		.Decode_Stall_0(Decode_Stall_0),
 		.Decode_Flush_0(Decode_Flush_0),
@@ -192,6 +195,7 @@ module Core(
 		.Decode_CsrAddr_1(Decode_CsrAddr_1),
 		.Decode_Rs1Addr_1(Decode_Rs1Addr_1),
 		.Decode_Rs2Addr_1(Decode_Rs2Addr_1),
+		.Decode_Rs3Addr_1(Decode_Rs3Addr_1),
         .Decode_Rm_1(Decode_Rm_1),
 		.Decode_Stall_1(Decode_Stall_1),
 		.Decode_Flush_1(Decode_Flush_1),
