@@ -438,6 +438,10 @@
 `define	CSR_ADDR_WIDTH		12
 `define	CSR_DATA_WIDTH	  32
 `define	CSR_USTATUS       12'h000
+`define CSR_FRM           12'h001
+`define CSR_FFLAG         12'h002
+`define CSR_FCSR          12'h003 //Floating-Point Control and Status Register (frm + fflags).
+
 `define CSR_STVEC         12'h105 //Supervisor trap handler base address.
 `define CSR_SATP          12'h180 //Supervisor address translation and protection.
 

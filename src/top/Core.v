@@ -288,40 +288,41 @@ module Core(
 		.EX_LdStFlag(EX_LdStFlag),
 		.EX_StallReq(EX_StallReq)
 	);
+
 wire [31:0] EXMEM_NowPC;	
 	Csr i_Csr (
         .clk(clk),
         .rst_n(rst_n),
         .Ctrl_Stall(Ctrl_Stall),
+        .IFID_NowPC(IFID_NowPC),
+		.IFID_Instr(IFID_Instr),
+        .Decode_Flush(Decode_Flush),
+		.Decode_16BitFlag(Decode_16BitFlag),
         .IDEX_CsrAddr(IDEX_CsrAddr),
         .IDEX_CsrCmd(IDEX_CsrCmd),
+        .IDEX_Imm(IDEX_Imm),
+        .IDEX_Rs1Data(IDEX_Rs1Data),
+        .IDEX_ImmSel(IDEX_ImmSel),
+        .IDEX_NowPC(IDEX_NowPC),
+        .IDEX_StType(IDEX_StType),
+        .IDEX_LdType(IDEX_LdType),
+		.EX_BranchPC(EX_BranchPC), //new 
+        .EX_BranchFlag(EX_BranchFlag), 
+        .EX_AluData(EX_AluData),
+		.EXMem_LdType(EXMem_LdType),    
+		.EXMem_StType(EXMem_StType),    
+		.EXMem_AluData(EXMem_AluData) ,
+        .EXMEM_NowPC(EXMEM_NowPC),
         .Csr_RdData(Csr_RdData),
         .Csr_ExcpFlag(Csr_ExcpFlag),
         .Csr_Evec(Csr_Evec),
         .Csr_Memflush(Csr_Memflush),
+        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
         .NMI(1'b0),
         .RESET(1'b0),
-        .IDEX_NowPC(IDEX_NowPC),
-        .IFID_NowPC(IFID_NowPC),
-        .IDEX_Imm(IDEX_Imm),
-        .IDEX_Rs1Data(IDEX_Rs1Data),
-        .IDEX_ImmSel(IDEX_ImmSel),
         .Core_interrupt(3'b0),
         .DBG_interrupt (5'b0),
-        .EX_AluData(EX_AluData),
-        .IDEX_StType(IDEX_StType),
-        .IDEX_LdType(IDEX_LdType),
-        .EX_BranchFlag(EX_BranchFlag),
-        .Decode_Flush(Decode_Flush),
-        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
-		.EXMem_LdType(EXMem_LdType),    
-		.EXMem_StType(EXMem_StType),    
-		.EXMem_AluData(EXMem_AluData) ,
-		.EX_BranchPC(EX_BranchPC), //new   
-               .EXMEM_NowPC(EXMEM_NowPC),
-		.Decode_16BitFlag(Decode_16BitFlag),
-               .Fetchaddr_Invalid(Fetchaddr_Invalid),
-.IFID_Instr(IFID_Instr)
+        .Fetchaddr_Invalid(Fetchaddr_Invalid)//unuse?
 	);	
 		
 
@@ -342,7 +343,7 @@ wire [31:0] EXMEM_NowPC;
 				IDEX_LdType,
 				IDEX_WbRdEn,
 				IDEX_WbSel,
-                          IDEX_NowPC
+                IDEX_NowPC
 			} 
 		),
 		.out(
@@ -354,7 +355,7 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_LdType,				
 				EXMem_RdWrtEn,
 				EXMem_WbSel,
-                          EXMEM_NowPC
+                EXMEM_NowPC
 			} 
 		)
 	);
@@ -369,7 +370,7 @@ wire [31:0] EXMEM_NowPC;
 		.Mem_DcacheSign(Mem_DcacheSign),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
-            .Csr_Memflush(Csr_Memflush)//new   
+        .Csr_Memflush(Csr_Memflush)//new   
     ); 	
 	
 	Dcache i_Dcache(
