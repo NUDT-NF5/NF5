@@ -32,6 +32,7 @@ module Core(
 	
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
+	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs3Data;
 	wire	     							DecodeHazard_StallReq;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
@@ -53,11 +54,13 @@ module Core(
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
+	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs2Data;
+	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs3Data;
 	
     wire    [31:0] 							EX_AluData;
     wire           							EX_LdStFlag;
@@ -174,6 +177,8 @@ module Core(
 		.rData1(RF_Rs1Data),
 		.rAddr2(Decode_Rs2Addr),
 		.rData2(RF_Rs2Data),
+		.rAddr3(Decode_Rs3Addr),
+		.rData3(RF_Rs3Data),
 		.wEN(MemWb_RdWrtEn),
 		.wAddr(MemWb_RdAddr),
 		.wData(Wb_DataWrt)
@@ -183,9 +188,11 @@ module Core(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
-		.Decode_Rs2Addr(Decode_Rs2Addr),	
+		.Decode_Rs2Addr(Decode_Rs2Addr),
+		.Decode_Rs3Addr(Decode_Rs3Addr),	
 		.RF_Rs1Data(RF_Rs1Data),
 		.RF_Rs2Data(RF_Rs2Data),
+		.RF_Rs3Data(RF_Rs3Data),
 		.IDEX_RdAddr(IDEX_RdAddr),
 		.IDEX_WbRdEn(IDEX_WbRdEn),
 		.EX_AluData(EX_AluData),
@@ -200,7 +207,8 @@ module Core(
 		.Decode_LdType(Decode_LdType),
 		.DecodeHazard_StallReq(DecodeHazard_StallReq),
 		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
-		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data)
+		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data),
+		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
 	);
 	
 
@@ -223,6 +231,7 @@ module Core(
 				Decode_CsrAddr,
 				DecodeHazard_Rs1Data,
 				DecodeHazard_Rs2Data,
+				DecodeHazard_Rs3Data,
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -246,6 +255,7 @@ module Core(
 				IDEX_CsrAddr,
 				IDEX_Rs1Data,
 				IDEX_Rs2Data,
+				IDEX_Rs3Data,
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
