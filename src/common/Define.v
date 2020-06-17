@@ -31,14 +31,19 @@
 `define	RF_NUMBER			32
 
 /*----------DecodeHazard.v---------*/
-`define	RS1_SEL_WIDTH		3
-`define	RS2_SEL_WIDTH		3
-`define	RS_SEL_WIDTH		3
-`define	RS_SEL_RF			`RS_SEL_WIDTH'd0
-`define	RS_SEL_EX			`RS_SEL_WIDTH'd1
-`define	RS_SEL_EXMem		`RS_SEL_WIDTH'd2
-`define	RS_SEL_Dcache		`RS_SEL_WIDTH'd3
-`define	RS_SEL_Wb			`RS_SEL_WIDTH'd4
+`define	RS1_SEL_WIDTH		4
+`define	RS2_SEL_WIDTH		4
+`define	RS_SEL_WIDTH		4
+`define	RS_SEL_RF_0 		`RS_SEL_WIDTH'd0
+`define	RS_SEL_RF_1 		`RS_SEL_WIDTH'd1
+`define	RS_SEL_EX_0			`RS_SEL_WIDTH'd2
+`define	RS_SEL_EX_1			`RS_SEL_WIDTH'd3
+`define	RS_SEL_EXMem_0		`RS_SEL_WIDTH'd4
+`define	RS_SEL_EXMem_1		`RS_SEL_WIDTH'd5
+`define	RS_SEL_Dcache_0		`RS_SEL_WIDTH'd6
+`define	RS_SEL_Dcache_1		`RS_SEL_WIDTH'd7
+`define	RS_SEL_Wb_0			`RS_SEL_WIDTH'd8
+`define	RS_SEL_Wb_1			`RS_SEL_WIDTH'd9
 
 /*----------Decode.v---------*/
 `define PC_Plus_2			2'b00

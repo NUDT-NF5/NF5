@@ -21,7 +21,7 @@ module Dcache(
   output wire  [`DATA_WIDTH-1  	:0]      	Dcache_DataRd,
   //Icache	
   input  wire  [`ADDR_WIDTH-1  	:0]      	Icache_NextPC,
-  output wire  [`INSTR_WIDTH-1  	:0]      	Icache_Instr
+  output wire  [`INSTR_WIDTH-1  	:0]     Icache_Instr
 );
 
 wire [11:0]     addr;  //12bit address  4KB 

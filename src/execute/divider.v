@@ -35,10 +35,10 @@ module divider #(
     wire    [RLEN - 1:0] unsigned_quotient;
     wire    [DLEN - 1:0] unsigned_remainder;
 
-    parameter   IDLE = 4'b0001;
-    parameter   CALC = 4'b0010;
-    parameter   ADJSIGN = 4'b0100;
-    parameter   NOOP = 4'b1000;
+    localparam   IDLE = 4'b0001;
+    localparam   CALC = 4'b0010;
+    localparam   ADJSIGN = 4'b0100;
+    localparam   NOOP = 4'b1000;
 
 always @(posedge clk or negedge rst_n)
     if(~rst_n)
