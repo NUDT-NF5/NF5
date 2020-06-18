@@ -202,90 +202,114 @@ module Core(
 		.Decode_NextPC(Decode_NextPC)
 	);
 	
-	// RegFile i_RegFile(
-	// 	.clk(clk),
-	// 	.rst_n(rst_n),
-	// 	.rAddr1(Decode_Rs1Addr),
-	// 	.rData1(RF_Rs1Data),
-	// 	.rAddr2(Decode_Rs2Addr),
-	// 	.rData2(RF_Rs2Data),
-	// 	.wEN(MemWb_RdWrtEn),
-	// 	.wAddr(MemWb_RdAddr),
-	// 	.wData(Wb_DataWrt)
-	// );
+	 RegFile i_RegFile(
+	 	.clk(clk),
+	 	.rst_n(rst_n),
+	 	.rAddr1_0(Decode_Rs1Addr_0),
+	 	.rData1_0(RF_Rs1Data_0),
+	 	.rAddr2_0(Decode_Rs2Addr_0),
+	 	.rData2_0(RF_Rs2Data_0),
+		.rAddr1_1(Decode_Rs1Addr_1),
+	 	.rData1_1(RF_Rs1Data_1),
+	 	.rAddr2_1(Decode_Rs2Addr_1),
+	 	.rData2_1(RF_Rs2Data_1),
+	 	.wEN_0(MemWb_RdWrtEn_0),
+	 	.wAddr_0(MemWb_RdAddr_0),
+	 	.wData_0(Wb_DataWrt_0),
+	 	.wEN_1(MemWb_RdWrtEn_1),
+	 	.wAddr_1(MemWb_RdAddr_1),
+	 	.wData_1(Wb_DataWrt_1)
+	 );
 
-// 	DecodeHazard i_DecodeHazard(
-// 		.clk(clk),
-// 		.rst_n(rst_n),
-// 		.Decode_Rs1Addr(Decode_Rs1Addr),
-// 		.Decode_Rs2Addr(Decode_Rs2Addr),	
-// 		.RF_Rs1Data(RF_Rs1Data),
-// 		.RF_Rs2Data(RF_Rs2Data),
-// 		.IDEX_RdAddr(IDEX_RdAddr),
-// 		.IDEX_WbRdEn(IDEX_WbRdEn),
-// 		.EX_AluData(EX_AluData),
-// 		.EXMem_RdAddr(EXMem_RdAddr),
-// 		.EXMem_RdWrtEn(EXMem_RdWrtEn),
-// 		.EXMem_AluData(EXMem_AluData),
-// 		.Dcache_DataRd(Dcache_DataRd),
-// 		.Mem_LdEn(Mem_LdEn),
-// 		.MemWb_RdAddr(MemWb_RdAddr),
-// 		.MemWb_RdWrtEn(MemWb_RdWrtEn),
-// 		.Wb_DataWrt(Wb_DataWrt),
-// 		.Decode_LdType(Decode_LdType),
-// 		.DecodeHazard_StallReq(DecodeHazard_StallReq),
-// 		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
-// 		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data)
-// 	);
-	
+ 	DecodeHazard i_DecodeHazard(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Decode_Rs1Addr_0(Decode_Rs1Addr_0),
+ 		.Decode_Rs2Addr_0(Decode_Rs2Addr_0),	
+ 		.RF_Rs1Data_0(RF_Rs1Data_0),
+ 		.RF_Rs2Data_0(RF_Rs2Data_0),
+ 		.Decode_Rs1Addr_1(Decode_Rs1Addr_1),
+ 		.Decode_Rs2Addr_1(Decode_Rs2Addr_1),	
+ 		.RF_Rs1Data_1(RF_Rs1Data_1),
+ 		.RF_Rs2Data_1(RF_Rs2Data_1),
+ 		.IDEX_RdAddr_0(IDEX_RdAddr_0),
+ 		.IDEX_WbRdEn_0(IDEX_WbRdEn_0),
+ 		.EX_AluData_0(EX_AluData_0),
+ 		.IDEX_RdAddr_1(IDEX_RdAddr_1),
+ 		.IDEX_WbRdEn_1(IDEX_WbRdEn_1),
+ 		.EX_AluData_1(EX_AluData_1),
+ 		.EXMem_RdAddr_0(EXMem_RdAddr_0),
+ 		.EXMem_RdWrtEn_0(EXMem_RdWrtEn_0),
+ 		.EXMem_AluData_0(EXMem_AluData_0),
+ 		.EXMem_RdAddr_1(EXMem_RdAddr_1),
+ 		.EXMem_RdWrtEn_1(EXMem_RdWrtEn_1),
+ 		.EXMem_AluData_1(EXMem_AluData_1),
+ 		.Dcache_DataRd_0(Dcache_DataRd_0),
+ 		.Mem_LdEn_0(Mem_LdEn_0),
+ 		.Dcache_DataRd_1(Dcache_DataRd_1),
+ 		.Mem_LdEn_1(Mem_LdEn_1),
+ 		.MemWb_RdAddr_0(MemWb_RdAddr_0),
+ 		.MemWb_RdWrtEn_0(MemWb_RdWrtEn_0),
+ 		.Wb_DataWrt_0(Wb_DataWrt_0),
+ 		.MemWb_RdAddr_1(MemWb_RdAddr_1),
+ 		.MemWb_RdWrtEn_1(MemWb_RdWrtEn_1),
+ 		.Wb_DataWrt_1(Wb_DataWrt_1),
+ 		.Decode_LdType_0(Decode_LdType_0),
+ 		.DecodeHazard_StallReq(DecodeHazard_StallReq),
+ 		.Decode_LdType_1(Decode_LdType_1),
+ 		.DecodeHazard_Rs1Data_0(DecodeHazard_Rs1Data_0),
+ 		.DecodeHazard_Rs2Data_0(DecodeHazard_Rs2Data_0),
+ 		.DecodeHazard_Rs1Data_1(DecodeHazard_Rs1Data_1),
+ 		.DecodeHazard_Rs2Data_1(DecodeHazard_Rs2Data_1)
+ 	);	
 
-//    PipeStage #(
-// 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
-// 	)
-// 	i_IDEX(
-// 		.clk(clk),
-// 		.rst_n(rst_n),
-// 		.Stall(Ctrl_Stall[2]),
-// 		.Flush(Flush[1]),
-// 		.in(
-// 			{
-// 				Decode_AllCtr,
-// 				Decode_RdAddr,
-// 				Decode_Rs1Addr,
-// 				Decode_Rs2Addr,
-// 				Decode_Imm,
-// 				Decode_ImmSel,
-// 				Decode_CsrAddr,
-// 				DecodeHazard_Rs1Data,
-// 				DecodeHazard_Rs2Data,
-// 				Decode_16BitFlag,
-// 				IFID_NowPC
-// 			} 
-// 		),
-// 		.out(
-// 			{
-// 				IDEX_Sel1,
-// 				IDEX_Sel2,
-// 				IDEX_AluOp,
-// 				IDEX_StType,
-// 				IDEX_LdType,
-// 				IDEX_WbSel,
-// 				IDEX_WbRdEn,
-// 				IDEX_CsrCmd,
-// 				IDEX_CsrIllegal,
-// 				IDEX_RdAddr,
-// 				IDEX_Rs1Addr,
-// 				IDEX_Rs2Addr,
-// 				IDEX_Imm,
-// 				IDEX_ImmSel,
-// 				IDEX_CsrAddr,
-// 				IDEX_Rs1Data,
-// 				IDEX_Rs2Data,
-// 				IDEX_16BitFlag,
-// 				IDEX_NowPC
-// 			} 
-// 		)
-// 	);
+    PipeStage #(
+ 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
+ 	)
+ 	i_IDEX(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[2]),
+ 		.Flush(Flush[1]),
+ 		.in(
+ 			{
+ 				Decode_AllCtr_0,
+ 				Decode_RdAddr_0,
+ 				Decode_Rs1Addr_0,
+ 				Decode_Rs2Addr_0,
+ 				Decode_Imm_0,
+ 				Decode_ImmSel_0,
+ 				Decode_CsrAddr_0,
+ 				DecodeHazard_Rs1Data,
+ 				DecodeHazard_Rs2Data,
+ 				Decode_16BitFlag,
+ 				IFID_NowPC
+ 			} 
+ 		),
+ 		.out(
+ 			{
+ 				IDEX_Sel1,
+ 				IDEX_Sel2,
+ 				IDEX_AluOp,
+ 				IDEX_StType,
+ 				IDEX_LdType,
+ 				IDEX_WbSel,
+ 				IDEX_WbRdEn,
+ 				IDEX_CsrCmd,
+ 				IDEX_CsrIllegal,
+ 				IDEX_RdAddr,
+ 				IDEX_Rs1Addr,
+ 				IDEX_Rs2Addr,
+ 				IDEX_Imm,
+ 				IDEX_ImmSel,
+ 				IDEX_CsrAddr,
+ 				IDEX_Rs1Data,
+ 				IDEX_Rs2Data,
+ 				IDEX_16BitFlag,
+ 				IDEX_NowPC
+ 			} 
+ 		)
+ 	);
 	
 // 	EX i_EX (
 // 		.IDEX_Rs1Data(IDEX_Rs1Data),
