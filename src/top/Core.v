@@ -311,33 +311,48 @@ module Core(
  		)
  	);
 	
-// 	EX i_EX (
-// 		.IDEX_Rs1Data(IDEX_Rs1Data),
-// 		.IDEX_Rs2Data(IDEX_Rs2Data),
-// 		.IDEX_Sel1(IDEX_Sel1),
-// 		.IDEX_NowPC(IDEX_NowPC),
-// 		.IDEX_Sel2(IDEX_Sel2),
-// 		.IDEX_Imm(IDEX_Imm),
-// 		//.Dcache_DataRd(Dcache_DataRd), 
-// 		//.Mem_LdEn(Mem_LdEn), 
-// 		//.IDEX_Rs1Addr(IDEX_Rs1Addr), 
-//         //.IDEX_Rs2Addr(IDEX_Rs2Addr), 
-// 		//.EXMem_RdAddr(EXMem_RdAddr),
-// 		.Csr_RdData(Csr_RdData),
-// 		.IDEX_AluOp(IDEX_AluOp),
-// 		.IDEX_LdType(IDEX_LdType),
-// 		.IDEX_StType(IDEX_StType),
-// 		.Mem_DcacheEN(Mem_DcacheEn),
-// 		.IDEX_16BitFlag(IDEX_16BitFlag),
-// 		.clk(clk),
-// 		.rst_n(rst_n),
-// 		.EX_AluData(EX_AluData),
-// 		.EX_BranchFlag(EX_BranchFlag),
-// 		.EX_BranchPC(EX_BranchPC),
-// 		.EX_LdStFlag(EX_LdStFlag),
-// 		.EX_StallReq(EX_StallReq)
-// 	);
-// wire [31:0] EXMEM_NowPC;	
+ 	EX i_EX (
+		.IDEX_Rs1Data_0(IDEX_Rs1Data_0),
+		.IDEX_Rs2Data_0(IDEX_Rs2Data_0),
+		.IDEX_Sel1_0(IDEX_Sel1_0),
+		.IDEX_NowPC_0(IDEX_NowPC_0),
+		.IDEX_Sel2_0(IDEX_Sel2_0),
+		.IDEX_Imm_0(IDEX_Imm_0),
+		.Csr_RdData_0(Csr_RdData_0),
+		.IDEX_AluOp_0(IDEX_AluOp_0),
+		.IDEX_LdType_0(IDEX_LdType_0),
+		.IDEX_StType_0(IDEX_StType_0),
+		.Mem_DcacheEN_0(Mem_DcacheEN_0),
+		.IDEX_16BitFlag_0(IDEX_16BitFlag_0),
+		.IDEX_WbRdEn_0(IDEX_WbRdEn_0),
+		.IDEX_Rs1Data_1(IDEX_Rs1Data_1),
+		.IDEX_Rs2Data_1(IDEX_Rs2Data_1),
+		.IDEX_Sel1_1(IDEX_Sel1_1),
+		.IDEX_NowPC_1(IDEX_NowPC_1),
+		.IDEX_Sel2_1(IDEX_Sel2_1),
+		.IDEX_Imm_1(IDEX_Imm_1),
+		.Csr_RdData_1(Csr_RdData_1),
+		.IDEX_AluOp_1(IDEX_AluOp_1),
+		.IDEX_LdType_1(IDEX_LdType_1),
+		.IDEX_StType_1(IDEX_StType_1),
+		.Mem_DcacheEN_1(Mem_DcacheEN_1),
+		.IDEX_16BitFlag_1(IDEX_16BitFlag_1),
+		.clk(clk),
+		.rst_n(rst_n),
+		.IDEX_RdAddr_0(IDEX_RdAddr_0),
+		.IDEX_Rs1Addr_1(IDEX_Rs1Addr_1),
+		.IDEX_Rs2Addr_1(IDEX_Rs2Addr_1),
+		.EX_AluData_0(EX_AluData_0),
+		.EX_BranchFlag_0(EX_BranchFlag_0),
+		.EX_BranchPC_0(EX_BranchPC_0),
+		.EX_LdStFlag_0(EX_LdStFlag_0),
+		.EX_AluData_1(EX_AluData_1),
+		.EX_BranchFlag_1(EX_BranchFlag_1),
+		.EX_BranchPC_1(EX_BranchPC_1),
+		.EX_LdStFlag_1(EX_LdStFlag_1),
+		.EX_StallReq(EX_StallRe1)
+ 	);
+ wire [31:0] EXMEM_NowPC;	
 // 	Csr i_Csr (
 //         .clk(clk),
 //         .rst_n(rst_n),
@@ -374,39 +389,55 @@ module Core(
 // 	);	
 		
 
-// 	PipeStage #(
-// 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
-// 	)
-// 	i_EXMem(
-// 		.clk(clk),
-// 		.rst_n(rst_n),
-// 		.Stall(Ctrl_Stall[3]),
-// 		.Flush(Csr_Memflush|Flush[2]),	
-// 		.in(
-// 			{
-// 				EX_AluData,
-// 				IDEX_RdAddr,
-// 				IDEX_Rs2Data,
-// 				IDEX_StType,
-// 				IDEX_LdType,
-// 				IDEX_WbRdEn,
-// 				IDEX_WbSel,
-//                           IDEX_NowPC
-// 			} 
-// 		),
-// 		.out(
-// 			{
-// 				EXMem_AluData,
-// 				EXMem_RdAddr,
-// 				EXMem_Rs2Data,
-// 				EXMem_StType,
-// 				EXMem_LdType,				
-// 				EXMem_RdWrtEn,
-// 				EXMem_WbSel,
-//                           EXMEM_NowPC
-// 			} 
-// 		)
-// 	);
+ 	PipeStage #(
+ 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
+ 	)
+ 	i_EXMem(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[3]),
+ 		.Flush(Csr_Memflush|Flush[2]),	
+ 		.in(
+ 			{
+ 				EX_AluData_0,
+ 				IDEX_RdAddr_0,
+ 				IDEX_Rs2Data_0,
+ 				IDEX_StType_0,
+ 				IDEX_LdType_0,
+ 				IDEX_WbRdEn_0,
+ 				IDEX_WbSel_0,
+                IDEX_NowPC_0,
+ 				EX_AluData_1,
+ 				IDEX_RdAddr_1,
+ 				IDEX_Rs2Data_1,
+ 				IDEX_StType_1,
+ 				IDEX_LdType_1,
+ 				IDEX_WbRdEn_1,
+ 				IDEX_WbSel_1,
+                IDEX_NowPC_1,
+ 			} 
+ 		),
+ 		.out(
+ 			{
+ 				EXMem_AluData_0,
+ 				EXMem_RdAddr_0,
+ 				EXMem_Rs2Data_0,
+ 				EXMem_StType_0,
+ 				EXMem_LdType_0,
+ 				EXMem_RdWrtEn_0,
+ 				EXMem_WbSel_0,
+                EXMEM_NowPC_0,
+ 				EXMem_AluData_1,
+ 				EXMem_RdAddr_1,
+ 				EXMem_Rs2Data_1,
+ 				EXMem_StType_1,
+ 				EXMem_LdType_1,
+ 				EXMem_RdWrtEn_1,
+ 				EXMem_WbSel_1,
+                EXMEM_NowPC_1
+ 			} 
+ 		)
+ 	);
 
 // 	Mem i_Mem(
 // 		.EXMem_LdType(EXMem_LdType),    
