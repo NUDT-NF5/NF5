@@ -29,7 +29,7 @@ wire [4 :0]     sel_hw;
 wire [4 :0]     sel_byte;
 wire [6 :0]     sel_byte_start;
 wire [31:0]     sel_data_rd;
-wire [31:0]     data_tmp;
+wire [63:0]     data_tmp;
 reg  [31:0]     Cache_core_data_reg;
 reg  [31:0]     data [0:9215];
   

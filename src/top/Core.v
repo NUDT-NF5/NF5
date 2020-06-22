@@ -82,32 +82,77 @@ module Core(
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 	wire									EX_StallReq;
 	
+
+
+
     wire    [31:0] 							EXMem_AluData;
     wire    [31:0] 							EXMem_Rs2Data;
-    wire           							EXMem_RdWrtEn;
-    wire    [4:0]  							EXMem_RdAddr;
-    wire           							EXMem_WbSel;
-    wire    [1:0]  							EXMem_StType;
-    wire    [2:0]  							EXMem_LdType;
+    //wire           							EXMem_RdWrtEn;
+    //wire    [4:0]  							EXMem_RdAddr;
+    //wire           							EXMem_WbSel;
 
-    wire                          		 	Mem_LdEn;        
-    wire                          		 	Mem_DcacheEn;    
-    wire                          		 	Mem_DcacheRd;    
-    wire  	[1:0]      			  			Mem_DcacheWidth; 
-    wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
-	wire									Mem_DcacheSign;   
+    //wire    [1:0]  							EXMem_StType;
+    //wire    [2:0]  							EXMem_LdType;
+//========YB Change for ss 2020.06.22 21:21========
+    //wire                          		 	Mem_LdEn;        
+    //wire                          		 	Mem_DcacheEn;    
+    //wire                          		 	Mem_DcacheRd;    
+    //wire  	[1:0]      			  			Mem_DcacheWidth; 
+    //wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
+	//wire									    Mem_DcacheSign;   
 
-	wire  	[`DATA_WIDTH-1  :0]      		Dcache_DataRd;
-	wire  	[`INSTR_WIDTH-1  :0]      		Icache_Instr;
-
-    wire                       				MemWb_WbSel;
-    wire  	[`DATA_WIDTH-1 :0]   			MemWb_AluData;
-    wire  	[`DATA_WIDTH-1 :0]   			MemWb_DataRd;
-    wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr;
+	//wire  	[`DATA_WIDTH-1  :0]      		Dcache_DataRd;
+	//wire  	[`INSTR_WIDTH-1  :0]      		Icache_Instr;
+    //wire                       				MemWb_WbSel;
+    //wire  	[`DATA_WIDTH-1 :0]   			MemWb_AluData;
+    //wire  	[`DATA_WIDTH-1 :0]   			MemWb_DataRd;
+	//wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr;
 	
+	//wire  	[`DATA_WIDTH-1 :0]   			Wb_DataWrt;
+    //wire                       				MemWb_RdWrtEn;
+//========YB Change for ss 2020.06.22 21:21========
+	wire           							EXMem_RdWrtEn_0;
+    wire    [4:0]  							EXMem_RdAddr_0 ;
+    wire           							EXMem_WbSel_0  ;
+	wire           							EXMem_RdWrtEn_1;
+    wire    [4:0]  							EXMem_RdAddr_1 ;
+    wire           							EXMem_WbSel_1  ;
+
+    wire                       				MemWb_RdWrtEn_0;
+    wire                       				MemWb_RdWrtEn_1;
+	wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr_0;
+	wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr_1;
 	
-	wire  	[`DATA_WIDTH-1 :0]   			Wb_DataWrt;
-    wire                       				MemWb_RdWrtEn;
+	  wire  [`LD_TYPE_WIDTH-1:0]     EXMem_LdType_0   ;    //From EXMem stage, indicate load type 
+      wire  [`ST_TYPE_WIDTH-1:0]     EXMem_StType_0   ;    //From EXMem stage, indicate store type
+      wire  [`DATA_WIDTH-1   :0]     EXMem_AluData_0  ;    //From EXMem stage, indicate Dcaceh Addr
+
+      wire  [`LD_TYPE_WIDTH-1:0]     EXMem_LdType_1   ;    //From EXMem stage, indicate load type 
+      wire  [`ST_TYPE_WIDTH-1:0]     EXMem_StType_1   ;    //From EXMem stage, indicate store type
+      wire  [`DATA_WIDTH-1   :0]     EXMem_AluData_1  ;    //From EXMem stage, indicate Dcaceh Addr
+
+      wire  [`DATA_WIDTH-1   :0]     EXMem_Rs2Data_0  ;  
+      wire  [`DATA_WIDTH-1   :0]     EXMem_Rs2Data_1  ;  
+
+      wire                           Mem_LdEN_0       ;    //To EX stage, generate forward control signal
+      wire                           Mem_LdEN_1       ;    //To EX stage, generate forward control signal
+
+      wire  [`DATA_WIDTH-1   :0]     Dcache_DataRd_0   ; 
+      wire  [`DATA_WIDTH-1   :0]     Dcache_DataRd_1   ; 
+      wire  [`ADDR_WIDTH-1   :0]     Icache_NextPC     ;
+      wire  [`INSTR_WIDTH-1  :0]     Icache_Instr      ;
+
+	  wire                       MemWb_WbSel_0   ;      
+      wire  [`DATA_WIDTH-1 :0]   MemWb_AluData_0 ;   
+      wire  [`DATA_WIDTH-1 :0]   MemWb_DataRd_0  ;   
+      wire  [`DATA_WIDTH-1 :0]   Wb_DataWrt_0    ; 
+
+      wire                       MemWb_WbSel_1   ;
+      wire  [`DATA_WIDTH-1 :0]   MemWb_AluData_1 ;  
+      wire  [`DATA_WIDTH-1 :0]   MemWb_DataRd_1  ; 
+      wire  [`DATA_WIDTH-1 :0]   Wb_DataWrt_1    ;
+
+
 
 	wire   	[4:0]   						Ctrl_Stall;	
 	wire	[3:0]							Flush;
@@ -120,7 +165,7 @@ module Core(
 		
 	// Ctrl i_Ctrl(
 	// 	.Icache_StallReq(1'b0),
-	// 	.Dcache_StallReq(1'b0),
+	 	.Dcache_StallReq(Mem_Stall),//========YB Change for ss 2020.06.22 21:21========
 	// 	.Decode_Stall   (Decode_Stall),
 	// 	.Mem_LdStFlag   (Mem_DcacheEn),
  //        .DecodeHazard_StallReq(DecodeHazard_StallReq),//data_hazard
@@ -439,66 +484,95 @@ module Core(
  		)
  	);
 
-// 	Mem i_Mem(
-// 		.EXMem_LdType(EXMem_LdType),    
-// 		.EXMem_StType(EXMem_StType),    
-// 		.EXMem_AluData(EXMem_AluData),   
-// 		.Mem_LdEN(Mem_LdEn),        
-// 		.Mem_DcacheEN(Mem_DcacheEn),    
-// 		.Mem_DcacheRd(Mem_DcacheRd),  
-// 		.Mem_DcacheSign(Mem_DcacheSign),  
-// 		.Mem_DcacheWidth(Mem_DcacheWidth), 
-// 		.Mem_DcacheAddr(Mem_DcacheAddr),
-//             .Csr_Memflush(Csr_Memflush)//new   
-//     ); 	
-	
-	// Dcache i_Dcache(
-	// 	.clk(clk),
-	// 	.rst_n(rst_n),
-	// 	.Mem_DcacheEN(Mem_DcacheEn),    
-	// 	.Mem_DcacheRd(Mem_DcacheRd),    
-	// 	.Mem_DcacheWidth(Mem_DcacheWidth), 
-	// 	.Mem_DcacheAddr(Mem_DcacheAddr),   
-	// 	.EXMem_Rs2Data(EXMem_Rs2Data),
-	// 	.Mem_DcacheSign(Mem_DcacheSign), 
-	// 	.Dcache_DataRd(Dcache_DataRd),
-	// 	.Icache_NextPC(Fetch_NextPC),
-	// 	.Icache_Instr(Icache_Instr)
-	// );
-	
-// 	PipeStage #(
-// 		.STAGE_WIDTH(`PIPE_MemWb_LEN)
-// 	)
-// 	i_MemWb(
-// 		.clk(clk),
-// 		.rst_n(rst_n),
-// 		.Stall(Ctrl_Stall[4]),
-// 		.Flush(Csr_Memflush|Flush[3]),
-// 		.in(
-// 			{
-// 				EXMem_RdAddr,
-// 				EXMem_RdWrtEn,
-// 				EXMem_AluData,
-// 				Dcache_DataRd,
-// 				EXMem_WbSel
-// 			} 
-// 		),
-// 		.out(
-// 			{
-// 				MemWb_RdAddr,
-// 				MemWb_RdWrtEn,
-// 				MemWb_AluData,
-// 				MemWb_DataRd,
-// 				MemWb_WbSel
-// 			} 
-// 		)
-// 	);
+//========YB Change for ss 2020.06.22 21:21========
+ 	Mem i_Mem(
+		.clk(clk),
+ 		.rst_n(rst_n),
+		 //=====ss-0====
+		.EXMem_LdType_0(EXMem_LdType_0),
+		.EXMem_StType_0(EXMem_StType_0),
+		.EXMem_AluData_0(EXMem_AluData_0),
+		.EXMem_Rs2Data_0(EXMem_Rs2Data_0),
+		 //=====ss-1====
+		.EXMem_LdType_1(EXMem_LdType_1),
+		.EXMem_StType_1(EXMem_StType_1),
+		.EXMem_AluData_1(EXMem_AluData_1),
+		.EXMem_Rs2Data_1(EXMem_Rs2Data_1),
+		.Mem_LdEN_0(Mem_LdEN_0),
+		.Mem_LdEN_1(Mem_LdEN_1),
 
-// 	Wb i_Wb(
-// 		.MemWb_WbSel(MemWb_WbSel),
-// 		.MemWb_AluData(MemWb_AluData),
-// 		.MemWb_DataRd(MemWb_DataRd),
-// 		.Wb_DataWrt(Wb_DataWrt)
-//     );
+		//=========YB：Dcache=========
+ 		.Mem_DcacheEN(Mem_DcacheEn),    
+ 		.Mem_DcacheRd(Mem_DcacheRd),  
+		.Mem_DcacheWidth(Mem_DcacheWidth), 
+		.Mem_DcacheAddr(Mem_DcacheAddr),
+ 		.Mem_DcacheSign(Mem_DcacheSign),
+		.Mem_Stall(Mem_Stall), //connect to Dcache Stall 
+    		.Csr_Memflush(Csr_Memflush)//new 
+
+    	.Dcache_DataRd_0(Dcache_DataRd_0) 
+    	.Dcache_DataRd_1(Dcache_DataRd_1)  
+    	.Icache_NextPC(Icache_NextPC)   
+    	.Icache_Instr(Icache_Instr)   
 		
+     ); 	
+	
+//========YB Change for ss 2020.06.22 21:21========
+ 	PipeStage #(
+ 		//.STAGE_WIDTH(`PIPE_MemWb_LEN) //need to count signal
+ 	)
+ 	i_MemWb(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[4]),
+ 		.Flush(Csr_Memflush|Flush[3]),
+ 		.in(
+ 			{
+				//=====ss-0====
+				EXMem_RdAddr_0   , 				
+				EXMem_RdWrtEn_0  ,
+				EXMem_AluData_0  ,
+				Dcache_DataRd_0  ,
+				EXMem_WbSel_0    ,  
+				//=====ss-1====
+				EXMem_RdAddr_1   , 
+				EXMem_RdWrtEn_1  ,
+				EXMem_AluData_1  ,
+				Dcache_DataRd_1  ,
+				EXMem_WbSel_1       
+ 			} 
+ 		),
+ 		.out(
+ 			{
+ 				//=====ss-0====
+				 MemWb_RdAddr_0   , 
+ 				MemWb_RdWrtEn_0  ,
+ 				MemWb_AluData_0  ,
+ 				MemWb_DataRd_0   ,
+ 				MemWb_WbSel_0    ,
+				//=====ss-1====
+				MemWb_RdAddr_1   , 
+ 				MemWb_RdWrtEn_1  ,
+ 				MemWb_AluData_1  ,
+ 				MemWb_DataRd_1   ,
+ 				MemWb_WbSel_1    
+ 			} 
+ 		)
+ 	);
+//========YB Change for ss 2020.06.22 21:21========
+ 	Wb i_Wb(
+ 		.MemWb_WbSel_0(MemWb_WbSel_0),
+ 		.MemWb_WbSel_1(MemWb_WbSel_1),
+
+ 		.MemWb_AluData_0(MemWb_AluData_0),
+ 		.MemWb_AluData_1(MemWb_AluData_1),
+
+ 		.MemWb_DataRd_0(MemWb_DataRd_0),
+ 		.MemWb_DataRd_1(MemWb_DataRd_1),
+
+ 		.Wb_DataWrt_0(Wb_DataWrt_0)
+ 		.Wb_DataWrt_1(Wb_DataWrt_1)
+
+     );
+
 endmodule
