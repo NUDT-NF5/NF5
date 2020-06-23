@@ -12,7 +12,8 @@ module Core(
 );
 	wire	[`ADDR_WIDTH - 1 : 0]			Fetch_NextPC;
 
-	wire	[`ADDR_WIDTH - 1 : 0]			IFID_NowPC;
+	wire	[`ADDR_WIDTH - 1 : 0]			IFID_NowPC_0;
+	wire	[`ADDR_WIDTH - 1 : 0]			IFID_NowPC_1;
 	wire	[`INSTR_WIDTH - 1 : 0]			IFID_Instr;
 
 	//part 1
@@ -43,7 +44,7 @@ module Core(
 	wire									Decode_16BitFlag_1;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType_1;
 
-	wire 	[2 - 1 : 0]						Decode_NextPC;
+	wire 	[`PC_PLUS_WIDTH - 1 : 0]						Decode_NextPC;
 
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data_0;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data_0;
@@ -187,7 +188,7 @@ module Core(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Stall(1'b0),//need to edit control
-		.IFID_NowPC(IFID_NowPC),
+		.IFID_NowPC(IFID_NowPC_0),
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(1'b0),//need to edit control
 		.Ctrl_ExcpPC(32'h0000_0008),//need to edit control
@@ -208,7 +209,7 @@ module Core(
 		.Stall(1'b0),//need to edit control
 		.Flush(1'b0),//need to edit control
 		.in( {Fetch_NextPC , Icache_Instr} ),
-		.out( {IFID_NowPC , IFID_Instr} )
+		.out( {IFID_NowPC_0 , IFID_Instr} )
 	);
 
 	Decode i_Decode(
@@ -218,6 +219,8 @@ module Core(
 		// .IFID_Instr(64'h00000013_57c157c1), // 32/16/16
 		// .IFID_Instr(64'h57c10000_001357c1), // 16/32/16
 		.IFID_Instr(IFID_Instr),
+		.IFID_NowPC_0(IFID_NowPC_0),
+		.IFID_NowPC_1(IFID_NowPC_1),
 		//part 0
 		.Decode_AllCtr_0(Decode_AllCtr_0),
 		.Decode_RdAddr_0(Decode_RdAddr_0),
@@ -328,7 +331,8 @@ module Core(
  				DecodeHazard_Rs1Data,
  				DecodeHazard_Rs2Data,
  				Decode_16BitFlag,
- 				IFID_NowPC
+ 				IFID_NowPC_0,
+ 				IFID_NowPC_1 
  			} 
  		),
  		.out(
@@ -351,7 +355,8 @@ module Core(
  				IDEX_Rs1Data,
  				IDEX_Rs2Data,
  				IDEX_16BitFlag,
- 				IDEX_NowPC
+ 				IDEX_NowPC_0,
+ 				IDEX_NowPC_1
  			} 
  		)
  	);
