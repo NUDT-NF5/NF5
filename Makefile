@@ -6,6 +6,9 @@ result_dir = $(nc_dir)/result
 src_dir = $(base_dir)/src
 output_dir = $(nc_dir)/output
 iverilog_dir=$(base_dir)/iverilog-project
+soft_scripts=$(base_dir)/soft_proj/soft_scripts
+
+soft_proj=soft_name #indicate software project directory name
 temp:
 	echo $(base_dir)
 	echo $(base_dir)
@@ -24,12 +27,11 @@ compile:
 sim_default:
 	make gen_filelist
 	bash $(iverilog_dir)/run_default
-
 	
 sim:	
 	make gen_filelist	
 	./isa_run.sh
-
+ 	
 sim_gui_nc:
 	make gen_filelist
 	cd $(nc_dir) && bash $(nc_dir)/set_gui && cd -
@@ -39,12 +41,27 @@ sim_gui_gtk:
 	make gen_filelist
 	gtkwave $(iverilog_dir)/test.vcd
 
-debug:
-	cd iverilog-project && iverilog -o test filelist.v  && vvp test && cat mySim.log
+#For C project	how to use: make cproj_gen soft_proj=helloword (#your C code name)
+cproj_gen:
+	bash $(soft_scripts)/make_C $(soft_proj)
+	#bash $(soft_scripts)/soft_run.sh
+cproj_compile:
+	bash $(soft_scripts)/compile_C $(soft_proj)
+	bash $(soft_scripts)/soft_run.sh
+
+#For assemble project how to use: make cproj_gen soft_proj=helloword (#your assemble code name)
+asproj_gen:
+	bash $(soft_scripts)/make_AS $(soft_proj)
+	#bash $(soft_scripts)/soft_run.sh
+asproj_compile:
+	bash $(soft_scripts)/compile_AS $(soft_proj)
+	bash $(soft_scripts)/soft_run.sh
 
 hardclean:
-	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work output/* ./iverilog-project/test ./iverilog-project/*.vcd
+	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work
 
 clean: hardclean
 
 all: compile sim
+
+.PHONY:gen_filelist compile sim_gui hardclean clean all
