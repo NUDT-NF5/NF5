@@ -1,0 +1,54 @@
+#!/bin/bash
+soft_dir=soft_proj
+if [ -d $soft_dir/$1 ]
+  then 
+     rm -rf $soft_dir/$1
+  else
+     echo "ready to make new directory"
+fi
+cd $soft_dir
+mkdir -p $1
+name=$1
+cd $name 
+mkdir -p C_source
+mkdir -p Excu_code
+mkdir -p Link_code
+mkdir -p Dump_code
+mkdir -p Machine_code
+touch C_source/$name.c
+gedit C_source/$name.c
+touch Link_code/link.ld
+cat>Link_code/link.ld<<EOF
+SECTIONS
+{
+  . = 0x00000000;
+  .text.init : { *(.text.init) }
+  . = ALIGN(0x1000);
+  .tohost : { *(.tohost) }
+  . = ALIGN(0x1000);
+  .text : { *(.text) }
+  . = ALIGN(0x1000);
+  .data : { *(.data) }
+  .bss : { *(.bss) }
+  _end = .;
+}
+EOF
+
+:<<!
+#---------generate C_source code-----------
+riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -march=rv32i -mabi=ilp32 -T Link_code/link.ld -o Excu_code/$name C_source/$name.c
+#riscv64-unknown-elf-gcc -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T Link_code/link.ld -o Excu_code/$name C_source/$name.c 
+
+#---------objdump--------------------------
+riscv64-unknown-elf-objdump -D Excu_code/$name > Dump_code/$name.objdump
+
+#---------objcopy--------------------------
+cp Excu_code/$name Machine_code/$name
+riscv64-unknown-elf-objcopy -O verilog Machine_code/$name
+
+#---------copy verilog file to Instructions.list--------
+rm -rf ../iverilog-project/Instructions.list
+rm -rf ../nc-project/Instructions.list
+cp Machine_code/$name ../../iverilog-project/Instructions.list
+cp Machine_code/$name ../../nc-project/Instructions.list
+!

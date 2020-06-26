@@ -1,0 +1,52 @@
+#!/bin/bash
+soft_dir=soft_proj
+if [ -d $soft_dir/$1 ]
+  then 
+     rm -rf $soft_dir/$1
+  else
+     echo "ready to make new directory"
+fi
+cd $soft_dir
+mkdir -p $1
+name=$1
+cd $name 
+mkdir -p As_source
+mkdir -p Excu_code
+mkdir -p Link_code
+mkdir -p Dump_code
+mkdir -p Machine_code
+touch As_source/$name.s
+gedit As_source/$name.s
+touch Link_code/link.ld
+cat>Link_code/link.ld<<EOF
+SECTIONS
+{
+  . = 0x00000000;
+  .text.init : { *(.text.init) }
+  . = ALIGN(0x1000);
+  .tohost : { *(.tohost) }
+  . = ALIGN(0x1000);
+  .text : { *(.text) }
+  . = ALIGN(0x1000);
+  .data : { *(.data) }
+  .bss : { *(.bss) }
+  _end = .;
+}
+EOF
+:<<!
+#---------generate AS_source code-----------
+riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -march=rv32im -mabi=ilp32 -T Link_code/link.ld -o Excu_code/$name As_source/$name.s
+
+#---------objdump--------------------------
+riscv64-unknown-elf-objdump -D Excu_code/$name > Dump_code/$name.objdump
+
+#---------objcopy--------------------------
+cp Excu_code/$name Machine_code/$name
+riscv64-unknown-elf-objcopy -O verilog Machine_code/$name
+
+#---------copy verilog file to Instructions.list--------
+rm -rf ../iverilog-project/Instructions.list
+rm -rf ../nc-project/Instructions.list
+cp Machine_code/$name ../../iverilog-project/Instructions.list
+cp Machine_code/$name ../../nc-project/Instructions.list
+!

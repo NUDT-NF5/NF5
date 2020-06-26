@@ -40,8 +40,10 @@ sim_gui_nc:
 sim_gui_gtk:
 	make gen_filelist
 	gtkwave $(iverilog_dir)/test.vcd
-
-#For C project	how to use: make cproj_gen soft_proj=helloword (#your C code name)
+	
+#==================For C project [how to use]======================: 
+#1st step   make cproj_gen     soft_proj=helloword (#your C code name)
+#2nd step   make cproj_compile soft_proj=helloword (#your C code name)
 cproj_gen:
 	bash $(soft_scripts)/make_C $(soft_proj)
 	#bash $(soft_scripts)/soft_run.sh
@@ -49,7 +51,9 @@ cproj_compile:
 	bash $(soft_scripts)/compile_C $(soft_proj)
 	bash $(soft_scripts)/soft_run.sh
 
-#For assemble project how to use: make cproj_gen soft_proj=helloword (#your assemble code name)
+#==================For AS project [how to use]======================: 
+#1st step   make asproj_gen     soft_proj=helloword (#your AS code name)
+#2nd step   make asproj_compile soft_proj=helloword (#your AS code name)
 asproj_gen:
 	bash $(soft_scripts)/make_AS $(soft_proj)
 	#bash $(soft_scripts)/soft_run.sh

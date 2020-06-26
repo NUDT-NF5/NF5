@@ -1,0 +1,28 @@
+#!/bin/bash
+#mkdir -p $1
+soft_dir=soft_proj
+cd $soft_dir
+name=$1
+cd $name 
+
+#---------compile C_source code-----------
+#riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -march=rv32im -mabi=ilp32 -T Link_code/link.ld -o Excu_code/$name C_source/$name.c
+#riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostartfiles -march=rv32im -mabi=ilp32 -T Link_code/link.ld -o Excu_code/$name C_source/$name.c
+#riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -T Link_code/link.ld -o Excu_code/$name C_source/$name.c 
+#riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostartfiles -march=rv32imafdc -mabi=ilp32d -T Link_code/link.ld -o Excu_code/$name C_source/$name.c 
+
+#---------compile C_source code-----------
+riscv64-unknown-elf-gcc -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -march=rv32im -mabi=ilp32 -T Link_code/link.ld -o Excu_code/$name As_source/$name.s
+
+#---------objdump--------------------------
+riscv64-unknown-elf-objdump -D Excu_code/$name > Dump_code/$name.objdump
+
+#---------objcopy--------------------------
+cp Excu_code/$name Machine_code/$name
+riscv64-unknown-elf-objcopy -O verilog Machine_code/$name
+
+#---------copy verilog file to Instructions.list--------
+rm -rf ../iverilog-project/Instructions.list
+rm -rf ../nc-project/Instructions.list
+cp Machine_code/$name ../../iverilog-project/Instructions.list
+cp Machine_code/$name ../../nc-project/Instructions.list
