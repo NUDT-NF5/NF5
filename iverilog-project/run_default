@@ -1,7 +1,7 @@
 #!/bin/bash
 #iverilog -o $EDA_env_dir/test $src_dir/*/*.v $src_dir/top/TbAll.sv && vvp -n $EDA_env_dir/test
 #src_dir=../src
-cd iverilog-project 
+cd iverilog-project  
 cat Instructions_default.list > Instructions.list
 cat TbAll_default.sv > ../src/top/TbAll.sv
 iverilog -o test filelist.v

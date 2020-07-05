@@ -98,7 +98,7 @@ always@(posedge clk)
 initial
         begin            
             $dumpfile("test.vcd");
-            $dumpvars(0,TbAll);
+            $dumpvars(-1,TbAll);
         end
 
 

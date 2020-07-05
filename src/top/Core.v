@@ -231,9 +231,9 @@ wire 				   Fetchaddr_Invalid = 0;
 //wire nomisalign_Br= EX_BranchFlag ;//&!Fetchaddr_Invalid;
 	
 	Fetch i_Fetch(
-		.clk(clk),
-		.rst_n(rst_n),
-		.Stall(1'b0),//need to edit control
+		// .clk(clk),
+		// .rst_n(rst_n),
+		// .Stall(1'b0),//need to edit control
 		.IFID_NowPC(IFID_NowPC_0),
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(1'b0),//need to edit control
