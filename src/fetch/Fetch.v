@@ -37,6 +37,8 @@ module Fetch(
 			Fetch_NextPC = IFID_NowPC + 4;
 		else if(Decode_NextPC == `PC_PLUS_2)
 			Fetch_NextPC = IFID_NowPC + 2;
+		else if(Decode_NextPC == `PC_PLUS_0)
+			Fetch_NextPC = IFID_NowPC;
 		// Fetch_NextPC is a latch
 endmodule
 

@@ -19,10 +19,11 @@
 `define	START_PC			`X_LEN'h0000_0000
 
 `define PC_PLUS_WIDTH		3
-`define PC_PLUS_2			`PC_PLUS_WIDTH'd0
-`define PC_PLUS_4			`PC_PLUS_WIDTH'd1
-`define PC_PLUS_6			`PC_PLUS_WIDTH'd2
-`define PC_PLUS_8			`PC_PLUS_WIDTH'd3
+`define PC_PLUS_0			`PC_PLUS_WIDTH'd0
+`define PC_PLUS_2			`PC_PLUS_WIDTH'd1
+`define PC_PLUS_4			`PC_PLUS_WIDTH'd2
+`define PC_PLUS_6			`PC_PLUS_WIDTH'd3
+`define PC_PLUS_8			`PC_PLUS_WIDTH'd4
 
 /*----------SimMemory.v---------*/
 `define	SIM_MEM_WIDTH		32

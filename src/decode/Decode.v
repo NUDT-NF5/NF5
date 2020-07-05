@@ -153,7 +153,7 @@ module Decode(
     		6'b100001 : begin instr_0 = message32_1; instr_1 = message16_3; Decode_NextPC = `PC_PLUS_6; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0004; end // 16/16/32
     		6'b000111 : begin instr_0 = message16_1; instr_1 = message16_2; Decode_NextPC = `PC_PLUS_4; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; end // 16/16/16/16
     		6'b001110 : begin instr_0 = message16_1; instr_1 = message16_2; Decode_NextPC = `PC_PLUS_4; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; end // 32/16/16
-    		default   : begin instr_0 = {`DECODER_OUT_WIDTH{1'b0}}; instr_1 = {`DECODER_OUT_WIDTH{1'b0}}; Decode_NextPC = `PC_PLUS_2; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002;end
+    		default   : begin instr_0 = {`DECODER_OUT_WIDTH{1'b0}}; instr_1 = {`DECODER_OUT_WIDTH{1'b0}}; Decode_NextPC = `PC_PLUS_0; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002;end
     	endcase
     end
 

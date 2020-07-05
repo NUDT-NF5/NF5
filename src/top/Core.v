@@ -256,7 +256,7 @@ wire 				   Fetchaddr_Invalid = 0;
 	i_IFID(
 		.clk(clk),
 		.rst_n(rst_n),
-		.rst_value(96'h00000000_00000013_00000013),//rst and flush with 2 nops
+		.rst_value(96'h00000000_00000000_00000000),//rst and flush with 2 nops
 		.Stall(1'b0),//need to edit control
 		.Flush(1'b0),//need to edit control
 		.in( {Fetch_NextPC , Icache_Instr} ),
