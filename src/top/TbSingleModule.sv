@@ -55,9 +55,9 @@ end
 	wire 	[`PC_PLUS_WIDTH - 1 : 0]		Decode_NextPC;
 
 	Fetch i_Fetch(
-		.clk(clk),
-		.rst_n(rst_n),
-		.Stall(1'b0),//need to edit control
+		//.clk(clk),
+		//.rst_n(rst_n),
+		//.Stall(1'b0),//need to edit control
 		.IFID_NowPC(IFID_NowPC),
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(1'b0),//need to edit control

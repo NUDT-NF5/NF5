@@ -44,7 +44,7 @@ module Core(
 	wire									Decode_16BitFlag_1;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType_1;
 
-	wire 	[`PC_PLUS_WIDTH - 1 : 0]						Decode_NextPC;
+	wire 	[`PC_PLUS_WIDTH - 1 : 0]        Decode_NextPC;
 
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data_0;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data_0;
@@ -112,6 +112,7 @@ module Core(
     wire           							EX_LdStFlag_1;
 	wire									EX_BranchFlag_1;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC_1;
+	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 
     wire    [31:0] 							EXMem_AluData_0;
     wire    [31:0] 							EXMem_Rs2Data_0;
@@ -128,15 +129,15 @@ module Core(
     wire           							EXMem_WbSel_1;
     wire    [1:0]  							EXMem_StType_1;
     wire    [2:0]  							EXMem_LdType_1;
-	wire    [`ADDR_WIDTH - 1:0]                 EXMEM_NowPC_0;
-	wire    [`ADDR_WIDTH - 1:0]                 EXMEM_NowPC_1;
+	wire    [`ADDR_WIDTH - 1:0]             EXMEM_NowPC_0;
+	wire    [`ADDR_WIDTH - 1:0]             EXMEM_NowPC_1;
 //========YB Change for ss 2020.06.22 21:21========
     //wire                          		 	Mem_LdEn;        
     //wire                          		 	Mem_DcacheEn;    
     wire                          		 	Mem_DcacheRd;    
     wire  	[1:0]      			  			Mem_DcacheWidth; 
     wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
-	wire									    Mem_DcacheSign;   
+	wire									Mem_DcacheSign;   
 
 	//wire  	[`DATA_WIDTH-1  :0]      		Dcache_DataRd;
 	//wire  	[`INSTR_WIDTH-1  :0]      		Icache_Instr;
@@ -213,6 +214,7 @@ wire 				   Fetchaddr_Invalid = 0;
 	 	.EX_LdStFlag_0    (EX_LdStFlag_0),
 	 	.EX_BranchFlag_0  (EX_BranchFlag_0),
 	 	.Decode_16BitFlag_0(Decode_16BitFlag_0),
+		.EX_BranchPC_0(EX_BranchPC_0),
 	 	.Ctrl_Stall     (Ctrl_Stall),
 	 	.EX_StallReq	(EX_StallReq),
 	 	.Csr_ExcpFlag   (Csr_ExcpFlag),
@@ -222,7 +224,10 @@ wire 				   Fetchaddr_Invalid = 0;
 		.Mem_LdStFlag_1   (Mem_DcacheEN_1),
 	 	.EX_LdStFlag_1    (EX_LdStFlag_1),
 	 	.EX_BranchFlag_1  (EX_BranchFlag_1),
+		.EX_BranchPC_1(EX_BranchPC_1),
+		.EX_BranchPC(EX_BranchPC),
 	 	.Decode_16BitFlag_1(Decode_16BitFlag_1),
+		.EX_BranchFlag(EX_BranchFlag),
  //        .Csr_WFIClrFlag (Csr_WFIClrFlag ) ,
         .Csr_Memflush(Csr_Memflush)  
     );
@@ -238,9 +243,9 @@ wire 				   Fetchaddr_Invalid = 0;
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(1'b0),//need to edit control
 		.Ctrl_ExcpPC(32'h0000_0008),//need to edit control
-		.EX_BranchFlag(1'b0),//need to edit ex
+		.EX_BranchFlag(EX_BranchFlag),//need to edit ex
              //.EX_BranchFlag(nomisalign_Br),
-		.EX_BranchPC(32'h0000_000b),//need to edit ex
+		.EX_BranchPC(EX_BranchPC),//need to edit ex
 		.Decode_NextPC(Decode_NextPC)//the low 16bit of IFID_Instr is 16-bit instr
 
 	);

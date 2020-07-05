@@ -17,6 +17,7 @@ module Ctrl(
     input  wire          Csr_ExcpFlag   ,
     input  wire          Csr_WFIClrFlag    ,//clr wfi_stall
     input  wire          Decode_16BitFlag_0 ,
+    input  wire  [`ADDR_WIDTH - 1:0] EX_BranchPC_0,
     input  wire          EX_StallReq    ,
     output reg   [4:0]   Ctrl_Stall     ,
     output               issue_select,
@@ -27,8 +28,11 @@ module Ctrl(
     input  wire          EX_LdStFlag_1    ,
     input  wire          EX_BranchFlag_1  ,
     input  wire          Decode_16BitFlag_1 ,
+    input  wire  [`ADDR_WIDTH - 1:0] EX_BranchPC_1,
+    output wire  [`ADDR_WIDTH - 1:0] EX_BranchPC,
 
     output       [3:0]   Flush,
+    output               EX_BranchFlag,
     input  wire          Csr_Memflush             
     );
 reg [4:0]stage_flush; 
@@ -43,6 +47,10 @@ wire WFI_Req= Csr_WFIClrFlag ? 1'b0 :Decode_Stall_0[1] || Decode_Stall_1[1];
 //wire DecodeHazard_Stall=DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1 &! Csr_Memflush; 
 reg  ctrl_issue_select;
 reg  stage_issue_select;
+
+assign EX_BranchFlag = EX_BranchFlag_0 || EX_BranchFlag_1;
+assign EX_BranchPC = (EX_BranchFlag_0 && EX_BranchFlag_1) ? EX_BranchPC_0 : 
+                     EX_BranchFlag_0 ? EX_BranchPC_0 : EX_BranchPC_1;
 
 assign issue_select = ctrl_issue_select || stage_issue_select;
 
