@@ -30,10 +30,10 @@ module	TbAll;
 		rst_n <= 1;		
 		$readmemh("Instructions.list", data_reg);		
 		for (j=0;j<4096;j=j+1)  begin
-			i_Core.i_Dcache.data [j] [8*0+:8]= data_reg[j*4+0];
-			i_Core.i_Dcache.data [j] [8*1+:8]= data_reg[j*4+1];
-			i_Core.i_Dcache.data [j] [8*2+:8]= data_reg[j*4+2];
-			i_Core.i_Dcache.data [j] [8*3+:8]= data_reg[j*4+3];
+			i_Core.i_Mem.cache.data [j] [8*0+:8]= data_reg[j*4+0];
+			i_Core.i_Mem.cache.data [j] [8*1+:8]= data_reg[j*4+1];
+			i_Core.i_Mem.cache.data [j] [8*2+:8]= data_reg[j*4+2];
+			i_Core.i_Mem.cache.data [j] [8*3+:8]= data_reg[j*4+3];
 			end
 end
 	initial begin
@@ -59,7 +59,7 @@ end
 //fail_pc_addr
   parameter fail_pc=32'h000005dc ;
 
-wire [31:0] ifidpc=i_Core.IFID_NowPC;
+wire [31:0] ifidpc=i_Core.IFID_NowPC_0;
 reg  [31:0] count_pass;
 reg  [31:0] count_fail;
 initial
@@ -70,11 +70,15 @@ always@(posedge clk)
   begin
     if(ifidpc >= pass_pc)
       count_pass <= count_pass+1;
+    else if (ifidpc < pass_pc)
+      count_pass <= 0;
   end
  always@(posedge clk)
   begin
     if(ifidpc >= fail_pc)
       count_fail <= count_fail+1;
+    else if (ifidpc < fail_pc)
+      count_fail <= 0;
   end 
   
 always@(posedge clk) 

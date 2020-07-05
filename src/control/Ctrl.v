@@ -9,41 +9,72 @@
 module Ctrl(
     input  wire          Icache_StallReq,
     input  wire          Dcache_StallReq,
-    input  wire  [1:0]   Decode_Stall   ,//Id_Wfi Id_Fence 
-    input  wire	      	 DecodeHazard_StallReq ,
-    input  wire          Mem_LdStFlag   ,
-    input  wire          EX_LdStFlag    ,
-    output reg   [4:0]   Ctrl_Stall     ,
-    input  wire          EX_BranchFlag  ,
+    input  wire  [1:0]   Decode_Stall_0   ,//Id_Wfi Id_Fence 
+    input  wire          DecodeHazard_StallReq,
+    input  wire          Mem_LdStFlag_0   ,
+    input  wire          EX_LdStFlag_0    ,
+    input  wire          EX_BranchFlag_0  ,
     input  wire          Csr_ExcpFlag   ,
-    input  wire          Csr_WFIClrFlag	,//clr wfi_stall
-	input  wire			 Decode_16BitFlag ,
+    input  wire          Csr_WFIClrFlag    ,//clr wfi_stall
+    input  wire          Decode_16BitFlag_0 ,
     input  wire          EX_StallReq    ,
-    output    [3:0]	 Flush,
-input  wire	Csr_Memflush             
+    output reg   [4:0]   Ctrl_Stall     ,
+    output               issue_select,
+
+    input  wire  [1:0]   Decode_Stall_1   ,//Id_Wfi Id_Fence 
+    //input  wire          DecodeHazard_StallReq_1 ,
+    input  wire          Mem_LdStFlag_1   ,
+    input  wire          EX_LdStFlag_1    ,
+    input  wire          EX_BranchFlag_1  ,
+    input  wire          Decode_16BitFlag_1 ,
+
+    output       [3:0]   Flush,
+    input  wire          Csr_Memflush             
     );
 reg [4:0]stage_flush; 
- reg [4:0]ctrl_flush;  
-wire Idfence_ExReq = Decode_Stall[0]& EX_LdStFlag;
-wire Idfence_MemReq= Decode_Stall[0]& Mem_LdStFlag;
-wire WFI_Req= Csr_WFIClrFlag ? 1'b0 :Decode_Stall[1];
-wire DecodeHazard_Stall=DecodeHazard_StallReq &! Csr_Memflush; 
- 
+reg [4:0]ctrl_flush;  
+wire Idfence_ExReq_0 = Decode_Stall_0[0]& EX_LdStFlag_0;
+wire Idfence_MemReq_0= Decode_Stall_0[0]& Mem_LdStFlag_0;
+wire Idfence_ExReq_1 = Decode_Stall_1[0]& EX_LdStFlag_1;
+wire Idfence_ExReq = Idfence_ExReq_0 || Idfence_ExReq_1;
+wire Idfence_MemReq_1= Decode_Stall_1[0]& Mem_LdStFlag_1;
+wire Idfence_MemReq  = Idfence_MemReq_0 || Idfence_MemReq_1;
+wire WFI_Req= Csr_WFIClrFlag ? 1'b0 :Decode_Stall_0[1] || Decode_Stall_1[1];
+//wire DecodeHazard_Stall=DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1 &! Csr_Memflush; 
+reg  ctrl_issue_select;
+reg  stage_issue_select;
+
+assign issue_select = ctrl_issue_select || stage_issue_select;
+
  always @ (*) begin
-		if(Csr_ExcpFlag|EX_BranchFlag) //wb-mem ex-mem id-ex if-id
-			ctrl_flush=4'b0011; 
-		else if(Decode_16BitFlag)
-			ctrl_flush=4'b0001; 
-		else
-			ctrl_flush=4'b0000;
+        if(Csr_ExcpFlag|EX_BranchFlag_0)begin //wb-mem ex-mem id-ex if-id
+            ctrl_flush = 4'b0111;
+            ctrl_issue_select = 1'b1; 
+        end
+        else if(Csr_ExcpFlag|EX_BranchFlag_1)begin //wb-mem ex-mem id-ex if-id
+            ctrl_flush = 4'b0011;
+            ctrl_issue_select = 1'b0; 
+        end
+        else if(Decode_16BitFlag_0)begin
+            ctrl_flush=4'b0011; 
+            ctrl_issue_select = 1'b1; 
+        end
+        else if(Decode_16BitFlag_1)begin
+            ctrl_flush=4'b0001; 
+            ctrl_issue_select = 1'b0; 
+        end
+        else begin
+            ctrl_flush=4'b0000;
+            ctrl_issue_select = 1'b0; 
+        end
  end
 assign Flush=ctrl_flush|stage_flush ;
 
 /////////////stall_last ////////
  always @ (*) begin
-	if(WFI_Req) 
+    if(WFI_Req) 
         Ctrl_Stall = 5'b11111;
-    else if(DecodeHazard_Stall)
+    else if(DecodeHazard_StallReq)
         Ctrl_Stall = 5'b00011;
     else if(Dcache_StallReq |Idfence_MemReq)
         Ctrl_Stall = 5'b00111;
@@ -54,22 +85,42 @@ assign Flush=ctrl_flush|stage_flush ;
     else if(EX_StallReq)
         Ctrl_Stall = 5'b00111;
     else 
-	   Ctrl_Stall = 5'b0;
+       Ctrl_Stall = 5'b0;
   end
 
 always @ (*) begin//wb-mem ex-mem id-ex if-id
-     if(DecodeHazard_Stall)
+    if(DecodeHazard_StallReq)begin
         stage_flush = 4'b0010;
-    else if(Dcache_StallReq |Idfence_MemReq)
-        stage_flush = 4'b0100; 
-    else if(Idfence_ExReq)
+        stage_issue_select = 1'b0;
+    end
+    else if(Dcache_StallReq |Idfence_MemReq_0)begin
         stage_flush = 4'b0010; 
-    else if(Icache_StallReq)
+        stage_issue_select = 1'b1;
+    end
+    else if(Dcache_StallReq |Idfence_MemReq_1)begin
+        stage_flush = 4'b0100; 
+        stage_issue_select = 1'b0;
+    end
+    else if(Idfence_ExReq_0)begin
+        stage_flush = 4'b0001;
+        stage_issue_select = 1'b1;
+    end 
+    else if(Idfence_ExReq_1)begin
+        stage_flush = 4'b0010;
+        stage_issue_select = 1'b0;
+    end
+    else if(Icache_StallReq)begin
         stage_flush = 4'b0001; 
-    else if(EX_StallReq)
+        stage_issue_select = 1'b0;
+    end
+    else if(EX_StallReq)begin
         stage_flush = 4'b0100;
-    else 
-	  stage_flush = 4'b0;
+        stage_issue_select = 1'b0;
+    end
+    else begin
+      stage_flush = 4'b0;
+      stage_issue_select = 1'b0;
+    end
   end
 
 endmodule

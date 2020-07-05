@@ -40,7 +40,8 @@ sim_gui_gtk:
 	gtkwave $(iverilog_dir)/test.vcd
 
 debug:
-	cd iverilog-project && iverilog -o test filelist.v  && vvp test && cat mySim.log
+	cd iverilog-project && iverilog -o test filelist.v  && vvp test 
+# 	&& cat mySim.log
 
 hardclean:
 	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work output/* ./iverilog-project/test ./iverilog-project/*.vcd

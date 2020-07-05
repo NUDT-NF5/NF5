@@ -8,12 +8,18 @@
 `include "../src/common/Define.v"
 module Wb
 (
-    input  wire                       MemWb_WbSel,
-    input  wire  [`DATA_WIDTH-1 :0]   MemWb_AluData,
-    input  wire  [`DATA_WIDTH-1 :0]   MemWb_DataRd,
-    output wire  [`DATA_WIDTH-1 :0]   Wb_DataWrt
+    input  wire                       MemWb_WbSel_0,
+    input  wire  [`DATA_WIDTH-1 :0]   MemWb_AluData_0,
+    input  wire  [`DATA_WIDTH-1 :0]   MemWb_DataRd_0,
+    output wire  [`DATA_WIDTH-1 :0]   Wb_DataWrt_0,
+
+    input  wire                       MemWb_WbSel_1,
+    input  wire  [`DATA_WIDTH-1 :0]   MemWb_AluData_1,
+    input  wire  [`DATA_WIDTH-1 :0]   MemWb_DataRd_1,
+    output wire  [`DATA_WIDTH-1 :0]   Wb_DataWrt_1
     );
 
-assign Wb_DataWrt = (MemWb_WbSel == `WB_ALU) ? MemWb_AluData : MemWb_DataRd;
+assign Wb_DataWrt_0 = (MemWb_WbSel_0 == `WB_ALU) ? MemWb_AluData_0 : MemWb_DataRd_0;
+assign Wb_DataWrt_1 = (MemWb_WbSel_1 == `WB_ALU) ? MemWb_AluData_1 : MemWb_DataRd_1;
 
 endmodule

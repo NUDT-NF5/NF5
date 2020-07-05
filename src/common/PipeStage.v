@@ -10,13 +10,15 @@
 `include "../src/common/Define.v"
 module PipeStage
 #(
-	parameter							STAGE_WIDTH=`INSTR_WIDTH
+	parameter							STAGE_WIDTH=`INSTR_WIDTH,
+	parameter                           ISSUE1_START=`INSTR_WIDTH
 )
 (
 	input								clk,
 	input								rst_n,
 	input								Stall,
 	input								Flush,
+	input 								issue_select,
 	input		[STAGE_WIDTH - 1 : 0]	in,
 	output reg	[STAGE_WIDTH - 1 : 0]	out
 );
@@ -26,6 +28,8 @@ always @(posedge clk)
 		out <= 0;
 	else if(Stall)
 		out <= out;
+	else if(Flush && issue_select)
+		out[STAGE_WIDTH - 1:ISSUE1_START] <= 0;
 	else if(Flush)
 		out <= 0;
 	else 

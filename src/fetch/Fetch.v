@@ -22,7 +22,7 @@ module Fetch(
 	input								EX_BranchFlag,
 	input		[`ADDR_WIDTH - 1 : 0]	EX_BranchPC,
 	//Decode -> Fetch
-	input		[2 - 1 : 0]				Decode_NextPC
+	input		[`PC_PLUS_WIDTH - 1 : 0]				Decode_NextPC
 
 );
 		
@@ -36,9 +36,11 @@ module Fetch(
 			Fetch_NextPC <= EX_BranchPC;
         else if(Ctrl_ExcpFlag)
 			Fetch_NextPC <= Ctrl_ExcpPC;
-		else if(Decode_NextPC == `PC_Plus_8)
+		else if(Decode_NextPC == `PC_PLUS_8)
 			Fetch_NextPC <= IFID_NowPC + 8;
-		else if(Decode_NextPC == `PC_Plus_4)
+		else if(Decode_NextPC == `PC_PLUS_6)
+			Fetch_NextPC <= IFID_NowPC + 6;
+		else if(Decode_NextPC == `PC_PLUS_4)
 			Fetch_NextPC <= IFID_NowPC + 4;
 		else
 			Fetch_NextPC <= Fetch_NextPC + 2; //the most safe way
