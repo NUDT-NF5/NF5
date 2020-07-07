@@ -11,5 +11,5 @@ module ex_out(
 assign EX_AluData_0 = (m_prio == 2'b10) ? issue_AluData_m :
                       issue_AluData_0;
 assign EX_AluData_1 = (m_prio == 2'b11) ? issue_AluData_m :
-                      issue_AluData_0;
+                      issue_AluData_1;
 endmodule
