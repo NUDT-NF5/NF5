@@ -41,16 +41,18 @@
 `define	RS1_SEL_WIDTH		4
 `define	RS2_SEL_WIDTH		4
 `define	RS_SEL_WIDTH		4
-`define	RS_SEL_RF_1 		`RS_SEL_WIDTH'd0
-`define	RS_SEL_EX_1			`RS_SEL_WIDTH'd1
-`define	RS_SEL_EXMem_1		`RS_SEL_WIDTH'd2
-`define	RS_SEL_Dcache_1		`RS_SEL_WIDTH'd3
-`define	RS_SEL_Wb_1			`RS_SEL_WIDTH'd4
-`define	RS_SEL_RF_0 		`RS_SEL_WIDTH'd5
-`define	RS_SEL_EX_0			`RS_SEL_WIDTH'd6
-`define	RS_SEL_EXMem_0		`RS_SEL_WIDTH'd7
-`define	RS_SEL_Dcache_0		`RS_SEL_WIDTH'd8
-`define	RS_SEL_Wb_0			`RS_SEL_WIDTH'd9
+`define	RS_SEL_RF1_0 		`RS_SEL_WIDTH'd0
+`define	RS_SEL_RF2_0 		`RS_SEL_WIDTH'd1
+`define	RS_SEL_EX_0			`RS_SEL_WIDTH'd2
+`define	RS_SEL_EXMem_0		`RS_SEL_WIDTH'd3
+`define	RS_SEL_Dcache_0		`RS_SEL_WIDTH'd4
+`define	RS_SEL_Wb_0			`RS_SEL_WIDTH'd5
+`define	RS_SEL_RF1_1 		`RS_SEL_WIDTH'd6
+`define	RS_SEL_RF2_1 		`RS_SEL_WIDTH'd7
+`define	RS_SEL_EX_1			`RS_SEL_WIDTH'd8
+`define	RS_SEL_EXMem_1		`RS_SEL_WIDTH'd9
+`define	RS_SEL_Dcache_1		`RS_SEL_WIDTH'd10
+`define	RS_SEL_Wb_1			`RS_SEL_WIDTH'd11
 
 /*----------Decode.v---------*/
 

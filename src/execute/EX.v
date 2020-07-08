@@ -44,6 +44,10 @@ module EX(
     input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs1Addr_1,
     input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs2Addr_1,
 
+    input       [`DATA_WIDTH - 1:0]     Dcache_DataRd_0,
+    input                               MemWb_RdWrtEn_0,
+    input       [`RF_ADDR_WIDTH - 1:0]     MemWb_RdAddr_0,
+
     //output
     output      [`DATA_WIDTH - 1:0]     EX_AluData_0,
     output                              EX_BranchFlag_0,
@@ -176,6 +180,11 @@ ex_forward    forward(
                      .IDEX_LdType_0(IDEX_LdType_0),
                      .s1_1(s1_1),
                      .s2_1(s2_1),
+                     .clk(clk),
+                     .rst_n(rst_n),
+                     .Dcache_DataRd_0(Dcache_DataRd_0),
+                     .MemWb_RdWrtEn_0(MemWb_RdWrtEn_0),
+                     .MemWb_RdAddr_0(MemWb_RdAddr_0),
                      .issue0_data(EX_AluData_0),
                      .issue1_forward_rs1(forward_s1_1),
                      .issue1_forward_rs2(forward_s2_1),

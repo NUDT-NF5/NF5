@@ -90,52 +90,52 @@ module DecodeHazard(
 	reg 	[`LD_TYPE_WIDTH - 1 : 0 ]	preLdType_1;
 	Mux #(
 		.SEL_WIDTH(4),
-		.SEL_NUM(10),
+		.SEL_NUM(12),
 		.DATA_WIDTH(`DATA_WIDTH),
 		.DATA_WIDTH_LOG2(`DATA_WIDTH_LOG2)
 	) i_Rs1Mux_0
 	(
-		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs1Data_1,
-			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs1Data_0}),
+		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs2Data_1, RF_Rs1Data_1,
+			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs2Data_0, RF_Rs1Data_0}),
 		.sel(rs1Sel_0),
 		.out(DecodeHazard_Rs1Data_0)
 	);
 	
 	Mux #(
 		.SEL_WIDTH(4),
-		.SEL_NUM(10),
+		.SEL_NUM(12),
 		.DATA_WIDTH(`DATA_WIDTH),
 		.DATA_WIDTH_LOG2(`DATA_WIDTH_LOG2)
 	) i_Rs2Mux_0
 	(
-		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs1Data_1,
-			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs1Data_0}),
+		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs2Data_1, RF_Rs1Data_1,
+			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs2Data_0, RF_Rs1Data_0}),
 		.sel(rs2Sel_0),
 		.out(DecodeHazard_Rs2Data_0)
 	);
 
 	Mux #(
 		.SEL_WIDTH(4),
-		.SEL_NUM(10),
+		.SEL_NUM(12),
 		.DATA_WIDTH(`DATA_WIDTH),
 		.DATA_WIDTH_LOG2(`DATA_WIDTH_LOG2)
 	) i_Rs1Mux_1
 	(
-		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs1Data_1,
-			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs1Data_0}),
+		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs2Data_1, RF_Rs1Data_1,
+			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs2Data_0, RF_Rs1Data_0}),
 		.sel(rs1Sel_1),
 		.out(DecodeHazard_Rs1Data_1)
 	);
 	
 	Mux #(
 		.SEL_WIDTH(4),
-		.SEL_NUM(10),
+		.SEL_NUM(12),
 		.DATA_WIDTH(`DATA_WIDTH),
 		.DATA_WIDTH_LOG2(`DATA_WIDTH_LOG2)
 	) i_Rs2Mux_1
 	(
-		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs1Data_1,
-			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs1Data_0}),
+		.in({Wb_DataWrt_1, Dcache_DataRd_1, EXMem_AluData_1, EX_AluData_1, RF_Rs2Data_1, RF_Rs1Data_1,
+			 Wb_DataWrt_0, Dcache_DataRd_0, EXMem_AluData_0, EX_AluData_0, RF_Rs2Data_0, RF_Rs1Data_0}),
 		.sel(rs2Sel_1),
 		.out(DecodeHazard_Rs2Data_1)
 	);
@@ -144,17 +144,10 @@ module DecodeHazard(
 //issue0 rs1 forward
 always @(*)
     if(Decode_Rs1Addr_0 != 5'b0)
-		if(IDEX_WbRdEn_0 && Decode_Rs1Addr_0 == IDEX_RdAddr_0)
-			rs1Sel_0 = `RS_SEL_EX_0;
-		else if(IDEX_WbRdEn_0 && Decode_Rs1Addr_0 == IDEX_RdAddr_1)
+		if(IDEX_WbRdEn_0 && Decode_Rs1Addr_0 == IDEX_RdAddr_1)
 			rs1Sel_0 = `RS_SEL_EX_1;
-		else if(EXMem_RdWrtEn_0 && Decode_Rs1Addr_0 == EXMem_RdAddr_0)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
-                0 : 
-                    rs1Sel_0 = `RS_SEL_EXMem_0;
-                default : 
-                    rs1Sel_0 = `RS_SEL_Dcache_0;
-            endcase
+		else if(IDEX_WbRdEn_0 && Decode_Rs1Addr_0 == IDEX_RdAddr_0)
+			rs1Sel_0 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs1Addr_0 == EXMem_RdAddr_1)
             case (Mem_LdEn_1)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
@@ -162,30 +155,30 @@ always @(*)
                 default : 
                     rs1Sel_0 = `RS_SEL_Dcache_1;
             endcase
-        else if(MemWb_RdWrtEn_0 && Decode_Rs1Addr_0 == MemWb_RdAddr_0)
-            rs1Sel_0 = `RS_SEL_Wb_0;
+		else if(EXMem_RdWrtEn_0 && Decode_Rs1Addr_0 == EXMem_RdAddr_0)
+            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+                0 : 
+                    rs1Sel_0 = `RS_SEL_EXMem_0;
+                default : 
+                    rs1Sel_0 = `RS_SEL_Dcache_0;
+            endcase
         else if(MemWb_RdWrtEn_1 && Decode_Rs1Addr_0 == MemWb_RdAddr_1)
             rs1Sel_0 = `RS_SEL_Wb_1;
+        else if(MemWb_RdWrtEn_0 && Decode_Rs1Addr_0 == MemWb_RdAddr_0)
+            rs1Sel_0 = `RS_SEL_Wb_0;
         else
-            rs1Sel_0 = `RS_SEL_RF_0;
+            rs1Sel_0 = `RS_SEL_RF1_0;
     else
-        rs1Sel_0 = `RS_SEL_RF_0;
+        rs1Sel_0 = `RS_SEL_RF1_0;
 
 
 //issue0 rs2 forward
 always @(*)
     if(Decode_Rs2Addr_0 != 5'b0)
-		if(IDEX_WbRdEn_0 && Decode_Rs2Addr_0 == IDEX_RdAddr_0)
-			rs2Sel_0 = `RS_SEL_EX_0;
-		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_0 == IDEX_RdAddr_1)
+		if(IDEX_WbRdEn_0 && Decode_Rs2Addr_0 == IDEX_RdAddr_1)
 			rs2Sel_0 = `RS_SEL_EX_1;
-		else if(EXMem_RdWrtEn_0 && Decode_Rs2Addr_0 == EXMem_RdAddr_0)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
-                0 : 
-                    rs2Sel_0 = `RS_SEL_EXMem_0;
-                default : 
-                    rs2Sel_0 = `RS_SEL_Dcache_0;
-            endcase
+		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_0 == IDEX_RdAddr_0)
+			rs2Sel_0 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs2Addr_0 == EXMem_RdAddr_1)
             case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
@@ -193,29 +186,29 @@ always @(*)
                 default : 
                     rs2Sel_0 = `RS_SEL_Dcache_1;
             endcase
-        else if(MemWb_RdWrtEn_0 && Decode_Rs2Addr_0 == MemWb_RdAddr_0)
-            rs2Sel_0 = `RS_SEL_Wb_0;
+		else if(EXMem_RdWrtEn_0 && Decode_Rs2Addr_0 == EXMem_RdAddr_0)
+            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+                0 : 
+                    rs2Sel_0 = `RS_SEL_EXMem_0;
+                default : 
+                    rs2Sel_0 = `RS_SEL_Dcache_0;
+            endcase
 		else if(MemWb_RdWrtEn_1 && Decode_Rs2Addr_0 == MemWb_RdAddr_1)
             rs2Sel_0 = `RS_SEL_Wb_1;
+        else if(MemWb_RdWrtEn_0 && Decode_Rs2Addr_0 == MemWb_RdAddr_0)
+            rs2Sel_0 = `RS_SEL_Wb_0;
         else
-            rs2Sel_0 = `RS_SEL_RF_1;
+            rs2Sel_0 = `RS_SEL_RF2_1;
     else
-        rs2Sel_0 = `RS_SEL_RF_1;
+        rs2Sel_0 = `RS_SEL_RF2_1;
 
 //issue1 rs1 forward
 always @(*)
     if(Decode_Rs1Addr_1 != 5'b0)
-		if(IDEX_WbRdEn_0 && Decode_Rs1Addr_1 == IDEX_RdAddr_0)
-			rs1Sel_1 = `RS_SEL_EX_0;
-		else if(IDEX_WbRdEn_1 && Decode_Rs1Addr_1 == IDEX_RdAddr_1)
+		if(IDEX_WbRdEn_1 && Decode_Rs1Addr_1 == IDEX_RdAddr_1)
 			rs1Sel_1 = `RS_SEL_EX_1;
-		else if(EXMem_RdWrtEn_0 && Decode_Rs1Addr_1 == EXMem_RdAddr_0)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
-                0 : 
-                    rs1Sel_1 = `RS_SEL_EXMem_0;
-                default : 
-                    rs1Sel_1 = `RS_SEL_Dcache_0;
-            endcase
+		else if(IDEX_WbRdEn_0 && Decode_Rs1Addr_1 == IDEX_RdAddr_0)
+			rs1Sel_1 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs1Addr_1 == EXMem_RdAddr_1)
             case (Mem_LdEn_1)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
@@ -223,30 +216,30 @@ always @(*)
                 default : 
                     rs1Sel_1 = `RS_SEL_Dcache_1;
             endcase
-        else if(MemWb_RdWrtEn_0 && Decode_Rs1Addr_1 == MemWb_RdAddr_0)
-            rs1Sel_1 = `RS_SEL_Wb_0;
+		else if(EXMem_RdWrtEn_0 && Decode_Rs1Addr_1 == EXMem_RdAddr_0)
+            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+                0 : 
+                    rs1Sel_1 = `RS_SEL_EXMem_0;
+                default : 
+                    rs1Sel_1 = `RS_SEL_Dcache_0;
+            endcase
         else if(MemWb_RdWrtEn_1 && Decode_Rs1Addr_1 == MemWb_RdAddr_1)
             rs1Sel_1 = `RS_SEL_Wb_1;
+        else if(MemWb_RdWrtEn_0 && Decode_Rs1Addr_1 == MemWb_RdAddr_0)
+            rs1Sel_1 = `RS_SEL_Wb_0;
         else
-            rs1Sel_1 = `RS_SEL_RF_0;
+            rs1Sel_1 = `RS_SEL_RF1_1;
     else
-        rs1Sel_1 = `RS_SEL_RF_0;
+        rs1Sel_1 = `RS_SEL_RF1_1;
 
 
 //issue1 rs2 forward
 always @(*)
     if(Decode_Rs2Addr_1 != 5'b0)
-		if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_0)
-			rs2Sel_1 = `RS_SEL_EX_0;
-		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_1)
+		if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_1)
 			rs2Sel_1 = `RS_SEL_EX_1;
-		else if(EXMem_RdWrtEn_0 && Decode_Rs2Addr_1 == EXMem_RdAddr_0)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
-                0 : 
-                    rs2Sel_1 = `RS_SEL_EXMem_0;
-                default : 
-                    rs2Sel_1 = `RS_SEL_Dcache_0;
-            endcase
+		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_0)
+			rs2Sel_1 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs2Addr_1 == EXMem_RdAddr_1)
             case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
@@ -254,14 +247,21 @@ always @(*)
                 default : 
                     rs2Sel_1 = `RS_SEL_Dcache_1;
             endcase
-        else if(MemWb_RdWrtEn_0 && Decode_Rs2Addr_1 == MemWb_RdAddr_0)
-            rs2Sel_1 = `RS_SEL_Wb_0;
+		else if(EXMem_RdWrtEn_0 && Decode_Rs2Addr_1 == EXMem_RdAddr_0)
+            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+                0 : 
+                    rs2Sel_1 = `RS_SEL_EXMem_0;
+                default : 
+                    rs2Sel_1 = `RS_SEL_Dcache_0;
+            endcase
 		else if(MemWb_RdWrtEn_1 && Decode_Rs2Addr_1 == MemWb_RdAddr_1)
             rs2Sel_1 = `RS_SEL_Wb_1;
+        else if(MemWb_RdWrtEn_0 && Decode_Rs2Addr_1 == MemWb_RdAddr_0)
+            rs2Sel_1 = `RS_SEL_Wb_0;
         else
-            rs2Sel_1 = `RS_SEL_RF_1;
+            rs2Sel_1 = `RS_SEL_RF2_1;
     else
-        rs2Sel_1 = `RS_SEL_RF_1;
+        rs2Sel_1 = `RS_SEL_RF2_1;
 
 //need stall
 always @(posedge clk)
