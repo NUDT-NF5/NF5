@@ -236,7 +236,7 @@ always @(*)
 //issue1 rs2 forward
 always @(*)
     if(Decode_Rs2Addr_1 != 5'b0)
-		if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_1)
+		if(IDEX_WbRdEn_1 && Decode_Rs2Addr_1 == IDEX_RdAddr_1)
 			rs2Sel_1 = `RS_SEL_EX_1;
 		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_0)
 			rs2Sel_1 = `RS_SEL_EX_0;

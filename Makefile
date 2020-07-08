@@ -6,6 +6,7 @@ result_dir = $(nc_dir)/result
 src_dir = $(base_dir)/src
 output_dir = $(nc_dir)/output
 iverilog_dir=$(base_dir)/iverilog-project
+debug_input=$(test_dir)/isa-functional-test/test_0x0000/rv32ui-p/verilogtxt/rv32ui-p-add
 temp:
 	echo $(base_dir)
 	echo $(base_dir)
@@ -40,11 +41,11 @@ sim_gui_gtk:
 	gtkwave $(iverilog_dir)/test.vcd
 
 debug:
+	cat $(debug_input) > $(iverilog_dir)/Instructions.list
 	cd iverilog-project && cat TbAll_default.sv > ../src/top/TbAll.sv && iverilog -o test filelist.v  && vvp test && gtkwave test.vcd
-	#&& cat mySim.log
-# 	make gen_filelist	
-# 	./isa_run.sh
-# 	gtkwave $(iverilog_dir)/test.vcd
+
+	#20/07/07 cd iverilog-project && cat TbAll_default.sv > ../src/top/TbAll.sv && iverilog -o test filelist.v  && vvp test && gtkwave test.vcd
+
 
 hardclean:
 	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work output/* ./iverilog-project/test ./iverilog-project/*.vcd
