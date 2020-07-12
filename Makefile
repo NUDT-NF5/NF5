@@ -30,7 +30,7 @@ sim_default:
 	
 sim:	
 	make gen_filelist	
-	./isa_run.sh
+	bash ./isa_run.sh
  	
 sim_gui_nc:
 	make gen_filelist

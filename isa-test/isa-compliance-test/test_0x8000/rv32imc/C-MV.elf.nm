@@ -1,4 +1,4 @@
-00000000 a /tmp/ccNgZA6B.o
+00000000 a /tmp/ccDFyUOU.o
 80000000 T _start
 80000000 t .text.init
 80000004 t trap_vector

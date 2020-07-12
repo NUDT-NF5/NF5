@@ -28,7 +28,7 @@ do
           then 
             EDATool_run_dir=$iverilog_dir/run_iverilog  #$src_dir1
             EDA_env_dir=$iverilog_dir
-            TB_dir=TB_vivado
+            TB_dir=TB_iverilog
             break
         elif [ $number_nc_vivado -eq 2 ]
           then
@@ -138,6 +138,10 @@ if [ $number_single_all -eq 1 ]
                                       then
                                         cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-vivado.sv  $vivado_tb_dir/system_test_tb.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
+                                    elif [ $TB_dir = TB_iverilog ]
+                                      then
+                                        cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-iverilog.sv  $src_dir/top/TbAll.sv
+                                        cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                     else
                                         cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
@@ -182,6 +186,10 @@ if [ $number_single_all -eq 1 ]
                                   then
                                     cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-vivado.sv  $vivado_tb_dir/system_test_tb.sv
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
+                                elif [ $TB_dir = TB_iverilog ]
+                                  then
+                                    cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-iverilog.sv  $src_dir/top/TbAll.sv
+                                    cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                 else
                                     cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
@@ -213,6 +221,7 @@ if [ $number_single_all -eq 1 ]
 #====================test_single==================
 elif [ $number_single_all -eq 2 ]
   then
+             #====================functional==================
             if [ $number_0x_numb -eq 1 ] || [ $number_0x_numb -eq 2 ]
             then
                             rm -rf $out_dir/Result/Result_funct_self/*
@@ -229,6 +238,10 @@ elif [ $number_single_all -eq 2 ]
                               then
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-vivado.sv  $vivado_tb_dir/system_test_tb.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
+                            elif [ $TB_dir = TB_iverilog ]
+                              then
+                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-iverilog.sv  $src_dir/top/TbAll.sv
+                                cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
@@ -237,6 +250,7 @@ elif [ $number_single_all -eq 2 ]
                             echo  "Test $single_test_name is running  "
                             cp $EDA_env_dir/mySim.log $out_dir/Result/Result_funct_self/$single_test_name.txt
                             gedit $out_dir/Result/Result_funct_self/$single_test_name.txt
+            #===================compliance===================
             elif [ $number_0x_numb -eq 3 ] || [ $number_0x_numb -eq 4 ]
               then
                             rm -rf $out_dir/Result/Result_compliance_self/*
@@ -252,6 +266,10 @@ elif [ $number_single_all -eq 2 ]
                             if [ $TB_dir = TB_vivado ]
                               then
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-vivado.sv  $vivado_tb_dir/system_test_tb.sv
+                                cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
+                            elif [ $TB_dir = TB_iverilog ]
+                              then
+                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-iverilog.sv  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv

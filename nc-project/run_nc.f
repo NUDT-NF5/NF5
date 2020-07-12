@@ -17,21 +17,26 @@ filelist.v
 //+nc64bit
 
 //+nosdfwarn
-+ncnowarn+CUNGL1
-+ncnowarn+NONPRT
+//+ncnowarn+CUNGL1
+//+ncnowarn+NONPRT
++xmnowarn+CUNGL1
++xmnowarn+NONPRT
 
-
-+nccoverage+all
++xmcoverage+all
+//+nccoverage+all
 +tcl+test.tcl
 
 //updata coverage info
-+nccovoverwrite
+//+nccovoverwrite
++xmcovoverwrite
 
 //+nctop+example_tester
-+nccovdut+TbAll
+//+nccovdut+TbAll
++xmcovdut+TbAll
 
-+nccovtest+xor_salsa8
+//+nccovtest+xor_salsa8
++xmcovtest+xor_salsa8
 
 //optional test name used to combined coverage
 //use the option of test.tcl file
-+nccovfile+test.tcl
+//+nccovfile+test.tcl
