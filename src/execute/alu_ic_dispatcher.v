@@ -41,10 +41,9 @@ module alu_ic_dispatcher(
     output reg  [`DATA_WIDTH - 1:0]     EX_AluData,
     output      [`ADDR_WIDTH - 1:0]     EX_BranchPC,
     output reg                          EX_BranchFlag,
+    output reg                          alu_ic_en,
     output                              EX_LdStFlag
 );
-
-wire [63:0] mul_result_tmp;
 
 //arithmetic input selection
 always @(*) begin
@@ -56,7 +55,7 @@ always @(*) begin
         end
         `ALU_SUB : begin
             arithmetic_s1 = s1;
-            arithmetic_s2 = logic_result;
+            arithmetic_s2 = ~s2;
             arithop_sp = 3'b010;
         end
         `ALU_BEQ : begin
@@ -125,11 +124,11 @@ always @(*) begin
             logic_s2 = s2;
             logic_op  = 3'b100;
         end
-        `ALU_SUB : begin
+        /*`ALU_SUB : begin
             logic_s1 = s2;
             logic_s2 = 32'hffff_ffff;
             logic_op  = 3'b100;
-        end
+        end*/
         `ALU_JALR : begin
             logic_s1 = branch_result;
             logic_s2 = 32'hffff_fffe;
@@ -216,51 +215,67 @@ always @(*) begin
     case (IDEX_AluOp)
         `ALU_ADD : begin
             EX_AluData = arithmetic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_SUB : begin
             EX_AluData = arithmetic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_AND : begin
             EX_AluData = logic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_OR : begin
             EX_AluData = logic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_XOR : begin
             EX_AluData = logic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_SLL : begin
             EX_AluData = shift_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_SRL : begin
             EX_AluData = shift_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_SRA : begin
             EX_AluData = shift_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_SLT: begin
             EX_AluData = {31'b0, comparator_result[0]};      //if signed rs1 < signed rs2, comparator_result[0] == 1, else comparator_result[0] == 0
+            alu_ic_en = 1'b1;
         end
         `ALU_SLTU: begin
             EX_AluData = {31'b0, ucomparator_result[0]};     //if unsigned rs1 < unsigned rs2, ucomparator_result[0] == 1, else comparator_result[0] == 0
+            alu_ic_en = 1'b1;
         end
         `ALU_JAL : begin
             EX_AluData = arithmetic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_JALR : begin
             EX_AluData = arithmetic_result;
+            alu_ic_en = 1'b1;
         end
         `ALU_COPY_A : begin
             EX_AluData = s1;
+            alu_ic_en = 1'b1;
         end
         `ALU_COPY_B : begin
             EX_AluData = s2;
+            alu_ic_en = 1'b1;
         end
         `ALU_CSR : begin
             EX_AluData = Csr_RdData;
+            alu_ic_en = 1'b1;
         end
         default : begin
             EX_AluData    = 32'b0;
+            alu_ic_en = 1'b0;
         end
     endcase
 end

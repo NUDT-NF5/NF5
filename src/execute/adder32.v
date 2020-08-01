@@ -12,10 +12,12 @@ module adder32 (
     output     [31:0] s
 );
     //output co;         
-    cla_32  cla   (a, b, ci,/*g_out,p_out,*/ s); // 向下调用
+    //cla_32  cla   (a, b, ci,/*g_out,p_out,*/ s); // 向下调用
+assign s = a + b + ci;
+
 endmodule
 
-module add(
+/*module add(
     input       a,
     input       b,
     input       c,
@@ -133,4 +135,4 @@ wire                  p_out;
 cla_16 c1a0 (a[15:0], b[15:0], c_in, g[0], p[0], s[15:0]);
 cla_16 c1a1 (a[31:16], b[31:16], c_out, g[1], p[1], s[31:16]);
 g_p    g_p0 (g, p, c_in, g_out, p_out, c_out);
-endmodule
+endmodule*/

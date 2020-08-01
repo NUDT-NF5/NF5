@@ -11,7 +11,7 @@
 module PipeStage
 #(
 	parameter							STAGE_WIDTH=`INSTR_WIDTH,
-	parameter                           ISSUE1_START=`INSTR_WIDTH
+	parameter                           ISSUE1_START=0
 )
 (
 	input								clk,

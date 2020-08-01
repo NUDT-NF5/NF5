@@ -25,6 +25,7 @@ module alu_m_dispatcher(
     output reg  [`DATA_WIDTH:0]         div_s1,
     output reg  [`DATA_WIDTH:0]         div_s2,
     output reg                          div_start,
+    output reg                          alu_m_en,
 
     output reg  [`DATA_WIDTH - 1:0]     EX_AluData
 );
@@ -162,48 +163,57 @@ assign mul_result_tmp = ~mul_result + 1;
 always @(*) begin
     case (IDEX_AluOp)
         `ALU_MUL    : begin
+            alu_m_en = 1'b1;
             EX_AluData = mul_result[31:0];
         end
         `ALU_MULH   : begin
+            alu_m_en = 1'b1;
             if(s1[31] != s2[31])
                 EX_AluData = mul_result_tmp[63:32];
             else
                 EX_AluData = mul_result[63:32];
         end
         `ALU_MULHSU : begin
+            alu_m_en = 1'b1;
             if(s1[31])
                 EX_AluData = mul_result_tmp[63:32];
             else
                 EX_AluData = mul_result[63:32];
         end
         `ALU_MULHU  : begin
+            alu_m_en = 1'b1;
             EX_AluData = mul_result[63:32];
         end
         `ALU_DIV    : begin
+            alu_m_en = 1'b1;
             //if(|s2)
                 EX_AluData = div_quotient[`DATA_WIDTH - 1:0];
             //else
             //    EX_AluData = 32'hffff_ffff;
         end
         `ALU_DIVU   : begin
+            alu_m_en = 1'b1;
             //if(|s2)
                 EX_AluData = div_quotient[`DATA_WIDTH - 1:0];
             //else
             //    EX_AluData = 32'hffff_ffff;
         end
         `ALU_REM    : begin
+            alu_m_en = 1'b1;
             //if(|s2)
                 EX_AluData = div_remainder[`DATA_WIDTH - 1:0];
             //else
             //    EX_AluData = s1;
         end
         `ALU_REMU   : begin
+            alu_m_en = 1'b1;
             //if(|s2)
                 EX_AluData = div_remainder[`DATA_WIDTH - 1:0];
             //else
             //    EX_AluData = s1;
-        end 
+        end
         default : begin
+            alu_m_en = 1'b0;
             EX_AluData    = 32'b0;
         end
     endcase
