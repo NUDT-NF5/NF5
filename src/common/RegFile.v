@@ -43,7 +43,7 @@ module RegFile
     	if(~rst_n)
           for(i = 0 ; i < `RF_NUMBER ;i = i + 1)
 			regFiles[i] <= 0;
-		else if(wEN_0 && wEN_1 && (wAddr_0 != 0) && (wAddr_0 != 0)) begin
+		else if(wEN_0 && wEN_1 && (wAddr_0 != 0) && (wAddr_1 != 0)) begin
 			regFiles[wAddr_0] <= wData_0;
 			regFiles[wAddr_1] <= wData_1;
 		end

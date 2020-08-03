@@ -49,11 +49,11 @@ always @*
 
 assign issue1_forward_rs1 = (issue0_RdWrtEn && (issue0_rdaddr == issue1_rs1addr)
                              && issue0_rdaddr != 0) ?
-                             issue0_data : (MemWb_RdWrtEn_0 && MemWb_RdAddr_0 == issue1_rs1addr && exforward_stall_delay) ?
+                             issue0_data : (MemWb_RdWrtEn_0 && MemWb_RdAddr_0 == issue1_rs1addr && exforward_stall_delay && MemWb_RdAddr_0 != 0) ?
                              Dcache_DataRd_0 : s1_1;
 assign issue1_forward_rs2 = (issue0_RdWrtEn && (issue0_rdaddr == issue1_rs2addr)
                              && issue0_rdaddr != 0) ?
-                             issue0_data : (MemWb_RdWrtEn_0 && MemWb_RdAddr_0 == issue1_rs2addr && exforward_stall_delay) ?
+                             issue0_data : (MemWb_RdWrtEn_0 && MemWb_RdAddr_0 == issue1_rs2addr && exforward_stall_delay && MemWb_RdAddr_0 != 0) ?
                              Dcache_DataRd_0 : s2_1;
 assign exforward_stall    = ((inst_order_Mem_LdEn && (issue0_rdaddr == issue1_rs1addr)) ||
                              (inst_order_Mem_LdEn && (issue0_rdaddr == issue1_rs2addr))) ?
