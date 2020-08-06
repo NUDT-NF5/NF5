@@ -20,7 +20,7 @@ module Ctrl(
     input  wire  [`ADDR_WIDTH - 1:0] EX_BranchPC_0,
     input  wire          EX_StallReq    ,
     output reg   [4:0]   Ctrl_Stall     ,
-    output               issue_select,
+    output [3:0]         issue_select,
 
     input  wire  [1:0]   Decode_Stall_1   ,//Id_Wfi Id_Fence 
     //input  wire          DecodeHazard_StallReq_1 ,
@@ -45,35 +45,35 @@ wire Idfence_MemReq_1= Decode_Stall_1[0]& Mem_LdStFlag_1;
 wire Idfence_MemReq  = Idfence_MemReq_0 || Idfence_MemReq_1;
 wire WFI_Req= Csr_WFIClrFlag ? 1'b0 :Decode_Stall_0[1] || Decode_Stall_1[1];
 //wire DecodeHazard_Stall=DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1 &! Csr_Memflush; 
-reg  ctrl_issue_select;
-reg  stage_issue_select;
+reg  [3:0] ctrl_issue_select;
+reg  [3:0] stage_issue_select;
 
 assign EX_BranchFlag = EX_BranchFlag_0 || EX_BranchFlag_1;
 assign EX_BranchPC = (EX_BranchFlag_0 && EX_BranchFlag_1) ? EX_BranchPC_0 : 
                      EX_BranchFlag_0 ? EX_BranchPC_0 : EX_BranchPC_1;
 
-assign issue_select = ctrl_issue_select || stage_issue_select;
+assign issue_select = ctrl_issue_select | stage_issue_select;
 
  always @ (*) begin
         if(Csr_ExcpFlag|EX_BranchFlag_0)begin //wb-mem ex-mem id-ex if-id
             ctrl_flush = 4'b0111;
-            ctrl_issue_select = 1'b1; 
+            ctrl_issue_select = 4'b0011; 
         end
         else if(Csr_ExcpFlag|EX_BranchFlag_1)begin //wb-mem ex-mem id-ex if-id
             ctrl_flush = 4'b0011;
-            ctrl_issue_select = 1'b0; 
+            ctrl_issue_select = 4'b0011; 
         end
         else if(Decode_16BitFlag_0)begin
             ctrl_flush=4'b0011; 
-            ctrl_issue_select = 1'b1; 
+            ctrl_issue_select = 4'b0001; 
         end
         else if(Decode_16BitFlag_1)begin
             ctrl_flush=4'b0001; 
-            ctrl_issue_select = 1'b0; 
+            ctrl_issue_select = 4'b0001; 
         end
         else begin
             ctrl_flush=4'b0000;
-            ctrl_issue_select = 1'b0; 
+            ctrl_issue_select = 4'b0; 
         end
  end
 assign Flush=ctrl_flush|stage_flush ;
@@ -99,35 +99,35 @@ assign Flush=ctrl_flush|stage_flush ;
 always @ (*) begin//wb-mem ex-mem id-ex if-id
     if(DecodeHazard_StallReq)begin
         stage_flush = 4'b0010;
-        stage_issue_select = 1'b0;
+        stage_issue_select = 4'b0;
     end
     else if(Dcache_StallReq |Idfence_MemReq_0)begin
         stage_flush = 4'b0010; 
-        stage_issue_select = 1'b1;
+        stage_issue_select = 4'b0010;
     end
     else if(Dcache_StallReq |Idfence_MemReq_1)begin
         stage_flush = 4'b0100; 
-        stage_issue_select = 1'b0;
+        stage_issue_select = 4'b0;
     end
     else if(Idfence_ExReq_0)begin
         stage_flush = 4'b0001;
-        stage_issue_select = 1'b1;
+        stage_issue_select = 4'b0001;
     end 
     else if(Idfence_ExReq_1)begin
         stage_flush = 4'b0010;
-        stage_issue_select = 1'b0;
+        stage_issue_select = 4'b0;
     end
     else if(Icache_StallReq)begin
         stage_flush = 4'b0001; 
-        stage_issue_select = 1'b0;
+        stage_issue_select = 4'b0;
     end
     else if(EX_StallReq)begin
         stage_flush = 4'b0100;
-        stage_issue_select = 1'b0;
+        stage_issue_select = 4'b0;
     end
     else begin
       stage_flush = 4'b0;
-      stage_issue_select = 1'b0;
+      stage_issue_select = 4'b0;
     end
   end
 

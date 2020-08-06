@@ -190,7 +190,7 @@ module Core(
 
 	wire   	[4:0]   						Ctrl_Stall;	
 	wire	[3:0]							Flush;
-	wire 									issue_select;
+	wire 	[3:0]							issue_select;
 	  
     wire   [`DATA_WIDTH-1:0]           		Csr_RdData;                             
     wire   [`ADDR_WIDTH-1:0]           		Csr_Evec;
@@ -363,14 +363,14 @@ wire 				   Fetchaddr_Invalid = 0;
  	);	
 
     PipeStage #(
- 		.STAGE_WIDTH(`PIPE_IDEX_LEN),
-		.ISSUE1_START(`PIPE_IDEX_ISSUE1_START)
+ 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
  	)
- 	i_IDEX(
+ 	i_IDEX0(
  		.clk(clk),
  		.rst_n(rst_n),
  		.Stall(Ctrl_Stall[2]),
  		.Flush(Flush[1]),
+		.issue_select(issue_select[1]),
  		.in(
  			{
  				Decode_AllCtr_0,
@@ -383,18 +383,7 @@ wire 				   Fetchaddr_Invalid = 0;
  				DecodeHazard_Rs1Data_0,
  				DecodeHazard_Rs2Data_0,
  				Decode_16BitFlag_0,
- 				IFID_NowPC_0,
- 				Decode_AllCtr_1,
- 				Decode_RdAddr_1,
- 				Decode_Rs1Addr_1,
- 				Decode_Rs2Addr_1,
- 				Decode_Imm_1,
- 				Decode_ImmSel_1,
- 				Decode_CsrAddr_1,
- 				DecodeHazard_Rs1Data_1,
- 				DecodeHazard_Rs2Data_1,
- 				Decode_16BitFlag_1,
- 				IFID_NowPC_1 
+ 				IFID_NowPC_0
  			} 
  		),
  		.out(
@@ -417,8 +406,37 @@ wire 				   Fetchaddr_Invalid = 0;
  				IDEX_Rs1Data_0,
  				IDEX_Rs2Data_0,
  				IDEX_16BitFlag_0,
- 				IDEX_NowPC_0,
+ 				IDEX_NowPC_0
+ 			} 
+ 		)
+ 	);
 
+    PipeStage #(
+ 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
+ 	)
+ 	i_IDEX1(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[2]),
+ 		.Flush(Flush[1]),
+		.issue_select(1'b1),
+ 		.in(
+ 			{
+ 				Decode_AllCtr_1,
+ 				Decode_RdAddr_1,
+ 				Decode_Rs1Addr_1,
+ 				Decode_Rs2Addr_1,
+ 				Decode_Imm_1,
+ 				Decode_ImmSel_1,
+ 				Decode_CsrAddr_1,
+ 				DecodeHazard_Rs1Data_1,
+ 				DecodeHazard_Rs2Data_1,
+ 				Decode_16BitFlag_1,
+ 				IFID_NowPC_1 
+ 			} 
+ 		),
+ 		.out(
+ 			{
  				IDEX_Sel1_1,
  				IDEX_Sel2_1,
  				IDEX_AluOp_1,
@@ -524,14 +542,14 @@ wire 				   Fetchaddr_Invalid = 0;
 
 
  	PipeStage #(
- 		.STAGE_WIDTH(`PIPE_EXMem_LEN),
-		.ISSUE1_START(`PIPE_EXMem_ISSUE1_START)
+ 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
  	)
- 	i_EXMem(
+ 	i_EXMem0(
  		.clk(clk),
  		.rst_n(rst_n),
  		.Stall(Ctrl_Stall[3]),
  		.Flush(Csr_Memflush|Flush[2]),	
+		.issue_select(issue_select[2]),
  		.in(
  			{
  				EX_AluData_0,
@@ -541,7 +559,34 @@ wire 				   Fetchaddr_Invalid = 0;
  				IDEX_LdType_0,
  				IDEX_WbRdEn_0,
  				IDEX_WbSel_0,
-                IDEX_NowPC_0,
+                IDEX_NowPC_0
+ 			} 
+ 		),
+ 		.out(
+ 			{
+ 				EXMem_AluData_0,
+ 				EXMem_RdAddr_0,
+ 				EXMem_Rs2Data_0,
+ 				EXMem_StType_0,
+ 				EXMem_LdType_0,
+ 				EXMem_RdWrtEn_0,
+ 				EXMem_WbSel_0,
+                EXMEM_NowPC_0
+ 			} 
+ 		)
+ 	);
+
+ 	PipeStage #(
+ 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
+ 	)
+ 	i_EXMem1(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[3]),
+ 		.Flush(Csr_Memflush|Flush[2]),	
+		.issue_select(1'b1),
+ 		.in(
+ 			{
  				EX_AluData_1,
  				IDEX_RdAddr_1,
  				IDEX_Rs2Data_1,
@@ -554,14 +599,6 @@ wire 				   Fetchaddr_Invalid = 0;
  		),
  		.out(
  			{
- 				EXMem_AluData_0,
- 				EXMem_RdAddr_0,
- 				EXMem_Rs2Data_0,
- 				EXMem_StType_0,
- 				EXMem_LdType_0,
- 				EXMem_RdWrtEn_0,
- 				EXMem_WbSel_0,
-                EXMEM_NowPC_0,
  				EXMem_AluData_1,
  				EXMem_RdAddr_1,
  				EXMem_Rs2Data_1,
@@ -610,14 +647,14 @@ wire 				   Fetchaddr_Invalid = 0;
 	
 //========YB Change for ss 2020.06.22 21:21========
  	PipeStage #(
- 		.STAGE_WIDTH(`PIPE_MemWb_LEN),
-		.ISSUE1_START(`PIPE_MemWb_ISSUE1_START)
+ 		.STAGE_WIDTH(`PIPE_MemWb_LEN)
  	)
- 	i_MemWb(
+ 	i_MemWb0(
  		.clk(clk),
  		.rst_n(rst_n),
  		.Stall(Ctrl_Stall[4]),
  		.Flush(Csr_Memflush|Flush[3]),
+		.issue_select(issue_select[3]),
  		.in(
  			{
 				//=====ss-0====
@@ -625,7 +662,32 @@ wire 				   Fetchaddr_Invalid = 0;
 				EXMem_RdWrtEn_0  ,
 				EXMem_AluData_0  ,
 				Dcache_DataRd_0  ,
-				EXMem_WbSel_0    ,  
+				EXMem_WbSel_0       
+ 			} 
+ 		),
+ 		.out(
+ 			{
+ 				//=====ss-0====
+				 MemWb_RdAddr_0   , 
+ 				MemWb_RdWrtEn_0  ,
+ 				MemWb_AluData_0  ,
+ 				MemWb_DataRd_0   ,
+ 				MemWb_WbSel_0    
+ 			} 
+ 		)
+ 	);
+
+ 	PipeStage #(
+ 		.STAGE_WIDTH(`PIPE_MemWb_LEN)
+ 	)
+ 	i_MemWb1(
+ 		.clk(clk),
+ 		.rst_n(rst_n),
+ 		.Stall(Ctrl_Stall[4]),
+ 		.Flush(Csr_Memflush|Flush[3]),
+		.issue_select(1'b1),
+ 		.in(
+ 			{
 				//=====ss-1====
 				EXMem_RdAddr_1   , 
 				EXMem_RdWrtEn_1  ,
@@ -636,12 +698,6 @@ wire 				   Fetchaddr_Invalid = 0;
  		),
  		.out(
  			{
- 				//=====ss-0====
-				 MemWb_RdAddr_0   , 
- 				MemWb_RdWrtEn_0  ,
- 				MemWb_AluData_0  ,
- 				MemWb_DataRd_0   ,
- 				MemWb_WbSel_0    ,
 				//=====ss-1====
 				MemWb_RdAddr_1   , 
  				MemWb_RdWrtEn_1  ,
