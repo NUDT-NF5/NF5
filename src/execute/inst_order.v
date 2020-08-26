@@ -67,7 +67,7 @@ assign m_s2      = (indicator) ? m_s2_reg :
                    (IDEX_AluOp_0 >= `ALU_MUL) ? s2_0 :
                    (IDEX_AluOp_1 >= `ALU_MUL) ? s2_1 : `DATA_WIDTH'b0;*/
 
-assign inst_order_Mem_LdEn = indicator ? 1'b0 : Mem_LdEn;
+assign inst_order_Mem_LdEn = Mem_LdEn;
 
 /*assign m_prio = (IDEX_AluOp_0 >= `ALU_MUL) ? 2'b10 :
                 (IDEX_AluOp_1 >= `ALU_MUL) ? 2'b11 :

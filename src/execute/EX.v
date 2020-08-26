@@ -41,12 +41,20 @@ module EX(
     input                               clk,
     input                               rst_n,
     input       [`RF_ADDR_WIDTH - 1:0]  IDEX_RdAddr_0,
+    input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs1Addr_0,
+    input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs2Addr_0,
     input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs1Addr_1,
     input       [`RF_ADDR_WIDTH - 1:0]  IDEX_Rs2Addr_1,
 
     input       [`DATA_WIDTH - 1:0]     Dcache_DataRd_0,
-    input                               MemWb_RdWrtEn_0,
-    input       [`RF_ADDR_WIDTH - 1:0]  MemWb_RdAddr_0,
+    input                               EXMem_RdWrtEn_0,
+    input       [`RF_ADDR_WIDTH - 1:0]  EXMem_RdAddr_0,
+    input                               Mem_LdEN_0,
+
+    input       [`DATA_WIDTH - 1:0]     Dcache_DataRd_1,
+    input                               EXMem_RdWrtEn_1,
+    input       [`RF_ADDR_WIDTH - 1:0]  EXMem_RdAddr_1,
+    input                               Mem_LdEN_1,
 
     //output
     output      [`DATA_WIDTH - 1:0]     EX_AluData_0,
@@ -74,6 +82,8 @@ wire            [`ALU_OP_WIDTH - 1:0]   AluOp_1;
 //wire            [`ALU_OP_WIDTH - 1:0]   m_AluOp_0;
 //wire            [`DATA_WIDTH - 1:0]     m_s1;
 //wire            [`DATA_WIDTH - 1:0]     m_s2;
+wire            [`DATA_WIDTH - 1:0]     forward_s1_0;
+wire            [`DATA_WIDTH - 1:0]     forward_s2_0;
 wire            [`DATA_WIDTH - 1:0]     forward_s1_1;
 wire            [`DATA_WIDTH - 1:0]     forward_s2_1;
 wire                                    exforward_stall;
@@ -107,10 +117,10 @@ wire                                    div_ready = div_ready_0 || div_ready_1;
 
 mux_aluinput aluin  (
                      .IDEX_Sel1_0(IDEX_Sel1_0),
-                     .forward_rs1_0(IDEX_Rs1Data_0),
+                     .forward_rs1_0(forward_s1_0),
                      .IDEX_NowPC_0(IDEX_NowPC_0),
                      .IDEX_Sel2_0(IDEX_Sel2_0),
-                     .forward_rs2_0(IDEX_Rs2Data_0),
+                     .forward_rs2_0(forward_s2_0),
                      .IDEX_Imm_0(IDEX_Imm_0),
                      .IDEX_Sel1_1(IDEX_Sel1_1),
                      .forward_rs1_1(forward_s1_1),
@@ -133,12 +143,23 @@ ex_forward    forward(
                      .IDEX_LdType_0(IDEX_LdType_0),
                      .s1_1(IDEX_Rs1Data_1),
                      .s2_1(IDEX_Rs2Data_1),
+                     .issue0_rs1addr(IDEX_Rs1Addr_0),
+                     .issue0_rs2addr(IDEX_Rs2Addr_0),
+                     .s1_0(IDEX_Rs1Data_0),
+                     .s2_0(IDEX_Rs2Data_0),
                      .clk(clk),
                      .rst_n(rst_n),
                      .Dcache_DataRd_0(Dcache_DataRd_0),
-                     .MemWb_RdWrtEn_0(MemWb_RdWrtEn_0),
-                     .MemWb_RdAddr_0(MemWb_RdAddr_0),
+                     .EXMem_RdWrtEn_0(EXMem_RdWrtEn_0),
+                     .EXMem_RdAddr_0(EXMem_RdAddr_0),
+                     .Mem_LdEN_0(Mem_LdEN_0),
+                     .Dcache_DataRd_1(Dcache_DataRd_1),
+                     .EXMem_RdWrtEn_1(EXMem_RdWrtEn_1),
+                     .EXMem_RdAddr_1(EXMem_RdAddr_1),
+                     .Mem_LdEN_1(Mem_LdEN_1),
                      .issue0_data(EX_AluData_0),
+                     .issue0_forward_rs1(forward_s1_0),
+                     .issue0_forward_rs2(forward_s2_0),
                      .issue1_forward_rs1(forward_s1_1),
                      .issue1_forward_rs2(forward_s2_1),
                      .exforward_stall(exforward_stall)

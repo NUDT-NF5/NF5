@@ -44,6 +44,7 @@ module Core(
 	wire									Decode_16BitFlag_1;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType_1;
 
+	wire                                    Decode_Unicorn;
 	wire 	[`PC_PLUS_WIDTH - 1 : 0]        Decode_NextPC;
 
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data_0;
@@ -85,6 +86,8 @@ module Core(
 	wire									IDEX_16BitFlag_0;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC_0;
 
+	wire                                    IDEX_stall;
+
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_RdAddr_1;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Imm_1;
 	wire  	[`IMM_SEL_WIDTH - 1:0]         	IDEX_ImmSel_1;
@@ -114,6 +117,8 @@ module Core(
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC_1;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 
+    wire    [`DATA_WIDTH - 1 : 0]           EXMem_Rs2Data;
+
     wire    [31:0] 							EXMem_AluData_0;
     wire    [31:0] 							EXMem_Rs2Data_0;
     wire           							EXMem_RdWrtEn_0;
@@ -133,7 +138,7 @@ module Core(
 	wire    [`ADDR_WIDTH - 1:0]             EXMEM_NowPC_1;
 //========YB Change for ss 2020.06.22 21:21========
     //wire                          		 	Mem_LdEn;        
-    //wire                          		 	Mem_DcacheEn;    
+    wire                          		 	Mem_DcacheEn;    
     wire                          		 	Mem_DcacheRd;    
     wire  	[1:0]      			  			Mem_DcacheWidth; 
     wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
@@ -167,9 +172,11 @@ module Core(
 
       wire                           Mem_LdEN_0       ;    //To EX stage, generate forward control signal
       wire                           Mem_LdEN_1       ;    //To EX stage, generate forward control signal
-	  wire 							 Mem_Stall        ;
+//	  wire 							 Mem_Stall        ;
 	  wire 							 Mem_DcacheEN_0   ;
 	  wire 							 Mem_DcacheEN_1   ;
+
+      wire  [`DATA_WIDTH-1   :0]     Dcache_DataRd    ;
 
       wire  [`DATA_WIDTH-1   :0]     Dcache_DataRd_0   ; 
       wire  [`DATA_WIDTH-1   :0]     Dcache_DataRd_1   ; 
@@ -207,7 +214,7 @@ wire 				   Fetchaddr_Invalid = 0;
 		
 	Ctrl i_Ctrl(
 		.Icache_StallReq(1'b0),
-		.Dcache_StallReq(Mem_Stall),//========YB Change for ss 2020.06.22 21:21========
+		.Dcache_StallReq(1'b0),//========YB Change for ss 2020.06.22 21:21========
 		.Decode_Stall_0   (Decode_Stall_0),
 		.Mem_LdStFlag_0   (Mem_DcacheEN_0),
         .DecodeHazard_StallReq(DecodeHazard_StallReq),//data_hazard
@@ -298,6 +305,7 @@ wire 				   Fetchaddr_Invalid = 0;
 		.Decode_Flush_1(Decode_Flush_1),
 		.Decode_16BitFlag_1(Decode_16BitFlag_1),
 		.Decode_LdType_1(Decode_LdType_1),
+		.Decode_Unicorn(Decode_Unicorn),
 		.Decode_NextPC(Decode_NextPC)
 	);
 	
@@ -362,8 +370,9 @@ wire 				   Fetchaddr_Invalid = 0;
  		.DecodeHazard_Rs2Data_1(DecodeHazard_Rs2Data_1)
  	);	
 
-    PipeStage #(
- 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
+    PipeStage_IDEX #(
+ 		.STAGE_WIDTH(`PIPE_IDEX_LEN),
+		.STAGE_NUM(1'b0)
  	)
  	i_IDEX0(
  		.clk(clk),
@@ -371,6 +380,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Stall(Ctrl_Stall[2]),
  		.Flush(Flush[1]),
 		.issue_select(issue_select[1]),
+		.Decode_Unicorn(Decode_Unicorn),
  		.in(
  			{
  				Decode_AllCtr_0,
@@ -408,11 +418,13 @@ wire 				   Fetchaddr_Invalid = 0;
  				IDEX_16BitFlag_0,
  				IDEX_NowPC_0
  			} 
- 		)
+ 		),
+		.IDEX_stall(IDEX_stall)
  	);
 
-    PipeStage #(
- 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
+    PipeStage_IDEX #(
+ 		.STAGE_WIDTH(`PIPE_IDEX_LEN),
+		.STAGE_NUM(1'b1)
  	)
  	i_IDEX1(
  		.clk(clk),
@@ -420,6 +432,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Stall(Ctrl_Stall[2]),
  		.Flush(Flush[1]),
 		.issue_select(1'b1),
+		.Decode_Unicorn(Decode_Unicorn),
  		.in(
  			{
  				Decode_AllCtr_1,
@@ -489,11 +502,18 @@ wire 				   Fetchaddr_Invalid = 0;
 		.clk(clk),
 		.rst_n(rst_n),
 		.IDEX_RdAddr_0(IDEX_RdAddr_0),
+        .IDEX_Rs1Addr_0(IDEX_Rs1Addr_0),
+        .IDEX_Rs2Addr_0(IDEX_Rs2Addr_0),
 		.IDEX_Rs1Addr_1(IDEX_Rs1Addr_1),
 		.IDEX_Rs2Addr_1(IDEX_Rs2Addr_1),
 		.Dcache_DataRd_0(Dcache_DataRd_0),
-		.MemWb_RdWrtEn_0(MemWb_RdWrtEn_0),
-		.MemWb_RdAddr_0(MemWb_RdAddr_0),
+		.EXMem_RdWrtEn_0(EXMem_RdWrtEn_0),
+		.EXMem_RdAddr_0(EXMem_RdAddr_0),
+        .Mem_LdEN_0(Mem_LdEN_0),
+        .Dcache_DataRd_1(Dcache_DataRd_1),
+        .EXMem_RdWrtEn_1(EXMem_RdWrtEn_1),
+        .EXMem_RdAddr_1(EXMem_RdAddr_1),
+        .Mem_LdEN_1(Mem_LdEN_1),
 		.EX_AluData_0(EX_AluData_0),
 		.EX_BranchFlag_0(EX_BranchFlag_0),
 		.EX_BranchPC_0(EX_BranchPC_0),
@@ -613,8 +633,8 @@ wire 				   Fetchaddr_Invalid = 0;
 
 //========YB Change for ss 2020.06.22 21:21========
  	Mem i_Mem(
-		.clk(clk),
- 		.rst_n(rst_n),
+//		.clk(clk),
+// 		.rst_n(rst_n),
 		 //=====ss-0====
 		.EXMem_LdType_0(EXMem_LdType_0),
 		.EXMem_StType_0(EXMem_StType_0),
@@ -625,25 +645,38 @@ wire 				   Fetchaddr_Invalid = 0;
 		.EXMem_StType_1(EXMem_StType_1),
 		.EXMem_AluData_1(EXMem_AluData_1),
 		.EXMem_Rs2Data_1(EXMem_Rs2Data_1),
-		.Mem_LdEN_0(Mem_LdEN_0),
-		.Mem_LdEN_1(Mem_LdEN_1),
+
+        .Mem_LdEN_0(Mem_LdEN_0),
+        .Mem_LdEN_1(Mem_LdEN_1),
+        .EXMem_Rs2Data(EXMem_Rs2Data),
 
 		//=========YB：Dcache=========
+ 		.Mem_DcacheEN(Mem_DcacheEN),
  		.Mem_DcacheEN_0(Mem_DcacheEN_0),
 		.Mem_DcacheEN_1(Mem_DcacheEN_1),   
  		.Mem_DcacheRd(Mem_DcacheRd),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
  		.Mem_DcacheSign(Mem_DcacheSign),
-		.Mem_Stall(Mem_Stall), //connect to Dcache Stall 
-    		.Csr_Memflush(Csr_Memflush),//new 
-
+        .Csr_Memflush(Csr_Memflush),//new 
     	.Dcache_DataRd_0(Dcache_DataRd_0), 
-    	.Dcache_DataRd_1(Dcache_DataRd_1),  
-    	.Icache_NextPC(Fetch_NextPC),   
-    	.Icache_Instr(Icache_Instr)   
-		
-     ); 	
+    	.Dcache_DataRd_1(Dcache_DataRd_1),    
+		.Dcache_DataRd(Dcache_DataRd)
+     ); 
+
+	Dcache i_Dcache(
+		.clk(clk),
+		.rst_n(rst_n),
+		.Mem_DcacheEN(Mem_DcacheEN),    
+		.Mem_DcacheRd(Mem_DcacheRd),    
+		.Mem_DcacheWidth(Mem_DcacheWidth), 
+		.Mem_DcacheAddr(Mem_DcacheAddr),   
+		.EXMem_Rs2Data(EXMem_Rs2Data),
+		.Mem_DcacheSign(Mem_DcacheSign), 
+		.Dcache_DataRd(Dcache_DataRd),
+		.Icache_NextPC(Fetch_NextPC),
+		.Icache_Instr(Icache_Instr)
+	);	
 	
 //========YB Change for ss 2020.06.22 21:21========
  	PipeStage #(

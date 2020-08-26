@@ -30,6 +30,7 @@ module Ctrl(
     input  wire          Decode_16BitFlag_1 ,
     input  wire  [`ADDR_WIDTH - 1:0] EX_BranchPC_1,
     output wire  [`ADDR_WIDTH - 1:0] EX_BranchPC,
+    input                IDEX_stall,
 
     output       [3:0]   Flush,
     output               EX_BranchFlag,
@@ -86,7 +87,7 @@ assign Flush=ctrl_flush|stage_flush ;
         Ctrl_Stall = 5'b00011;
     else if(Dcache_StallReq |Idfence_MemReq)
         Ctrl_Stall = 5'b00111;
-    else if(Idfence_ExReq)
+    else if(Idfence_ExReq | IDEX_stall)
         Ctrl_Stall = 5'b00011;
     else if(Icache_StallReq)
         Ctrl_Stall = 5'b00001; 
@@ -99,7 +100,7 @@ assign Flush=ctrl_flush|stage_flush ;
 always @ (*) begin//wb-mem ex-mem id-ex if-id
     if(DecodeHazard_StallReq)begin
         stage_flush = 4'b0010;
-        stage_issue_select = 4'b0;
+        stage_issue_select = 4'b0010;
     end
     else if(Dcache_StallReq |Idfence_MemReq_0)begin
         stage_flush = 4'b0010; 
