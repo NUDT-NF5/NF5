@@ -10,16 +10,16 @@
 `include "../src/common/Define.v"
 module Fetch(
 	//IFID <-> Fetch
-	input		[`ADDR_WIDTH - 1 : 0]	IFID_NowPC,
-	output reg	[`ADDR_WIDTH - 1 : 0]	Fetch_NextPC,
+	input  wire		[`ADDR_WIDTH - 1 : 0]		IFID_NowPC,
+	output reg		[`ADDR_WIDTH - 1 : 0]		Fetch_NextPC,
 	//Ctrl -> Fetch
-	input								Ctrl_ExcpFlag,
-	input		[`ADDR_WIDTH - 1 : 0]	Ctrl_ExcpPC,
+	input  wire									Ctrl_ExcpFlag,
+	input  wire		[`ADDR_WIDTH - 1 : 0]		Ctrl_ExcpPC,
 	//EX -> Fetch
-	input								EX_BranchFlag,
-	input		[`ADDR_WIDTH - 1 : 0]	EX_BranchPC,
+	input  wire									EX_BranchFlag,
+	input  wire		[`ADDR_WIDTH - 1 : 0]		EX_BranchPC,
 	//Decode -> Fetch
-	input		[`PC_PLUS_WIDTH - 1 : 0]	Decode_NextPC
+	input  wire		[`PC_PLUS_WIDTH - 1 : 0]	Decode_NextPC
 
 );
 		
@@ -39,7 +39,8 @@ module Fetch(
 			Fetch_NextPC = IFID_NowPC + 2;
 		else if(Decode_NextPC == `PC_PLUS_0)
 			Fetch_NextPC = IFID_NowPC;
-		// Fetch_NextPC is a latch
+		else 
+			Fetch_NextPC = `START_PC;
 endmodule
 
 // module Fetch(
@@ -57,9 +58,8 @@ endmodule
 // 	input		[`ADDR_WIDTH - 1 : 0]	EX_BranchPC,
 // 	//Decode -> Fetch
 // 	input		[`PC_PLUS_WIDTH - 1 : 0]				Decode_NextPC
-
 // );
-		
+	
 // //PC_select: generate NextPC by prority
 // 	always @(posedge clk)//if slack < 0 ,change to negedge
 // 		if(~rst_n)
@@ -76,6 +76,8 @@ endmodule
 // 			Fetch_NextPC = IFID_NowPC + 6;
 // 		else if(Decode_NextPC == `PC_PLUS_4)
 // 			Fetch_NextPC = IFID_NowPC + 4;
-// 		else
-// 			Fetch_NextPC = Fetch_NextPC + 2; //the most safe way
+// 		else if(Decode_NextPC == `PC_PLUS_2)
+// 			Fetch_NextPC = Fetch_NextPC + 2;
+// 		else if(Decode_NextPC == `PC_PLUS_0)
+//             Fetch_NextPC = IFID_NowPC;
 // endmodule

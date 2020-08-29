@@ -57,11 +57,11 @@ assign issue_select = ctrl_issue_select | stage_issue_select;
 
  always @ (*) begin
         if(Csr_ExcpFlag|EX_BranchFlag_0)begin //wb-mem ex-mem id-ex if-id
-            ctrl_flush = 4'b0111;
+            ctrl_flush = 4'b0110;
             ctrl_issue_select = 4'b0011; 
         end
         else if(Csr_ExcpFlag|EX_BranchFlag_1)begin //wb-mem ex-mem id-ex if-id
-            ctrl_flush = 4'b0011;
+            ctrl_flush = 4'b0010;
             ctrl_issue_select = 4'b0011; 
         end
         else if(Decode_16BitFlag_0)begin

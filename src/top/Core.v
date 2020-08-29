@@ -245,7 +245,7 @@ wire 				   Fetchaddr_Invalid = 0;
 	Fetch i_Fetch(
 		// .clk(clk),
 		// .rst_n(rst_n),
-		// .Stall(1'b0),//need to edit control
+		// .Stall(Ctrl_Stall[0]),//need to edit control
 		.IFID_NowPC(IFID_NowPC_0),
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(1'b0),//need to edit control
@@ -264,8 +264,8 @@ wire 				   Fetchaddr_Invalid = 0;
 		.clk(clk),
 		.rst_n(rst_n),
 		.rst_value(96'h00000000_00000000_00000000),//rst and flush with 2 nops
-		.Stall(1'b0),//need to edit control
-		.Flush(1'b0),//need to edit control
+		.Stall(Ctrl_Stall[1]),//need to edit control
+		.Flush(Flush[0]),//need to edit control
 		.in( {Fetch_NextPC , Icache_Instr} ),
 		.out( {IFID_NowPC_0 , IFID_Instr} )
 	);
