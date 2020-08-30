@@ -184,7 +184,7 @@ always @(*)
 		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_0 == IDEX_RdAddr_0)
 			rs2Sel_0 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs2Addr_0 == EXMem_RdAddr_1)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+            case (Mem_LdEn_1)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
                     rs2Sel_0 = `RS_SEL_EXMem_1;
                 default : 
@@ -245,7 +245,7 @@ always @(*)
 		else if(IDEX_WbRdEn_0 && Decode_Rs2Addr_1 == IDEX_RdAddr_0)
 			rs2Sel_1 = `RS_SEL_EX_0;
 		else if(EXMem_RdWrtEn_1 && Decode_Rs2Addr_1 == EXMem_RdAddr_1)
-            case (Mem_LdEn_0)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
+            case (Mem_LdEn_1)                             //if instruction is load, then forward data which is from DCache, else forward data which is from AluData
                 0 : 
                     rs2Sel_1 = `RS_SEL_EXMem_1;
                 default : 

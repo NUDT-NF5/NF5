@@ -147,7 +147,7 @@ if [ $number_all -eq 1 ]
             cat $out_dir/Report/Report_funct.txt  | column -t  > $out_dir/Report/Report_funct_New.txt      
             rm -rf $out_dir/Report/Report_funct.txt
             mv $out_dir/Report/Report_funct_New.txt  $out_dir/Report/Report_funct.txt
-            gedit $out_dir/Report/Report_funct.txt
+            code $out_dir/Report/Report_funct.txt
   elif [ $number -eq 3 ] || [ $number -eq 4 ]
     then
             rm -rf $out_dir/Result/Result_compliance/*
@@ -181,7 +181,7 @@ if [ $number_all -eq 1 ]
             cat $out_dir/Report/Report_compliance.txt  | column -t  > $out_dir/Report/report_compliance_1.txt  
             rm -rf $out_dir/Report/Report_compliance.txt
             mv $out_dir/Report/report_compliance_1.txt $out_dir/Report/Report_compliance.txt
-            gedit $out_dir/Report/Report_compliance.txt 
+            code $out_dir/Report/Report_compliance.txt 
   else
     echo "Wrong"
   fi
@@ -232,7 +232,7 @@ elif [ $number_all -eq 2 ]
             rm -rf $isa_test_dir/TbAll_tmp2.txt
             echo -e "Test $single_test_name is running \n"
             cp $EDA_env_dir/mySim.log $out_dir/Result/Result_funct_self/$single_test_name.txt
-            gedit $out_dir/Result/Result_funct_self/$single_test_name.txt
+            code $out_dir/Result/Result_funct_self/$single_test_name.txt
     elif [ $number -eq 3 ] || [ $number -eq 4 ]
       then
             rm -rf $out_dir/Result/Result_compliance_self/*
@@ -259,7 +259,7 @@ elif [ $number_all -eq 2 ]
             else 
                 echo "Wrong"
             fi
-            gedit $out_dir/Result/Result_compliance_self/$single_test_name.txt 
+            code $out_dir/Result/Result_compliance_self/$single_test_name.txt 
             rm -rf $isa_test_dir/TbAll_tmp.txt
     else
       echo "Wrong"

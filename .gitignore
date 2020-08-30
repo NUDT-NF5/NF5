@@ -7,3 +7,4 @@ src/top/TbAll.sv
 /output
 /iverilog-project/test
 *.bak
+isa_run.sh

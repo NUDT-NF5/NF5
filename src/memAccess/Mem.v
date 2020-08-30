@@ -154,6 +154,6 @@ assign Mem_DcacheSign_0  = ((EXMem_LdType_0 == `LD_LB)||(EXMem_LdType_0 == `LD_L
 assign Mem_DcacheSign_1  = ((EXMem_LdType_1 == `LD_LB)||(EXMem_LdType_1 == `LD_LH))? 1:0;
 assign Mem_DcacheSign    = Mem_DcacheEN_0 ? Mem_DcacheSign_0 :
                            Mem_DcacheEN_1 ? Mem_DcacheSign_1 : 0;
-assign Dcache_DataRd_0   = Mem_LdEN_0 ? Dcache_DataRd : EXMem_AluData_0;
-assign Dcache_DataRd_1   = Mem_LdEN_1 ? Dcache_DataRd : EXMem_AluData_1;
+assign Dcache_DataRd_0   = Mem_LdEN_0 ? Dcache_DataRd : 0;
+assign Dcache_DataRd_1   = Mem_LdEN_1 ? Dcache_DataRd : 0;
 endmodule 
