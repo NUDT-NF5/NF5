@@ -39,7 +39,7 @@ always @(posedge clk)
 	else if(STAGE_NUM == 1'b0 && Decode_Unicorn)
         case (indicator)
             1'b1 : begin
-                out <= ~1;
+                out <= 0;
                 indicator <= ~indicator;
             end
             default : begin
@@ -54,7 +54,7 @@ always @(posedge clk)
                 indicator <= ~indicator;
             end
             default : begin
-                out <= ~1;
+                out <= 0;
                 indicator <= ~indicator;
             end
         endcase

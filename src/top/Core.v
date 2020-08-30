@@ -233,6 +233,7 @@ wire 				   Fetchaddr_Invalid = 0;
 	 	.EX_BranchFlag_1  (EX_BranchFlag_1),
 		.EX_BranchPC_1(EX_BranchPC_1),
 		.EX_BranchPC(EX_BranchPC),
+		.IDEX_stall(IDEX_stall),
 	 	.Decode_16BitFlag_1(Decode_16BitFlag_1),
 		.EX_BranchFlag(EX_BranchFlag),
  //        .Csr_WFIClrFlag (Csr_WFIClrFlag ) ,
@@ -331,8 +332,11 @@ wire 				   Fetchaddr_Invalid = 0;
  	DecodeHazard i_DecodeHazard(
  		.clk(clk),
  		.rst_n(rst_n),
+		.Decode_Unicorn(Decode_Unicorn),
+		.DecodeHazard_Unicorn(DecodeHazard_Unicorn),
  		.Decode_Rs1Addr_0(Decode_Rs1Addr_0),
- 		.Decode_Rs2Addr_0(Decode_Rs2Addr_0),	
+ 		.Decode_Rs2Addr_0(Decode_Rs2Addr_0),
+		.Decode_RdAddr_0(Decode_RdAddr_0),	
  		.RF_Rs1Data_0(RF_Rs1Data_0),
  		.RF_Rs2Data_0(RF_Rs2Data_0),
  		.Decode_Rs1Addr_1(Decode_Rs1Addr_1),
@@ -380,7 +384,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Stall(Ctrl_Stall[2]),
  		.Flush(Flush[1]),
 		.issue_select(issue_select[1]),
-		.Decode_Unicorn(Decode_Unicorn),
+		.Decode_Unicorn(DecodeHazard_Unicorn),
  		.in(
  			{
  				Decode_AllCtr_0,
@@ -432,7 +436,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Stall(Ctrl_Stall[2]),
  		.Flush(Flush[1]),
 		.issue_select(1'b1),
-		.Decode_Unicorn(Decode_Unicorn),
+		.Decode_Unicorn(DecodeHazard_Unicorn),
  		.in(
  			{
  				Decode_AllCtr_1,

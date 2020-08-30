@@ -12,9 +12,13 @@ module DecodeHazard(
 	input								clk,
 	input								rst_n,
 	
+	input                               Decode_Unicorn,
+    output  reg                         DecodeHazard_Unicorn,
+
 	//RF -> DecodeHazard
 	input	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr_0,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr_0,	
+	input   [`RF_ADDR_WIDTH - 1 : 0]    Decode_RdAddr_0,
 
 	input	[`DATA_WIDTH - 1 : 0]		RF_Rs1Data_0,
 	input	[`DATA_WIDTH - 1 : 0]		RF_Rs2Data_0,
@@ -280,5 +284,15 @@ wire   DecodeHazard_StallReq_0 = ((preLdType_0 != `LD_XXX) && ((rs1Sel_0 == `RS_
 wire   DecodeHazard_StallReq_1 = ((preLdType_1 != `LD_XXX) && ((rs1Sel_1 == `RS_SEL_EX_1) || (rs2Sel_1 == `RS_SEL_EX_1))) ? 1'b1 : 1'b0;
 
 assign DecodeHazard_StallReq = DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1;
+
+always @*
+    if(Decode_RdAddr_0 != 0 && Decode_LdType_0 != `LD_XXX)
+        if(Decode_RdAddr_0 == Decode_Rs1Addr_1 || Decode_RdAddr_0 == Decode_Rs2Addr_1)
+            DecodeHazard_Unicorn = 1'b1;
+        else
+            DecodeHazard_Unicorn = Decode_Unicorn;
+    else
+        DecodeHazard_Unicorn = Decode_Unicorn;
+        
 
 endmodule
