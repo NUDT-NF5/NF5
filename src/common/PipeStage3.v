@@ -26,10 +26,10 @@ module PipeStage3
 always @(posedge clk)
 	if(~rst_n)
 		out <= rst_value;
-	else if(Stall)
-		out <= out;
 	else if(Flush)
 		out <= rst_value;
+	else if(Stall)
+		out <= out;
 	else 
 		out <= in;
 
