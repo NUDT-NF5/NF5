@@ -129,6 +129,8 @@ module Mem
     ); 
 wire   St_EN_0;
 wire   St_EN_1;
+wire   [1:0]  Mem_DcacheWidth_0;
+wire   [1:0]  Mem_DcacheWidth_1;
 assign St_EN_0    = ( EXMem_StType_0 == `ST_XXX )? 0 : 1;
 assign St_EN_1    = ( EXMem_StType_1 == `ST_XXX )? 0 : 1;
 assign Mem_LdEN_0 = ( EXMem_LdType_0 == `LD_XXX ) ? 0 : 1;
@@ -139,14 +141,14 @@ assign Mem_DcacheEN      = Mem_DcacheEN_0 || Mem_DcacheEN_1;
 assign Mem_DcacheRd_0    = Mem_LdEN_0 ? 1 : 0;
 assign Mem_DcacheRd_1    = Mem_LdEN_1 ? 1 : 0;
 assign Mem_DcacheRd      = Mem_DcacheRd_0 || Mem_DcacheRd_1;
-wire   Mem_DcacheWidth_0 = (( EXMem_LdType_0 == `LD_LB ) || ( EXMem_LdType_0 == `LD_LBU ) || ( EXMem_StType_0 == `ST_SB ))? 2'b00 : 
+assign Mem_DcacheWidth_0 = (( EXMem_LdType_0 == `LD_LB ) || ( EXMem_LdType_0 == `LD_LBU ) || ( EXMem_StType_0 == `ST_SB ))? 2'b00 : 
                            (( EXMem_LdType_0 == `LD_LH ) || ( EXMem_LdType_0 == `LD_LHU ) || ( EXMem_StType_0 == `ST_SH ))? 2'b01 : 
                                                             (( EXMem_LdType_0 == `LD_LW ) || ( EXMem_StType_0 == `ST_SW ))? 2'b10 : 2'b00;
-wire   Mem_DcacheWidth_1 = (( EXMem_LdType_1 == `LD_LB ) || ( EXMem_LdType_1 == `LD_LBU ) || ( EXMem_StType_1 == `ST_SB ))? 2'b00 : 
+assign Mem_DcacheWidth_1 = (( EXMem_LdType_1 == `LD_LB ) || ( EXMem_LdType_1 == `LD_LBU ) || ( EXMem_StType_1 == `ST_SB ))? 2'b00 : 
                            (( EXMem_LdType_1 == `LD_LH ) || ( EXMem_LdType_1 == `LD_LHU ) || ( EXMem_StType_1 == `ST_SH ))? 2'b01 : 
                                                             (( EXMem_LdType_1 == `LD_LW ) || ( EXMem_StType_1 == `ST_SW ))? 2'b10 : 2'b00;
-assign Mem_DcacheWidth   = Mem_LdEN_0 ? Mem_DcacheWidth_0 :
-                           Mem_LdEN_1 ? Mem_DcacheWidth_1 : 0;
+assign Mem_DcacheWidth   = Mem_DcacheEN_0 ? Mem_DcacheWidth_0 :
+                           Mem_DcacheEN_1 ? Mem_DcacheWidth_1 : 0;
 assign EXMem_Rs2Data     = Mem_DcacheEN_0 ? EXMem_Rs2Data_0 : EXMem_Rs2Data_1;
 assign Mem_DcacheAddr    = Mem_DcacheEN_0 ? EXMem_AluData_0 : 
                            Mem_DcacheEN_1 ? EXMem_AluData_1 : 0;
