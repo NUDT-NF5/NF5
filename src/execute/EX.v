@@ -66,7 +66,8 @@ module EX(
     output                              EX_BranchFlag_1,
     output      [`ADDR_WIDTH - 1:0]     EX_BranchPC_1,
     output                              EX_LdStFlag_1,
-    output                              EX_StallReq
+    output                              EX_StallReq,
+    output      [`DATA_WIDTH - 1:0]     EX_Rs2Data_1
 );
 
 //mux_aluinput to alu_io
@@ -86,8 +87,7 @@ wire            [`DATA_WIDTH - 1:0]     forward_s1_0;
 wire            [`DATA_WIDTH - 1:0]     forward_s2_0;
 wire            [`DATA_WIDTH - 1:0]     forward_s1_1;
 wire            [`DATA_WIDTH - 1:0]     forward_s2_1;
-wire                                    exforward_stall;
-wire                                    inst_order_Mem_LdEn;
+wire                                    exforward_stall = 1'b0;
 //wire            [1:0]                   m_prio;
 //wire                                    inst_order_stall
 
@@ -137,7 +137,6 @@ mux_aluinput aluin  (
 ex_forward    forward(
                      .issue0_rdaddr(IDEX_RdAddr_0),
                      .issue0_RdWrtEn(IDEX_WbRdEn_0),
-                     .inst_order_Mem_LdEn(inst_order_Mem_LdEn),
                      .issue1_rs1addr(IDEX_Rs1Addr_1),
                      .issue1_rs2addr(IDEX_Rs2Addr_1),
                      .IDEX_LdType_0(IDEX_LdType_0),
@@ -161,8 +160,7 @@ ex_forward    forward(
                      .issue0_forward_rs1(forward_s1_0),
                      .issue0_forward_rs2(forward_s2_0),
                      .issue1_forward_rs1(forward_s1_1),
-                     .issue1_forward_rs2(forward_s2_1),
-                     .exforward_stall(exforward_stall)
+                     .issue1_forward_rs2(forward_s2_1)
 );
 
 /*inst_order  inst    (.clk(clk),
@@ -262,5 +260,6 @@ ex_out       alu_out(
 );
 
 assign EX_StallReq = div_start && (~div_ready);
+assign EX_Rs2Data_1 = forward_s2_1;
 
 endmodule // EX

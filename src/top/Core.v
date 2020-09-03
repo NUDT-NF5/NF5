@@ -116,6 +116,7 @@ module Core(
 	wire									EX_BranchFlag_1;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC_1;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
+	wire    [`DATA_WIDTH - 1 : 0]           EX_Rs2Data_1;
 
     wire    [`DATA_WIDTH - 1 : 0]           EXMem_Rs2Data;
 
@@ -526,7 +527,8 @@ wire 				   Fetchaddr_Invalid = 0;
 		.EX_BranchFlag_1(EX_BranchFlag_1),
 		.EX_BranchPC_1(EX_BranchPC_1),
 		.EX_LdStFlag_1(EX_LdStFlag_1),
-		.EX_StallReq(EX_StallReq)
+		.EX_StallReq(EX_StallReq),
+		.EX_Rs2Data_1(EX_Rs2Data_1)
  	);
  wire [31:0] EXMEM_NowPC;	
 // 	Csr i_Csr (
@@ -613,7 +615,7 @@ wire 				   Fetchaddr_Invalid = 0;
  			{
  				EX_AluData_1,
  				IDEX_RdAddr_1,
- 				IDEX_Rs2Data_1,
+ 				EX_Rs2Data_1,
  				IDEX_StType_1,
  				IDEX_LdType_1,
  				IDEX_WbRdEn_1,

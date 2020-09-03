@@ -16,11 +16,10 @@ module inst_order(
     input                          EX_BranchFlag_0,
 
     output [`ALU_OP_WIDTH - 1:0]   AluOp_0,
-    output [`ALU_OP_WIDTH - 1:0]   AluOp_1,
+    output [`ALU_OP_WIDTH - 1:0]   AluOp_1
 /*    output [`ALU_OP_WIDTH - 1:0]   m_AluOp_0,
     output [`DATA_WIDTH - 1:0]     m_s1,
     output [`DATA_WIDTH - 1:0]     m_s2,*/
-    output                         inst_order_Mem_LdEn
 //    output [1:0]                   m_prio
 );
 
@@ -66,8 +65,6 @@ assign m_s1      = (indicator) ? m_s1_reg :
 assign m_s2      = (indicator) ? m_s2_reg : 
                    (IDEX_AluOp_0 >= `ALU_MUL) ? s2_0 :
                    (IDEX_AluOp_1 >= `ALU_MUL) ? s2_1 : `DATA_WIDTH'b0;*/
-
-assign inst_order_Mem_LdEn = Mem_LdEn;
 
 /*assign m_prio = (IDEX_AluOp_0 >= `ALU_MUL) ? 2'b10 :
                 (IDEX_AluOp_1 >= `ALU_MUL) ? 2'b11 :

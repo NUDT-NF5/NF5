@@ -8,3 +8,4 @@ src/top/TbAll.sv
 /iverilog-project/test
 *.bak
 isa_run.sh
+iverilog-project/test.gtkw
