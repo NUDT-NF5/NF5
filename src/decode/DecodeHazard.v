@@ -278,10 +278,10 @@ always @(posedge clk)
 	if(~rst_n)
 		preLdType_1 <= `LD_XXX;
 	else
-		preLdType_1 <= Decode_LdType_0;
+		preLdType_1 <= Decode_LdType_1;
 
-wire   DecodeHazard_StallReq_0 = ((preLdType_0 != `LD_XXX) && ((rs1Sel_0 == `RS_SEL_EX_0) || (rs2Sel_0 == `RS_SEL_EX_0))) ? 1'b1 : 1'b0;
-wire   DecodeHazard_StallReq_1 = ((preLdType_1 != `LD_XXX) && ((rs1Sel_1 == `RS_SEL_EX_1) || (rs2Sel_1 == `RS_SEL_EX_1))) ? 1'b1 : 1'b0;
+wire   DecodeHazard_StallReq_0 = ((preLdType_0 != `LD_XXX) && ((rs1Sel_0 == `RS_SEL_EX_0) || (rs2Sel_0 == `RS_SEL_EX_0) || (rs1Sel_1 == `RS_SEL_EX_0) || (rs2Sel_1 == `RS_SEL_EX_0))) ? 1'b1 : 1'b0;
+wire   DecodeHazard_StallReq_1 = ((preLdType_1 != `LD_XXX) && ((rs1Sel_0 == `RS_SEL_EX_1) || (rs2Sel_0 == `RS_SEL_EX_1) || (rs1Sel_1 == `RS_SEL_EX_1) || (rs2Sel_1 == `RS_SEL_EX_1))) ? 1'b1 : 1'b0;
 
 assign DecodeHazard_StallReq = DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1;
 
