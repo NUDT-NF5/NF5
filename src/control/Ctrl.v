@@ -38,11 +38,11 @@ module Ctrl(
     );
 reg [4:0]stage_flush; 
 reg [4:0]ctrl_flush;  
-wire Idfence_ExReq_0 = Decode_Stall_0[0]& EX_LdStFlag_0;
-wire Idfence_MemReq_0= Decode_Stall_0[0]& Mem_LdStFlag_0;
-wire Idfence_ExReq_1 = Decode_Stall_1[0]& EX_LdStFlag_1;
+wire Idfence_ExReq_0 = Decode_Stall_0[0]& EX_LdStFlag_0 && ~EX_BranchFlag;    //there may be bugs
+wire Idfence_MemReq_0= Decode_Stall_0[0]& (Mem_LdStFlag_0 || Mem_LdStFlag_1);
+wire Idfence_ExReq_1 = Decode_Stall_1[0]& EX_LdStFlag_1 && ~EX_BranchFlag;    //there may be bugs
 wire Idfence_ExReq = Idfence_ExReq_0 || Idfence_ExReq_1;
-wire Idfence_MemReq_1= Decode_Stall_1[0]& Mem_LdStFlag_1;
+wire Idfence_MemReq_1= Decode_Stall_1[0]& (Mem_LdStFlag_0 || Mem_LdStFlag_1);
 wire Idfence_MemReq  = Idfence_MemReq_0 || Idfence_MemReq_1;
 wire WFI_Req= Csr_WFIClrFlag ? 1'b0 :Decode_Stall_0[1] || Decode_Stall_1[1];
 //wire DecodeHazard_Stall=DecodeHazard_StallReq_0 || DecodeHazard_StallReq_1 &! Csr_Memflush; 
@@ -103,17 +103,17 @@ always @ (*) begin//wb-mem ex-mem id-ex if-id
         stage_issue_select = 4'b0010;
     end
     else if(Dcache_StallReq |Idfence_MemReq_0)begin
-        stage_flush = 4'b0010; 
-        stage_issue_select = 4'b0010;
+        stage_flush = 4'b0100; 
+        stage_issue_select = 4'b0100;
     end
     else if(Dcache_StallReq |Idfence_MemReq_1)begin
         stage_flush = 4'b0100; 
-        stage_issue_select = 4'b0;
+        stage_issue_select = 4'b0100;
     end
     else if(Idfence_ExReq_0)begin
         stage_flush = 4'b0001;
         stage_issue_select = 4'b0001;
-    end 
+    end
     else if(Idfence_ExReq_1)begin
         stage_flush = 4'b0010;
         stage_issue_select = 4'b0;

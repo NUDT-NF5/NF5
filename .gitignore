@@ -9,3 +9,4 @@ src/top/TbAll.sv
 *.bak
 isa_run.sh
 iverilog-project/test.gtkw
+iverilog-project/test_fence.gtkw

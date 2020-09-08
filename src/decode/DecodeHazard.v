@@ -202,9 +202,9 @@ always @(*)
         else if(MemWb_RdWrtEn_0 && Decode_Rs2Addr_0 == MemWb_RdAddr_0)
             rs2Sel_0 = `RS_SEL_Wb_0;
         else
-            rs2Sel_0 = `RS_SEL_RF2_1;
+            rs2Sel_0 = `RS_SEL_RF2_0;
     else
-        rs2Sel_0 = `RS_SEL_RF2_1;
+        rs2Sel_0 = `RS_SEL_RF2_0;
 
 //issue1 rs1 forward
 always @(*)
