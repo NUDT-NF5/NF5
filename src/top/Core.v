@@ -212,6 +212,7 @@ assign 				   Csr_ExcpFlag = 0;
 assign                   Csr_Memflush = 0;
 assign                   Csr_WFIClrFlag = 0;
 wire 				   Fetchaddr_Invalid = 0;
+wire 				Idfence_MemReq;
 		
 	Ctrl i_Ctrl(
 		.Icache_StallReq(1'b0),
@@ -237,6 +238,7 @@ wire 				   Fetchaddr_Invalid = 0;
 		.IDEX_stall(IDEX_stall),
 	 	.Decode_16BitFlag_1(Decode_16BitFlag_1),
 		.EX_BranchFlag(EX_BranchFlag),
+		.Idfence_MemReq(Idfence_MemReq),
  //        .Csr_WFIClrFlag (Csr_WFIClrFlag ) ,
         .Csr_Memflush(Csr_Memflush)  
     );
@@ -386,6 +388,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Flush(Flush[1]),
 		.issue_select(issue_select[1]),
 		.Decode_Unicorn(DecodeHazard_Unicorn),
+		.Idfence_MemReq(Idfence_MemReq),
  		.in(
  			{
  				Decode_AllCtr_0,
@@ -438,6 +441,7 @@ wire 				   Fetchaddr_Invalid = 0;
  		.Flush(Flush[1]),
 		.issue_select(1'b1),
 		.Decode_Unicorn(DecodeHazard_Unicorn),
+		.Idfence_MemReq(Idfence_MemReq),
  		.in(
  			{
  				Decode_AllCtr_1,

@@ -20,20 +20,20 @@ module PipeStage_IDEX
 	input								Flush,
 	input 								issue_select,
     input                               Decode_Unicorn,
+    input                               Idfence_MemReq,
 	input		[STAGE_WIDTH - 1 : 0]	in,
 	output reg	[STAGE_WIDTH - 1 : 0]	out,
     output                              IDEX_stall
 );
 
     reg                                 indicator;
+    reg                                 Idfence_MemReq_r;
 
 always @(posedge clk)
 	if(~rst_n)begin
 		out <= 0;
         indicator <= 0;
     end
-	else if(Stall)
-		out <= out;
 	else if(Flush && issue_select)
 		out <= 0;
 	else if(STAGE_NUM == 1'b0 && Decode_Unicorn)
@@ -58,9 +58,18 @@ always @(posedge clk)
                 indicator <= ~indicator;
             end
         endcase
+	else if(Stall)
+		out <= out;
     else
         out <= in;
+
+always @(posedge clk or negedge rst_n) begin
+    if(~rst_n)
+        Idfence_MemReq_r <= 1'b0;
+    else
+        Idfence_MemReq_r <= Idfence_MemReq;
+end
 		
-    assign IDEX_stall = ~STAGE_NUM && Decode_Unicorn && ~indicator;
+    assign IDEX_stall = ~STAGE_NUM && Decode_Unicorn && ~indicator && ~Idfence_MemReq_r;
 
 endmodule
