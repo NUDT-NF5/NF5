@@ -29,39 +29,93 @@ module PipeStage_IDEX
     reg                                 indicator;
     reg                                 Idfence_MemReq_r;
 
-always @(posedge clk)
-	if(~rst_n)begin
-		out <= 0;
-        indicator <= 0;
+generate 
+    if(STAGE_NUM == 1'b0)begin
+        always @(posedge clk)
+	        if(~rst_n)begin
+	        	out <= 0;
+                indicator <= 0;
+            end
+	        else if(Flush && issue_select)
+	        	out <= 0;
+	        else if(Decode_Unicorn)
+                case (indicator)
+                    1'b1 : begin
+                        out <= 0;
+                        indicator <= ~indicator;
+                    end
+                    default : begin
+                        out <= in;
+                        indicator <= ~indicator;
+                    end
+                endcase
+	        else if(Stall)
+	        	out <= out;
+            else
+                out <= in;
     end
-	else if(Flush && issue_select)
-		out <= 0;
-	else if(STAGE_NUM == 1'b0 && Decode_Unicorn)
-        case (indicator)
-            1'b1 : begin
-                out <= 0;
-                indicator <= ~indicator;
+endgenerate
+
+generate 
+    if(STAGE_NUM == 1'b1)begin
+        always @(posedge clk)
+	        if(~rst_n)begin
+	        	out <= 0;
+                indicator <= 0;
             end
-            default : begin
+	        else if(Flush && issue_select)
+	        	out <= 0;
+	        else if(Decode_Unicorn)
+                case (indicator)
+                    1'b1 : begin
+                        out <= in;
+                        indicator <= ~indicator;
+                    end
+                    default : begin
+                        out <= 0;
+                        indicator <= ~indicator;
+                    end
+                endcase
+	        else if(Stall)
+	        	out <= out;
+            else
                 out <= in;
-                indicator <= ~indicator;
-            end
-        endcase
-    else if(STAGE_NUM == 1'b1 && Decode_Unicorn)
-        case (indicator)
-            1'b1 : begin
-                out <= in;
-                indicator <= ~indicator;
-            end
-            default : begin
-                out <= 0;
-                indicator <= ~indicator;
-            end
-        endcase
-	else if(Stall)
-		out <= out;
-    else
-        out <= in;
+    end
+endgenerate
+
+//always @(posedge clk)
+//	if(~rst_n)begin
+//		out <= 0;
+//        indicator <= 0;
+//    end
+//	else if(Flush && issue_select)
+//		out <= 0;
+//	else if(STAGE_NUM == 1'b0 && Decode_Unicorn)
+//        case (indicator)
+//            1'b1 : begin
+//                out <= 0;
+//                indicator <= ~indicator;
+//            end
+//            default : begin
+//                out <= in;
+//                indicator <= ~indicator;
+//            end
+//        endcase
+//    else if(STAGE_NUM == 1'b1 && Decode_Unicorn)
+//        case (indicator)
+//            1'b1 : begin
+//                out <= in;
+//                indicator <= ~indicator;
+//            end
+//            default : begin
+//                out <= 0;
+//                indicator <= ~indicator;
+//            end
+//        endcase
+//	else if(Stall)
+//		out <= out;
+//    else
+//        out <= in;
 
 always @(posedge clk or negedge rst_n) begin
     if(~rst_n)
