@@ -80,6 +80,10 @@ module Decode(
  	wire									is16_2;
  	wire									is16_3;
 
+ 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32_1;
+ 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32_2;
+ 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32_3;
+
  	wire	[6 - 1 : 0]						instrForm;
 
  	reg		[`DECODER_OUT_WIDTH - 1 : 0]	instr_0;
@@ -118,21 +122,24 @@ module Decode(
 			.instr32(IFID_Instr[31:0]),
 			.message32(message32_1),
 			.unicorn(unicorn32_1),
-			.is32(is32_1)
+			.is32(is32_1),
+			.iEncode  (iEncode32_1)
     	);
 
     Decoder32 i_decoder32_2(
 			.instr32(IFID_Instr[47:16]),
 			.message32(message32_2),
 			.unicorn(unicorn32_2),
-			.is32(is32_2)
+			.is32(is32_2),
+			.iEncode  (iEncode32_2)
     	);
 
     Decoder32 i_decoder32_3(
 			.instr32(IFID_Instr[63:32]),
 			.message32(message32_3),
 			.unicorn(unicorn32_3),
-			.is32(is32_3)
+			.is32(is32_3),
+			.iEncode  (iEncode32_3)
     	);
 
     Decoder16 i_decoder16_1(
@@ -162,10 +169,33 @@ module Decode(
     always @(*) begin : switchInstrForm_
     	casex (instrForm)
     		6'b1x1xxx : begin instr_0 = message32_1; instr_1 = message32_3; Decode_NextPC = `PC_PLUS_8; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0004; unicorn0 = unicorn32_1; unicorn1 = unicorn32_3; end // 32/32
-    		6'b010100 : begin instr_0 = message16_1; instr_1 = message32_2; Decode_NextPC = `PC_PLUS_6; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; unicorn0 = unicorn16_1; unicorn1 = unicorn32_2; end // 16/32/16
-    		6'b100001 : begin instr_0 = message32_1; instr_1 = message16_3; Decode_NextPC = `PC_PLUS_6; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0004; unicorn0 = unicorn32_1; unicorn1 = unicorn16_3; end // 16/16/32
+    		6'b0101xx : begin instr_0 = message16_1; instr_1 = message32_2; Decode_NextPC = `PC_PLUS_6; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; unicorn0 = unicorn16_1; unicorn1 = unicorn32_2; end // 16/32/16
+    		6'b1000x1 : begin instr_0 = message32_1; instr_1 = message16_3; Decode_NextPC = `PC_PLUS_6; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0004; unicorn0 = unicorn32_1; unicorn1 = unicorn16_3; end // 16/16/32
     		6'b000111 : begin instr_0 = message16_1; instr_1 = message16_2; Decode_NextPC = `PC_PLUS_4; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; unicorn0 = unicorn16_1; unicorn1 = unicorn16_2; end // 16/16/16/16
     		6'b001110 : begin instr_0 = message16_1; instr_1 = message16_2; Decode_NextPC = `PC_PLUS_4; Decode_16BitFlag_0 = 1'b1; Decode_16BitFlag_1 = 1'b1; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002; unicorn0 = unicorn16_1; unicorn1 = unicorn16_2; end // 32/16/16
+    		6'b100000 : //jal
+    					begin : JAL_PLUS_ILLEGAL
+    						if(iEncode32_1 == `INSTR_ENCODE_WIDTH'd2) //JAL
+    						begin
+    							instr_0 = message32_1;
+    							instr_1 = 0;
+    							Decode_NextPC = `PC_PLUS_0;
+    							Decode_16BitFlag_0 = 0;
+    							Decode_16BitFlag_1 = 0;
+    							IFID_NowPC_1 = 0;
+    							unicorn0 = unicorn32_1;
+    							unicorn1 = 0;
+    						end else begin : ALL_FAILS
+    							instr_0 = 0;
+    							instr_1 = 0;
+    							Decode_NextPC = `PC_PLUS_0;
+    							Decode_16BitFlag_0 = 0;
+    							Decode_16BitFlag_1 = 0;
+    							IFID_NowPC_1 = 0;
+    							unicorn0 = 0;
+    							unicorn1 = 0;
+    						end
+    					end
     		default   : begin instr_0 = {`DECODER_OUT_WIDTH{1'b0}}; instr_1 = {`DECODER_OUT_WIDTH{1'b0}}; Decode_NextPC = `PC_PLUS_0; Decode_16BitFlag_0 = 1'b0; Decode_16BitFlag_1 = 1'b0; IFID_NowPC_1 = IFID_NowPC_0 + 32'h0000_0002;end
     	endcase
     end
@@ -231,15 +261,16 @@ module Decode(
 endmodule
 
 module Decoder32 (
-	input  [32 - 1 : 0]					instr32,
-	output [`DECODER_OUT_WIDTH - 1 : 0]	message32,
-	output 								unicorn,
-	output 								is32
+	input  		[32 - 1 : 0]					instr32,
+	output 		[`DECODER_OUT_WIDTH - 1 : 0]	message32,
+	output 										unicorn,
+	output 										is32,
+	output wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode
 	
 );
 
 	// module 1
-	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode;// for all device control info need to be piped
+	//wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode;// for all device control info need to be piped
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr;

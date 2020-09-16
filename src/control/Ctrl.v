@@ -65,14 +65,14 @@ assign issue_select = ctrl_issue_select | stage_issue_select;
             ctrl_flush = 4'b0010;
             ctrl_issue_select = 4'b0011; 
         end
-        else if(Decode_16BitFlag_0)begin
-            ctrl_flush=4'b0011; 
-            ctrl_issue_select = 4'b0001; 
-        end
-        else if(Decode_16BitFlag_1)begin
-            ctrl_flush=4'b0001; 
-            ctrl_issue_select = 4'b0001; 
-        end
+        // else if(Decode_16BitFlag_0)begin
+        //     ctrl_flush=4'b0011; 
+        //     ctrl_issue_select = 4'b0001; 
+        // end
+        // else if(Decode_16BitFlag_1)begin
+        //     ctrl_flush=4'b0001; 
+        //     ctrl_issue_select = 4'b0001; 
+        // end
         else begin
             ctrl_flush=4'b0000;
             ctrl_issue_select = 4'b0; 
