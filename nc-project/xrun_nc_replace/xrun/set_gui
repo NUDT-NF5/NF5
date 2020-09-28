@@ -1,0 +1,9 @@
+#!/bin/sh
+#time:        2019.08.07
+#author:      sue
+#mail:        460967729@qq.com
+#description: this script will check set ncverilog with gui
+
+sed -i 's/\/\/\gui/\+gui/' run_nc.f
+sed -i 's/run/\#run/' test.tcl
+sed -i 's/exit/\#exit/' test.tcl

@@ -6,8 +6,9 @@ result_dir = $(nc_dir)/result
 src_dir = $(base_dir)/src
 output_dir = $(nc_dir)/output
 iverilog_dir=$(base_dir)/iverilog-project
-# debug_input=$(test_dir)/isa-functional-test/test_0x0000/rv32ui-p/verilogtxt/rv32ui-p-add
-debug_input=$(test_dir)/isa-functional-test/test_0x0000/rv32ui-p/verilogtxt/rv32ui-p-lb
+soft_scripts=$(base_dir)/soft_proj/soft_scripts
+
+soft_proj=soft_name #indicate software project directory name
 temp:
 	echo $(base_dir)
 	echo $(base_dir)
@@ -26,12 +27,11 @@ compile:
 sim_default:
 	make gen_filelist
 	bash $(iverilog_dir)/run_default
-
 	
 sim:	
 	make gen_filelist	
-	./isa_run.sh
-
+	bash isa_run.sh
+ 	
 sim_gui_nc:
 	make gen_filelist
 	cd $(nc_dir) && bash $(nc_dir)/set_gui && cd -
@@ -40,25 +40,32 @@ sim_gui_nc:
 sim_gui_gtk:
 	make gen_filelist
 	gtkwave $(iverilog_dir)/test.vcd
+	
+#==================For C project [how to use]======================: 
+#1st step   make cproj_gen     soft_proj=helloword (#your C code name)
+#2nd step   make cproj_compile soft_proj=helloword (#your C code name)
+cproj_gen:
+	bash $(soft_scripts)/make_C $(soft_proj)
+	#bash $(soft_scripts)/soft_run.sh
+cproj_compile:
+	bash $(soft_scripts)/compile_C $(soft_proj)
+	bash $(soft_scripts)/soft_run.sh
 
-debug:
-	cat $(debug_input) > $(iverilog_dir)/Instructions.list
-	cd isa-test && cat TbAll_iverilog_funct.txt > ../src/top/TbAll.sv && cd ../iverilog-project && iverilog -o test filelist.v  && vvp test && gtkwave test.vcd
-# 	cd iverilog-project && cat TbAll_default.sv > ../src/top/TbAll.sv && iverilog -o test filelist.v  && vvp test && gtkwave test.vcd
-
-	#20/07/07 cd iverilog-project && cat TbAll_default.sv > ../src/top/TbAll.sv && iverilog -o test filelist.v  && vvp test && gtkwave test.vcd
-
+#==================For AS project [how to use]======================: 
+#1st step   make asproj_gen     soft_proj=helloword (#your AS code name)
+#2nd step   make asproj_compile soft_proj=helloword (#your AS code name)
+asproj_gen:
+	bash $(soft_scripts)/make_AS $(soft_proj)
+	#bash $(soft_scripts)/soft_run.sh
+asproj_compile:
+	bash $(soft_scripts)/compile_AS $(soft_proj)
+	bash $(soft_scripts)/soft_run.sh
 
 hardclean:
-	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work output/* ./iverilog-project/test ./iverilog-project/*.vcd
-
-push:clean
-	git add . && git commit -m 'auto push by make' && git push
+	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work
 
 clean: hardclean
 
 all: compile sim
 
-
-
-.PHONY:gen_filelist compile sim_gui hardclean clean all debug push
+.PHONY:gen_filelist compile sim_gui hardclean clean all
