@@ -1,18 +1,13 @@
-/*
- * @Author: J-zenk
- * @Date:   2019-10-28 15:51
- * @Last Modified by: J-zenk
- * @Last Modified time: 2019-11-08 09:33:48
- * @Describe:adder32  module
- */
 module adder32 (
     input      [31:0] a,
     input      [31:0] b, 
-    input             ci,
     output     [31:0] s
 );
-    //output co;         
+    //output co;
+    //wire              g_out, p_out;
+    wire              ci = 1'b0;          
     cla_32  cla   (a, b, ci,/*g_out,p_out,*/ s); // 向下调用
+    //assign  co  =  g_out| p_out &  ci;
 endmodule
 
 module add(
@@ -121,7 +116,8 @@ module cla_32  (
     input      [31:0] a,
     input      [31:0] b,
     input             c_in,
-
+/*    output            g_out,
+    output            p_out,*/
     output     [31:0] s
 );
 

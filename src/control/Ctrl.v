@@ -1,9 +1,9 @@
 /*
- * @Author: Kefan-Xu
+ * @Author: Xukefan
  * @Date:   2019-10-30 10:00
- * @Last Modified by: Kefan-Xu
+ * @Last Modified by: Xukefan
  * @Last Modified time: 2019-10-30 10:00
- * @Describe: ctrl  for all module
+ * @Describe: simple TB for all module
  */
 `include "../src/common/Define.v"
 module Ctrl(
@@ -18,7 +18,6 @@ module Ctrl(
     input  wire          Csr_ExcpFlag   ,
     input  wire          Csr_WFIClrFlag	,//clr wfi_stall
 	input  wire			 Decode_16BitFlag ,
-    input  wire          EX_StallReq    ,
     output    [3:0]	 Flush,
 input  wire	Csr_Memflush             
     );
@@ -39,20 +38,34 @@ wire DecodeHazard_Stall=DecodeHazard_StallReq &! Csr_Memflush;
  end
 assign Flush=ctrl_flush|stage_flush ;
 
+/////////////priority:wfi  fence(mem-ex)  i-catch ////////
+/* always @ (*) begin
+	if(WFI_Req) 
+       Ctrl_Stall = 5'b11111;
+    else if(DecodeHazard_StallReq )
+       Ctrl_Stall = 5'b00111;
+    else if(Dcache_StallReq |Idfence_MemReq)
+       Ctrl_Stall = 5'b01111;
+    else if(Idfence_ExReq)
+       Ctrl_Stall = 5'b00111;
+    else if(Icache_StallReq)
+       Ctrl_Stall = 5'b00011; 
+    else 
+	   Ctrl_Stall = 5'b0;
+  end
+*/
 /////////////stall_last ////////
  always @ (*) begin
 	if(WFI_Req) 
-        Ctrl_Stall = 5'b11111;
+       Ctrl_Stall = 5'b11111;
     else if(DecodeHazard_Stall)
-        Ctrl_Stall = 5'b00011;
+       Ctrl_Stall = 5'b00011;
     else if(Dcache_StallReq |Idfence_MemReq)
-        Ctrl_Stall = 5'b00111;
+       Ctrl_Stall = 5'b00111;
     else if(Idfence_ExReq)
-        Ctrl_Stall = 5'b00011;
+       Ctrl_Stall = 5'b00011;
     else if(Icache_StallReq)
-        Ctrl_Stall = 5'b00001; 
-    else if(EX_StallReq)
-        Ctrl_Stall = 5'b00111;
+       Ctrl_Stall = 5'b00001; 
     else 
 	   Ctrl_Stall = 5'b0;
   end
@@ -66,8 +79,6 @@ always @ (*) begin//wb-mem ex-mem id-ex if-id
         stage_flush = 4'b0010; 
     else if(Icache_StallReq)
         stage_flush = 4'b0001; 
-    else if(EX_StallReq)
-        stage_flush = 4'b0100;
     else 
 	  stage_flush = 4'b0;
   end

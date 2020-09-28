@@ -1,10 +1,3 @@
-/*
- * @Author: J-zenk
- * @Date:   2019-10-28 15:51
- * @Last Modified by: J-zenk
- * @Last Modified time: 2019-11-08 09:33:48
- * @Describe: comparator  module
- */
 module comparator(
     input       [31:0] comparator_s1,
     input       [31:0] comparator_s2,

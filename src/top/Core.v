@@ -22,17 +22,13 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs3Addr;
-	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm;
 	wire	[2 - 1 : 0]						Decode_Stall;
 	wire	[4 - 1 : 0]						Decode_Flush;
 	wire									Decode_16BitFlag;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
-	wire	[2 - 1 : 0]						Decode_Fmt;
 	
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs3Data;
 	wire	     							DecodeHazard_StallReq;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
@@ -54,19 +50,16 @@ module Core(
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs3Data;
 	
     wire    [31:0] 							EX_AluData;
     wire           							EX_LdStFlag;
 	wire									EX_BranchFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
-	wire									EX_StallReq;
 	
     wire    [31:0] 							EXMem_AluData;
     wire    [31:0] 							EXMem_Rs2Data;
@@ -113,14 +106,15 @@ module Core(
 		.EX_LdStFlag    (EX_LdStFlag),
 		.Ctrl_Stall     (Ctrl_Stall),
 		.EX_BranchFlag  (EX_BranchFlag),
-		.EX_StallReq	(EX_StallReq),
 		.Csr_ExcpFlag   (Csr_ExcpFlag),
 		.Decode_16BitFlag(Decode_16BitFlag),
 		.Flush			(Flush) ,
         .Csr_WFIClrFlag (Csr_WFIClrFlag ) ,
-        .Csr_Memflush(Csr_Memflush)  
+        .Csr_Memflush(Csr_Memflush)       
     );
 	
+
+
 //wire Fetchaddr_Invalid;
 //wire nomisalign_Br= EX_BranchFlag ;//&!Fetchaddr_Invalid;
 	Fetch i_Fetch(
@@ -161,13 +155,10 @@ module Core(
 		.Decode_CsrAddr(Decode_CsrAddr),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
 		.Decode_Rs2Addr(Decode_Rs2Addr),
-		.Decode_Rs3Addr(Decode_Rs3Addr),
-        .Decode_Rm(Decode_Rm),
 		.Decode_Stall(Decode_Stall),
 		.Decode_Flush(Decode_Flush),
 		.Decode_16BitFlag(Decode_16BitFlag),
-		.Decode_LdType(Decode_LdType),
-		.Decode_Fmt(Decode_Fmt)
+		.Decode_LdType(Decode_LdType)
 	);
 	
 	RegFile i_RegFile(
@@ -177,8 +168,6 @@ module Core(
 		.rData1(RF_Rs1Data),
 		.rAddr2(Decode_Rs2Addr),
 		.rData2(RF_Rs2Data),
-		.rAddr3(Decode_Rs3Addr),
-		.rData3(RF_Rs3Data),
 		.wEN(MemWb_RdWrtEn),
 		.wAddr(MemWb_RdAddr),
 		.wData(Wb_DataWrt)
@@ -188,11 +177,9 @@ module Core(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
-		.Decode_Rs2Addr(Decode_Rs2Addr),
-		.Decode_Rs3Addr(Decode_Rs3Addr),	
+		.Decode_Rs2Addr(Decode_Rs2Addr),	
 		.RF_Rs1Data(RF_Rs1Data),
 		.RF_Rs2Data(RF_Rs2Data),
-		.RF_Rs3Data(RF_Rs3Data),
 		.IDEX_RdAddr(IDEX_RdAddr),
 		.IDEX_WbRdEn(IDEX_WbRdEn),
 		.EX_AluData(EX_AluData),
@@ -207,8 +194,7 @@ module Core(
 		.Decode_LdType(Decode_LdType),
 		.DecodeHazard_StallReq(DecodeHazard_StallReq),
 		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
-		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data),
-		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
+		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data)
 	);
 	
 
@@ -231,7 +217,6 @@ module Core(
 				Decode_CsrAddr,
 				DecodeHazard_Rs1Data,
 				DecodeHazard_Rs2Data,
-				DecodeHazard_Rs3Data,
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -255,7 +240,6 @@ module Core(
 				IDEX_CsrAddr,
 				IDEX_Rs1Data,
 				IDEX_Rs2Data,
-				IDEX_Rs3Data,
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
@@ -280,49 +264,45 @@ module Core(
 		.IDEX_StType(IDEX_StType),
 		.Mem_DcacheEN(Mem_DcacheEn),
 		.IDEX_16BitFlag(IDEX_16BitFlag),
-		.clk(clk),
-		.rst_n(rst_n),
 		.EX_AluData(EX_AluData),
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),
-		.EX_LdStFlag(EX_LdStFlag),
-		.EX_StallReq(EX_StallReq)
+		.EX_LdStFlag(EX_LdStFlag)
 	);
-
 wire [31:0] EXMEM_NowPC;	
 	Csr i_Csr (
         .clk(clk),
         .rst_n(rst_n),
         .Ctrl_Stall(Ctrl_Stall),
-        .IFID_NowPC(IFID_NowPC),
-		.IFID_Instr(IFID_Instr),
-        .Decode_Flush(Decode_Flush),
-		.Decode_16BitFlag(Decode_16BitFlag),
         .IDEX_CsrAddr(IDEX_CsrAddr),
         .IDEX_CsrCmd(IDEX_CsrCmd),
-        .IDEX_Imm(IDEX_Imm),
-        .IDEX_Rs1Data(IDEX_Rs1Data),
-        .IDEX_ImmSel(IDEX_ImmSel),
-        .IDEX_NowPC(IDEX_NowPC),
-        .IDEX_StType(IDEX_StType),
-        .IDEX_LdType(IDEX_LdType),
-		.EX_BranchPC(EX_BranchPC), //new 
-        .EX_BranchFlag(EX_BranchFlag), 
-        .EX_AluData(EX_AluData),
-		.EXMem_LdType(EXMem_LdType),    
-		.EXMem_StType(EXMem_StType),    
-		.EXMem_AluData(EXMem_AluData) ,
-        .EXMEM_NowPC(EXMEM_NowPC),
         .Csr_RdData(Csr_RdData),
         .Csr_ExcpFlag(Csr_ExcpFlag),
         .Csr_Evec(Csr_Evec),
         .Csr_Memflush(Csr_Memflush),
-        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
         .NMI(1'b0),
         .RESET(1'b0),
+        .IDEX_NowPC(IDEX_NowPC),
+        .IFID_NowPC(IFID_NowPC),
+        .IDEX_Imm(IDEX_Imm),
+        .IDEX_Rs1Data(IDEX_Rs1Data),
+        .IDEX_ImmSel(IDEX_ImmSel),
         .Core_interrupt(3'b0),
         .DBG_interrupt (5'b0),
-        .Fetchaddr_Invalid(Fetchaddr_Invalid)//unuse?
+        .EX_AluData(EX_AluData),
+        .IDEX_StType(IDEX_StType),
+        .IDEX_LdType(IDEX_LdType),
+        .EX_BranchFlag(EX_BranchFlag),
+        .Decode_Flush(Decode_Flush),
+        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
+		.EXMem_LdType(EXMem_LdType),    
+		.EXMem_StType(EXMem_StType),    
+		.EXMem_AluData(EXMem_AluData) ,
+		.EX_BranchPC(EX_BranchPC), //new   
+               .EXMEM_NowPC(EXMEM_NowPC),
+		.Decode_16BitFlag(Decode_16BitFlag),
+               .Fetchaddr_Invalid(Fetchaddr_Invalid),
+.IFID_Instr(IFID_Instr)
 	);	
 		
 
@@ -343,7 +323,7 @@ wire [31:0] EXMEM_NowPC;
 				IDEX_LdType,
 				IDEX_WbRdEn,
 				IDEX_WbSel,
-                IDEX_NowPC
+                          IDEX_NowPC
 			} 
 		),
 		.out(
@@ -355,7 +335,7 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_LdType,				
 				EXMem_RdWrtEn,
 				EXMem_WbSel,
-                EXMEM_NowPC
+                          EXMEM_NowPC
 			} 
 		)
 	);
@@ -370,7 +350,7 @@ wire [31:0] EXMEM_NowPC;
 		.Mem_DcacheSign(Mem_DcacheSign),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
-        .Csr_Memflush(Csr_Memflush)//new   
+            .Csr_Memflush(Csr_Memflush)//new   
     ); 	
 	
 	Dcache i_Dcache(
@@ -421,5 +401,7 @@ wire [31:0] EXMEM_NowPC;
 		.MemWb_DataRd(MemWb_DataRd),
 		.Wb_DataWrt(Wb_DataWrt)
     );
-		
+	
+
+	
 endmodule

@@ -16,9 +16,7 @@ module RegFile
 	output	[`DATA_WIDTH - 1 : 0]		rData1,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	rAddr2,
 	output	[`DATA_WIDTH - 1 : 0]		rData2,
-	input	[`RF_ADDR_WIDTH - 1 : 0]	rAddr3,
-	output	[`DATA_WIDTH - 1 : 0]		rData3,
-
+	
 	input								wEN,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	wAddr,
 	input	[`DATA_WIDTH - 1 : 0]		wData
@@ -27,8 +25,7 @@ module RegFile
 	
 	assign	rData1 = regFiles[rAddr1];
 	assign	rData2 = regFiles[rAddr2];
-	assign	rData3 = regFiles[rAddr3];
-
+	
 	integer i;
 	always @(posedge clk)
     	if(~rst_n)

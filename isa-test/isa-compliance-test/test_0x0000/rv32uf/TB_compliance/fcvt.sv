@@ -34,10 +34,10 @@ module	TbAll;
 		//for data transform		
 		$readmemh("Instructions.list", data_reg);
 		for (j=0;j<depth;j=j+1)  begin
-			i_Core.i_SRAM_Top.i_SRAM.data [j] [8*0+:8]= data_reg[j*4+0];
-			i_Core.i_SRAM_Top.i_SRAM.data [j] [8*1+:8]= data_reg[j*4+1];
-			i_Core.i_SRAM_Top.i_SRAM.data [j] [8*2+:8]= data_reg[j*4+2];
-			i_Core.i_SRAM_Top.i_SRAM.data [j] [8*3+:8]= data_reg[j*4+3];
+			i_Core.i_Dcache.data [j] [8*0+:8]= data_reg[j*4+0];
+			i_Core.i_Dcache.data [j] [8*1+:8]= data_reg[j*4+1];
+			i_Core.i_Dcache.data [j] [8*2+:8]= data_reg[j*4+2];
+			i_Core.i_Dcache.data [j] [8*3+:8]= data_reg[j*4+3];
 			end	
 	end
 
@@ -51,23 +51,14 @@ module	TbAll;
     end
     assign begin_signature = begin_signature_in[15:2];
     assign end_signature   = end_signature_in[15:2];	
-	integer S_num;
-	integer cache_line;
-	integer word;
+	integer dxx;
 	initial begin
 		fd = $fopen ("mySim.log", "w");
 		//$fdisplay(fd,"====== NF5 sim start ======");
-		#95000
-		for (S_num=begin_signature;S_num<end_signature;S_num=S_num+1)begin
-            $fdisplay(fd,"%h",i_Core.i_SRAM_Top.i_SRAM.data[S_num] );
-            end  
-		$fdisplay(fd,"\n\n\n" );
-		
-		for (cache_line=0;cache_line<20;cache_line=cache_line+1)begin
-			for (word=0;word<128;word=word+32)
-            $fdisplay(fd,"%h",i_Core.i_L1D_Cache.i_L1D_RAM.data1[cache_line][word+:'d32] );          
-            end  
-			     
+		#1500
+		for (dxx=begin_signature;dxx<end_signature;dxx=dxx+1)begin
+            $fdisplay(fd,"%h",i_Core.i_Dcache.data[dxx]);
+            end        
         //$fdisplay(fd,"====== NF5 sim finish ======");
 		$finish;
 		// Close this file handle

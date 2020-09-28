@@ -45,7 +45,7 @@ module	TbAll;
 	initial begin
 		fd = $fopen ("mySim.log", "w");
 		$fdisplay(fd,"====== NF5 sim start ======");
-		#100000;
+		#4000;
 		$fdisplay(fd,"====== NF5 sim finish ======");
 		$finish;
 		// Close this file handle
@@ -95,13 +95,13 @@ always@(posedge clk)
             #15 $finish;
         end
     end
-/*
+
 initial
         begin            
             $dumpfile("test.vcd");
             $dumpvars(0,TbAll);
         end
-*/
+
 endmodule
 
 

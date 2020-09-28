@@ -1,75 +1,87 @@
-/*
- * @Author: J-zenk
- * @Date:   2019-10-28 15:51
- * @Last Modified by: J-zenk
- * @Last Modified time: 2019-11-08 09:33:48
- * @Describe:EX  module
- */
 module EX(
-    input       [`DATA_WIDTH - 1:0]     IDEX_Rs1Data,
-    input       [`DATA_WIDTH - 1:0]     IDEX_Rs2Data,
+    //signals for forward
+    /*input       [4:0]  EXMem_RdAddr,
+    //input       [31:0] EXMem_AluData,
+    input       [31:0] Dcache_DataRd,
+    input              Mem_LdEn,
+    //input       [4:0]  MemWb_RdAddr,
+    //input       [31:0] Wb_DataWrt,
+    //input              EXMem_RdWrtEn,
+    //input              MemWb_RdWrtEn,*/
+    input       [31:0] IDEX_Rs1Data,
+    //input       [4:0]  IDEX_Rs1Addr,
+    input       [31:0] IDEX_Rs2Data,
+    //input       [4:0]  IDEX_Rs2Addr,
+
     //signals for mux_aluinput
-    input                               IDEX_Sel1,
-    input       [`DATA_WIDTH - 1:0]     IDEX_NowPC,
-    input                               IDEX_Sel2,
-    input       [`DATA_WIDTH - 1:0]     IDEX_Imm,
+    input              IDEX_Sel1,
+    input       [31:0] IDEX_NowPC,
+    input              IDEX_Sel2,
+    input       [31:0] IDEX_Imm,
+
     //other input
-    input       [`DATA_WIDTH - 1:0]     Csr_RdData,
-    input       [`ALU_OP_WIDTH - 1:0]   IDEX_AluOp,
-    input       [2:0]                   IDEX_LdType,
-    input       [1:0]                   IDEX_StType,
-    input                               Mem_DcacheEN,
-    input                               IDEX_16BitFlag,
-    input                               clk,
-    input                               rst_n,
+    input       [31:0] Csr_RdData,
+    input       [4:0]  IDEX_AluOp,
+    input       [2:0]  IDEX_LdType,
+    input       [1:0]  IDEX_StType,
+    input              Mem_DcacheEN,
+    input              IDEX_16BitFlag,
+
     //output
-    output      [`DATA_WIDTH - 1:0]     EX_AluData,
-    output                              EX_BranchFlag,
-    output      [`ADDR_WIDTH - 1:0]     EX_BranchPC,
-    output                              EX_LdStFlag,
-    output                              EX_StallReq
+    output      [31:0] EX_AluData,
+    output             EX_BranchFlag,
+    output      [31:0] EX_BranchPC,
+    output             EX_LdStFlag
+    //output      [31:0] forward_rs1
+
 );
 
+//forward to mux_aluinput
+//wire            [31:0] forward_rs1;
+//wire            [31:0] forward_rs2;
+
 //mux_aluinput to alu_io
-wire            [`DATA_WIDTH - 1:0]     s1;
-wire            [`DATA_WIDTH - 1:0]     s2;
+wire            [31:0] s1;
+wire            [31:0] s2;
 
 //arithmetic
-wire            [`DATA_WIDTH - 1:0]     arithmetic_s1;
-wire            [`DATA_WIDTH - 1:0]     arithmetic_s2;
-wire            [2:0]                   arithop_sp;
-wire            [`DATA_WIDTH - 1:0]     arithmetic_result;
-wire            [`ADDR_WIDTH - 1:0]     branch_result;
+wire            [31:0] arithmetic_s1;
+wire            [31:0] arithmetic_s2;
+wire            [2:0]  arithop_sp;
+wire            [31:0] arithmetic_result;
+wire            [31:0] branch_result;
 
 //logic
-wire            [`DATA_WIDTH - 1:0]     logic_s1;
-wire            [`DATA_WIDTH - 1:0]     logic_s2;
-wire            [2:0]                   logic_op;
-wire            [`DATA_WIDTH - 1:0]     logic_result;
+wire            [31:0] logic_s1;
+wire            [31:0] logic_s2;
+wire            [2:0]  logic_op;
+wire            [31:0] logic_result;
 
 //compapator
-wire            [`DATA_WIDTH - 1:0]     comparator_s1;
-wire            [`DATA_WIDTH - 1:0]     comparator_s2;
-wire            [2:0]                   comparator_result;
-wire            [2:0]                   ucomparator_result;
+wire            [31:0] comparator_s1;
+wire            [31:0] comparator_s2;
+wire            [2:0]  comparator_result;
+wire            [2:0]  ucomparator_result;
 
 //shift
-wire            [`DATA_WIDTH - 1:0]     shift_s1;
-wire            [4:0]                   shift_s2;
-wire            [2:0]                   shift_type;
-wire            [`DATA_WIDTH - 1:0]     shift_result;
+wire            [31:0] shift_s1;
+wire            [4:0]  shift_s2;
+wire            [2:0]  shift_type;
+wire            [31:0] shift_result;
 
 //multiplier
-wire            [`DATA_WIDTH - 1:0]     mul_s1;
-wire            [`DATA_WIDTH - 1:0]     mul_s2;
-wire            [2 * `DATA_WIDTH - 1:0] mul_result;
+wire            [31:0] mul_s1;
+wire            [31:0] mul_s2;
+wire            [63:0] mul_result;
 //divider
-wire            [`DATA_WIDTH:0]         div_s1;
-wire            [`DATA_WIDTH:0]         div_s2;
-wire            [`DATA_WIDTH:0]     div_quotient;
-wire            [`DATA_WIDTH:0]     div_remainder;
-wire                                    div_start;
-wire                                    div_ready;
+wire            [31:0] div_s1;
+wire            [31:0] div_s2;
+wire            [31:0] div_result;
+
+//forward alu_forward (.EXMem_RdAddr(EXMem_RdAddr), .EXMem_AluData(EXMem_AluData), .Dcache_DataRd(Dcache_DataRd), 
+//                     .Mem_LdEn(Mem_LdEn), .MemWb_RdAddr(MemWb_RdAddr), .Wb_DataWrt(Wb_DataWrt), .EXMem_RdWrtEn(EXMem_RdWrtEn),
+//                     .MemWb_RdWrtEn(MemWb_RdWrtEn), .IDEX_Rs1Data(IDEX_Rs1Data), .IDEX_Rs1Addr(IDEX_Rs1Addr), .IDEX_Rs2Data(IDEX_Rs2Data), 
+//                     .IDEX_Rs2Addr(IDEX_Rs2Addr), .forward_rs1(forward_rs1), .forward_rs2(forward_rs2));
 
 mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1), 
                      .forward_rs1(IDEX_Rs1Data), 
@@ -77,10 +89,15 @@ mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1),
                      .IDEX_Sel2(IDEX_Sel2), 
                      .forward_rs2(IDEX_Rs2Data), 
                      .IDEX_Imm(IDEX_Imm), 
+                     /*.Dcache_DataRd(Dcache_DataRd), 
+                     .Mem_LdEn(Mem_LdEn), 
+                     .IDEX_Rs1Addr(IDEX_Rs1Addr), 
+                     .IDEX_Rs2Addr(IDEX_Rs2Addr), 
+                     .EXMem_RdAddr(EXMem_RdAddr),*/
                      .s1(s1), 
                      .s2(s2));
 
-alu_dispatcher alu_dp(.s1(s1), 
+alu_io alu_i_o      (.s1(s1), 
                      .s2(s2), 
                      .IDEX_AluOp(IDEX_AluOp), 
                      .forward_rs1(IDEX_Rs1Data), 
@@ -111,9 +128,7 @@ alu_dispatcher alu_dp(.s1(s1),
                      .mul_result(mul_result),
                      .div_s1(div_s1), 
                      .div_s2(div_s2),
-                     .div_quotient(div_quotient),
-                     .div_remainder(div_remainder),
-                     .div_start(div_start),
+                     .div_result(div_result),
                      .EX_AluData(EX_AluData), 
                      .EX_BranchPC(EX_BranchPC),
                      .EX_BranchFlag(EX_BranchFlag), 
@@ -146,18 +161,8 @@ multiplier alu_mul  (.mul_s1(mul_s1),
                      .mul_s2(mul_s2),
                      .mul_result(mul_result));
 
-divider            #(.DLEN(`DATA_WIDTH + 1),
-                     .RLEN(`DATA_WIDTH + 1))
-                     alu_div
-                    (.clk(clk),
-                     .rst_n(rst_n),
-                     .div_s1(div_s1),
+divider alu_div     (.div_s1(div_s1), 
                      .div_s2(div_s2),
-                     .div_start(div_start),
-                     .div_quotient(div_quotient),
-                     .div_remainder(div_remainder),
-                     .div_ready(div_ready));
-
-assign EX_StallReq = div_start && (~div_ready);
-
+                     .div_result(div_result));      
+ 
 endmodule // EX

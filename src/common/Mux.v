@@ -1,10 +1,3 @@
-/*
- * @Author: Sue
- * @Date:   2019-10-28 9:48
- * @Last Modified by: Sue
- * @Last Modified time: 2019-10-28 9:48
- * @Describe: general module 
- */
 `include "../src/common/Define.v"
 module Mux 
 #(
