@@ -103,11 +103,11 @@ always @ (*) begin//wb-mem ex-mem id-ex if-id
         stage_flush = 4'b0010;
         stage_issue_select = 4'b0010;
     end
-    else if(Dcache_StallReq |Idfence_MemReq_0)begin
+    else if(Dcache_StallReq)begin
         stage_flush = 4'b0100; 
         stage_issue_select = 4'b0100;
     end
-    else if(Dcache_StallReq |Idfence_MemReq_1)begin
+    else if((Idfence_MemReq_0 | Idfence_MemReq_1) && ~IDEX_stall)begin
         stage_flush = 4'b0100; 
         stage_issue_select = 4'b0100;
     end

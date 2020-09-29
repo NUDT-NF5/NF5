@@ -272,10 +272,11 @@ elif [ $number_single_all -eq 2 ]
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             elif [ $TB_dir = TB_iverilog ]
                               then
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
+                                # cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
+                                cp /home/zenk/NF5/isa-test/TbAll_self_assert_compliance.txt  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
+                                cp /home/zenk/NF5/isa-test/TbAll_self_assert_compliance.txt  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             fi   
                             $EDATool_run_dir
