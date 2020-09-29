@@ -22,7 +22,9 @@ module Decode(
 	//Decode -> RegFile and IDEX
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs1Addr,
 	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs2Addr,
-		
+	output	reg	[`RF_ADDR_WIDTH - 1 : 0]	Decode_Rs3Addr,
+	output	reg	[`FUNCT3_WIDTH - 1 : 0]	    Decode_Rm,
+    
 	//Decode -> Ctrl	
 	output	reg [2 - 1 : 0]					Decode_Stall,
 	output	reg [4 - 1 : 0]					Decode_Flush,
@@ -30,14 +32,17 @@ module Decode(
 	output 									Decode_16BitFlag,
 	
 	//Decode ->DecodeHazard
-	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType
-	
+	output 		[`LD_TYPE_WIDTH - 1 : 0 ]	Decode_LdType,
+
+	//Decode ->FPU
+	output	reg	[2 - 1 : 0]					Decode_Fmt
 );
 	//32 bit
 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode32;// for all device control info need to be piped
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr32;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr32;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr32;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr32;
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr32;
 	wire 	[`All_CTRL_WIDTH - 1 : 0]		allCtr32;
 	wire	[`IMM_SEL_WIDTH - 1 : 0]		immSel32;
@@ -45,6 +50,7 @@ module Decode(
 	wire	[`DECODE_FLUSH_WIDTH - 1 : 0]	flushFlag32;	
 	wire 	[`XLEN_WIDTH_SEL - 1 : 0]  		xlenSel32;
 	wire	[`DATA_WIDTH - 1 : 0] 			imm32;
+	wire	[2 - 1 : 0]						fmt;
 	
 	//16 bit
 	wire	[`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode16;// for all device control info need to be piped
@@ -69,14 +75,18 @@ module Decode(
 	wire	[`BOOL_WIDTH - 1 : 0 ]			wbRdEn;
 	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		csrCmd;
 	wire	[`BOOL_WIDTH - 1 : 0 ]			illegal;
-	
+
+    wire    [`FUNCT3_WIDTH - 1 : 0] 		rm;	
 	InstrTypeDecode32 i_InstrTypeDecode32(
 		.instr(IFID_Instr),
 		.iEncode(iEncode32),
 		.rdAddr(rdAddr32),
 		.rs1Addr(rs1Addr32),
 		.rs2Addr(rs2Addr32),
-		.csrAddr(csrAddr32)
+		.rs3Addr(rs3Addr32),
+		.csrAddr(csrAddr32),
+        .funct3(rm),
+        .fmt(fmt)
 	);
 	
 	ControlDecode32 i_ControlDecode32(
@@ -139,6 +149,9 @@ module Decode(
 				Decode_CsrAddr	 = 12'b0;
 				Decode_Rs1Addr   = rs1Addr16;
 				Decode_Rs2Addr   = rs2Addr16;
+				Decode_Rs3Addr   = 5'b0;
+				Decode_Fmt		 = 2'b0;
+                Decode_Rm        = 3'b0;   
 				Decode_Stall     = stallFlag16;
 				Decode_Flush     = flushFlag16;
 			end
@@ -151,6 +164,9 @@ module Decode(
 				Decode_CsrAddr	 = csrAddr32;
 				Decode_Rs1Addr   = rs1Addr32;
 				Decode_Rs2Addr   = rs2Addr32;
+				Decode_Rs3Addr   = rs3Addr32;
+				Decode_Fmt		 = fmt;
+                Decode_Rm        = rm;
 				Decode_Stall     = stallFlag32;
 				Decode_Flush     = flushFlag32;
 			end
@@ -259,12 +275,10 @@ module ControlDecode16(
 	output		[`DECODE_FLUSH_WIDTH - 1 : 0]		flushFlag,
 	output 		[`XLEN_WIDTH_SEL - 1 : 0]  			xlenSel
 );
-	//wire	[`PC_SEL_WIDTH - 1 : 0 ]		pcSel;
 	wire	[`A_SEL_WIDTH - 1 : 0 ]			A_sel;
 	wire	[`B_SEL_WIDTH - 1 : 0 ]			B_sel;
 	wire	[`ALU_OP_WIDTH - 1 : 0 ]		aluOp;
 	wire	[`BR_TYPE_WIDTH - 1 : 0 ]		brType;
-	//wire	[`BOOL_WIDTH - 1 : 0 ]			kill;
 	wire	[`ST_TYPE_WIDTH - 1 : 0 ]		stType;
 	wire	[`LD_TYPE_WIDTH - 1 : 0 ]		ldType;
 	wire	[`WB_SEL_WIDTH - 1 : 0 ]		wbSel;
@@ -274,13 +288,11 @@ module ControlDecode16(
 
 	reg		[`localAllCTRLWIDTH16 - 1 : 0 ]	localAllCtr;
 	
-	assign	{	//pcSel,
-				A_sel,
+	assign	{	A_sel,
 				B_sel,
 				immSel,
 				aluOp,
 				brType,
-				//kill,
 				stType,
 				ldType,
 				wbSel,
@@ -353,7 +365,6 @@ endmodule
 module InstrTypeDecode16(
 	input		[`INSTR_WIDTH_16 - 1 : 0]		instr,
 	output	reg [`INSTR_ENCODE_WIDTH - 1 : 0]	iEncode
-	//output	reg									i16BitFlag
 );
 	//funct opcode
 	wire	[`FUNCT3_WIDTH - 1 : 0] 			funct3;
@@ -372,9 +383,7 @@ module InstrTypeDecode16(
 	//quadrant 1
 	assign	q1Funct2_1  = instr[11:10];
 	assign	q1Funct2_2  = instr[6:5];
-	
-	//assign	i16BitFlag 	= ((iEncode != `UNKNOWN) && (iEncode != `C_RESERVED)) ? 1'b1 : 1'b0;
-	
+		
 	//iEncode
 	always @(*)
 		case(opCode)
@@ -485,17 +494,19 @@ module InstrTypeDecode32(
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rdAddr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs1Addr,
 	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs2Addr,
-	output	 	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr
-	//output										i32BitFlag
+	output	 	[`RF_ADDR_WIDTH - 1 : 0]		rs3Addr,
+	output	 	[`CSR_ADDR_WIDTH - 1 : 0]		csrAddr,
+    output	    [`FUNCT3_WIDTH - 1 : 0] 		funct3,
+    output	    [2 - 1 : 0] 					fmt
+
 );
 	wire	[`FUNCT7_WIDTH - 1 : 0] 		funct7;
-	wire	[`FUNCT3_WIDTH - 1 : 0] 		funct3;
 	wire 	[`OPCODE_WIDTH - 1 : 0] 		opCode;
 
 	assign	{funct7,rs2Addr,rs1Addr,funct3,rdAddr,opCode} = instr;
 	assign	csrAddr = {funct7,rs2Addr};
-	//assign	i32BitFlag = (iEncode == `UNKNOWN) ? 1'b0 : 1'b1;
-	
+	assign  {rs3Addr, fmt} = funct7;
+
 	always @(*)
 		case(opCode)
 			`OP_LUI		:	iEncode = `LUI;
@@ -603,11 +614,133 @@ module InstrTypeDecode32(
 								`FUNCT3_7   :	iEncode = `CSRRCI;
 			                	default     :	iEncode = `UNKNOWN;
 			                endcase
-			`OP_ZERO	: 
-							//if(instr[31:7] == 25'b0)
-							//	iEncode = `NOP;
-							//else
-								iEncode = `UNKNOWN;
+			`OP_FDLD	:   
+							case(funct3)
+					        	`FUNCT3_2   :	iEncode = `FLW;
+								`FUNCT3_3   :	iEncode = `FLD;								
+			                	default     :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FDST    :   
+							case(funct3)
+					        	`FUNCT3_2   :	iEncode = `FSW;
+								`FUNCT3_3   :	iEncode = `FSD;								
+			                	default     :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FDMADD  :   
+							case(funct7[1:0])
+					        	2'b00      :	iEncode = `FMADD_S;
+								2'b01      :	iEncode = `FMADD_D;								
+			                	default    :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FDMSUB  :   
+							case(funct7[1:0])
+					        	2'b00      :	iEncode = `FMSUB_S;
+								2'b01      :	iEncode = `FMSUB_D;								
+			                	default    :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FDNMSUB :   
+							case(funct7[1:0])
+					        	2'b00      :	iEncode = `FNMSUB_S;
+								2'b01      :	iEncode = `FNMSUB_D;								
+			                	default    :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FDNMADD :   
+							case(funct7[1:0])
+					        	2'b00      :	iEncode = `FNMADD_S;
+								2'b01      :	iEncode = `FNMADD_D;								
+			                	default    :	iEncode = `UNKNOWN;
+			                endcase
+            `OP_FD      :   
+							case(funct7)
+                                //float
+					        	7'b000_0000 :	iEncode = `FADD_S;
+                                7'b000_0100 :	iEncode = `FSUB_S;
+                                7'b000_1000 :	iEncode = `FMUL_S;
+                                7'b000_1100 :	iEncode = `FDIV_S;
+                                7'b010_1100 :	iEncode = `FSQRT_S;
+                                7'b001_0000 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FSGNJ_S;
+                                                    `FUNCT3_1   :	iEncode = `FSGNJN_S;
+                                                    `FUNCT3_2   :	iEncode = `FSGNJX_S;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+                                7'b001_0100 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FMIN_S;
+                                                    `FUNCT3_1   :	iEncode = `FMAX_S;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+					        	7'b110_0000 :	
+												case(rs2Addr)
+											    	5'd0        :	iEncode = `FCVT_WS;
+                                                    5'd1        :	iEncode = `FCVT_WUS;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+                                7'b111_0000 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FMV_XW;
+                                                    `FUNCT3_1   :	iEncode = `FCLASS_S;
+													default     :	iEncode = `UNKNOWN;
+											    endcase
+                                7'b101_0000 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FLE_S;
+                                                    `FUNCT3_1   :	iEncode = `FLT_S;
+                                                    `FUNCT3_2   :	iEncode = `FEQ_S;
+													default     :	iEncode = `UNKNOWN;
+											    endcase
+                                7'b110_1000 :	
+												case(rs2Addr)
+											    	5'd0        :	iEncode = `FCVT_SW;
+                                                    5'd1        :	iEncode = `FCVT_SWU;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+                                7'b111_1000 :	iEncode = `FMV_WX;
+                                //double
+					        	7'b000_0001 :	iEncode = `FADD_D;
+                                7'b000_0101 :	iEncode = `FSUB_D;
+                                7'b000_1001 :	iEncode = `FMUL_D;
+                                7'b000_1101 :	iEncode = `FDIV_D;
+                                7'b010_1101 :	iEncode = `FSQRT_D;
+                                7'b001_0001 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FSGNJ_D;
+                                                    `FUNCT3_1   :	iEncode = `FSGNJN_D;
+                                                    `FUNCT3_2   :	iEncode = `FSGNJX_D;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+                                7'b001_0101 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FMIN_D;
+                                                    `FUNCT3_1   :	iEncode = `FMAX_D;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+					        	7'b010_0000 :   iEncode = `FCVT_SD;
+					        	7'b010_0001 :   iEncode = `FCVT_DS;
+					        	7'b101_0001 :	
+												case(funct3)
+											    	`FUNCT3_0   :	iEncode = `FLE_D;
+                                                    `FUNCT3_1   :	iEncode = `FLT_D;
+                                                    `FUNCT3_2   :	iEncode = `FEQ_D;
+													default     :	iEncode = `UNKNOWN;
+											    endcase
+					        	7'b111_0001 :   iEncode = `FCLASS_D;
+					        	7'b110_0001 :	
+												case(rs2Addr)
+											    	5'd0        :	iEncode = `FCVT_WD;
+                                                    5'd1        :	iEncode = `FCVT_WUD;
+													default     :	iEncode = `UNKNOWN;
+											    endcase	
+					        	7'b110_1001 :	
+												case(rs2Addr)
+											    	5'd0        :	iEncode = `FCVT_DW;
+                                                    5'd1        :	iEncode = `FCVT_DWU;
+													default     :	iEncode = `UNKNOWN;
+											    endcase						
+			                	default     :	iEncode = `UNKNOWN;
+			                endcase
+			`OP_ZERO	:   iEncode = `UNKNOWN;
 			default		:	iEncode = `UNKNOWN;
 		endcase
 endmodule
@@ -671,64 +804,117 @@ module ControlDecode32(
 						//         		     2  	    1        1        3         5      	    3     kill   2         3        1    wbRdEn   3  illegal
 						//         		   pcSel 	  A_sel    B_sel   imm_sel    aluOp    	  brType    |  stType    ldType   wbSel    |  csrCmd   |	  stallFlag		  flushFlag       xlenSel
 						//         		     |   	    |        |        |         |      	    |       |     |         |       |      |     |     |		|			    |				|	
-				`LUI   :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_COPY_B	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`AUIPC :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`JAL   :	localAllCtr = {`PC_ALU	, `A_PC,   `B_IMM, `IMM_J, `ALU_JAL   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`JALR  :	localAllCtr = {`PC_ALU	, `A_RS1,  `B_IMM, `IMM_I, `ALU_JALR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BEQ   :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BEQ   	, `BR_EQ , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BNE   :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BNE   	, `BR_NE , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BLT   :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BLT   	, `BR_LT , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BGE   :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BGE   	, `BR_GE , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BLTU  :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BLTU   	, `BR_LTU, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`BGEU  :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BGEU   	, `BR_GEU, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`LB    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LB , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`LH    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LH , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`LW    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LW , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`LBU   :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LBU, `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`LHU   :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LHU, `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SB    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SB , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SH    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SH , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SW    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SW , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`ADDI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLTI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLT   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLTIU :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLTU  	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`XORI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_XOR   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`ORI   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_OR    	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`ANDI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_AND   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLLI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SRLI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SRAI  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`ADD   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SUB   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SUB   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLL   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLT   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLT   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SLTU  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLTU  	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`XOR   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XOR   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SRL   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`SRA   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`OR    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_OR    	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`AND   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_AND   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`MUL   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MUL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`MULH  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULH   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`MULHSU:	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULHSU  , `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`MULHU :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULHU   , `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`DIV   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_DIV   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`DIVU  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_DIVU   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`REM   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_REM   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`REMU  :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_REMU   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`FENCE :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_FENCE,	`FLUSH_XXX,		`IS_32BIT};
-				`FENCEI:	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_FENCE,	`FLUSH_XXX,		`IS_32BIT};
-				`CSRRW :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_W, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`CSRRS :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_S, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`CSRRC :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR		, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_C, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`CSRRWI:	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_W, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`CSRRSI:	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_S, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`CSRRCI:	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR  	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_C, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
-				`ECALL :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_ECALL,	`IS_32BIT};
-				`EBREAK:	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_EBREAK,	`IS_32BIT};
-				`ERET  :	localAllCtr = {`PC_CTRL	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_ERET,	`IS_32BIT};
-				`WFI   :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_WFI,		`FLUSH_XXX,		`IS_32BIT};
-				`NOP   :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+				`LUI      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_COPY_B	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`AUIPC    :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`JAL      :	localAllCtr = {`PC_ALU	, `A_PC,   `B_IMM, `IMM_J, `ALU_JAL   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`JALR     :	localAllCtr = {`PC_ALU	, `A_RS1,  `B_IMM, `IMM_I, `ALU_JALR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BEQ      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BEQ   	, `BR_EQ , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BNE      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BNE   	, `BR_NE , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BLT      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BLT   	, `BR_LT , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BGE      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BGE   	, `BR_GE , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BLTU     :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BLTU   	, `BR_LTU, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`BGEU     :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BGEU   	, `BR_GEU, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`LB       :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LB , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`LH       :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LH , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`LW       :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LW , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`LBU      :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LBU, `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`LHU      :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LHU, `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SB       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SB , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SH       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SH , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SW       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SW , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`ADDI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLTI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLT   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLTIU    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLTU  	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`XORI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_XOR   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`ORI      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_OR    	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`ANDI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_AND   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLLI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SRLI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SRAI     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`ADD      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SUB      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SUB   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLL      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLT      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLT   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SLTU     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLTU  	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`XOR      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XOR   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SRL      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`SRA      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`OR       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_OR    	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`AND      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_AND   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`MUL      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MUL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`MULH     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULH   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`MULHSU   :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULHSU  , `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`MULHU    :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULHU   , `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`DIV      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_DIV   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`DIVU     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_DIVU   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`REM      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_REM   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`REMU     :	localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_REMU   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`FENCE    :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_FENCE,	`FLUSH_XXX,		`IS_32BIT};
+				`FENCEI   :	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_FENCE,	`FLUSH_XXX,		`IS_32BIT};
+				`CSRRW    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_W, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`CSRRS    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_S, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`CSRRC    :	localAllCtr = {`PC_0  	, `A_RS1,  `B_XXX, `IMM_X, `ALU_CSR		, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_C, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`CSRRWI   :	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_W, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`CSRRSI   :	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_S, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`CSRRCI   :	localAllCtr = {`PC_0  	, `A_XXX,  `B_XXX, `IMM_Z, `ALU_CSR  	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_C, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT};
+				`ECALL    :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_ECALL,	`IS_32BIT};
+				`EBREAK   :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_EBREAK,	`IS_32BIT};
+				`ERET     :	localAllCtr = {`PC_CTRL	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_P, `N,	`STALL_XXX,		`FLUSH_ERET,	`IS_32BIT};
+				`WFI      :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_WFI,		`FLUSH_XXX,		`IS_32BIT};
+				`NOP      :	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                
+                `FLW      : localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSW      : localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMADD_S  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMSUB_S  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FNMSUB_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FNMADD_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FADD_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSUB_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMUL_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FDIV_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSQRT_S  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJ_S  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJN_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJX_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMIN_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMAX_S   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_WS  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_WUS : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMV_XW   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FEQ_S    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FLT_S    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FLE_S    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCLASS_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_SW  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_SWU : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMV_WX   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FLD      : localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSD      : localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMADD_D  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMSUB_D  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FNMSUB_D : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FNMADD_D : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FADD_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSUB_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMUL_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FDIV_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSQRT_D  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJ_D  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJN_D : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FSGNJX_D : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMIN_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FMAX_D   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_SD  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_DS  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FEQ_D    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FLT_D    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FLE_D    : localAllCtr = {`PC_4  	, `A_PC ,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCLASS_D : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_WD  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_WUD : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_DW  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
+                `FCVT_DWU : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`STALL_XXX,		`IS_32BIT};
 				default:	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `Y,	`STALL_XXX,		`FLUSH_ILLEGAL,	`IS_XXBIT};
 		endcase
 endmodule

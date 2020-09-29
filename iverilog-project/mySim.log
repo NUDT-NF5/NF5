@@ -1,230 +1,52 @@
-====== NF5 sim start ======
-clk = 0
-clk = 1
-clk = 2
-clk = 3
-clk = 4
-clk = 5
-clk = 6
-clk = 7
-clk = 8
-clk = 9
-clk = 10
-clk = 11
-clk = 12
-clk = 13
-clk = 14
-clk = 15
-clk = 16
-clk = 17
-clk = 18
-clk = 19
-clk = 20
-clk = 21
-clk = 22
-clk = 23
-clk = 24
-clk = 25
-clk = 26
-clk = 27
-clk = 28
-clk = 29
-clk = 30
-clk = 31
-clk = 32
-clk = 33
-clk = 34
-clk = 35
-clk = 36
-clk = 37
-clk = 38
-clk = 39
-clk = 40
-clk = 41
-clk = 42
-clk = 43
-clk = 44
-clk = 45
-clk = 46
-clk = 47
-clk = 48
-clk = 49
-clk = 50
-clk = 51
-clk = 52
-clk = 53
-clk = 54
-clk = 55
-clk = 56
-clk = 57
-clk = 58
-clk = 59
-clk = 60
-clk = 61
-clk = 62
-clk = 63
-clk = 64
-clk = 65
-clk = 66
-clk = 67
-clk = 68
-clk = 69
-clk = 70
-clk = 71
-clk = 72
-clk = 73
-clk = 74
-clk = 75
-clk = 76
-clk = 77
-clk = 78
-clk = 79
-clk = 80
-clk = 81
-clk = 82
-clk = 83
-clk = 84
-clk = 85
-clk = 86
-clk = 87
-clk = 88
-clk = 89
-clk = 90
-clk = 91
-clk = 92
-clk = 93
-clk = 94
-clk = 95
-clk = 96
-clk = 97
-clk = 98
-clk = 99
-clk = 100
-clk = 101
-clk = 102
-clk = 103
-clk = 104
-clk = 105
-clk = 106
-clk = 107
-clk = 108
-clk = 109
-clk = 110
-clk = 111
-clk = 112
-clk = 113
-clk = 114
-clk = 115
-clk = 116
-clk = 117
-clk = 118
-clk = 119
-clk = 120
-clk = 121
-clk = 122
-clk = 123
-clk = 124
-clk = 125
-clk = 126
-clk = 127
-clk = 128
-clk = 129
-clk = 130
-clk = 131
-clk = 132
-clk = 133
-clk = 134
-clk = 135
-clk = 136
-clk = 137
-clk = 138
-clk = 139
-clk = 140
-clk = 141
-clk = 142
-clk = 143
-clk = 144
-clk = 145
-clk = 146
-clk = 147
-clk = 148
-clk = 149
-clk = 150
-clk = 151
-clk = 152
-clk = 153
-clk = 154
-clk = 155
-clk = 156
-clk = 157
-clk = 158
-clk = 159
-clk = 160
-clk = 161
-clk = 162
-clk = 163
-clk = 164
-clk = 165
-clk = 166
-clk = 167
-clk = 168
-clk = 169
-clk = 170
-clk = 171
-clk = 172
-clk = 173
-clk = 174
-clk = 175
-clk = 176
-clk = 177
-clk = 178
-clk = 179
-clk = 180
-clk = 181
-clk = 182
-clk = 183
-clk = 184
-clk = 185
-clk = 186
-clk = 187
-clk = 188
-clk = 189
-clk = 190
-clk = 191
-clk = 192
-clk = 193
-clk = 194
-clk = 195
-clk = 196
-clk = 197
-clk = 198
-clk = 199
-clk = 200
-clk = 201
-clk = 202
-clk = 203
-clk = 204
-clk = 205
-clk = 206
-clk = 207
-clk = 208
-clk = 209
-clk = 210
-clk = 211
-clk = 212
-clk = 213
-clk = 214
-clk = 215
-clk = 216
-clk = 217
-clk = 218
-clk = 219
-clk = 220
-clk = 221
-clk = 222
-clk = 223
-clk = 224
-clk = 225
-clk = 226
-clk = 227
-ISA_test Pass when clk=       227, PC=000002fc 
+00000000
+00000000
+00000000
+00000000
+00000000
+00000001
+00000000
+00000001
+00000001
+00000001
+ffffffff
+00000000
+00000000
+00000001
+7fffffff
+7fffffff
+00000000
+7fffffff
+00000000
+7fffffff
+80000000
+00000000
+80000000
+00000001
+00000000
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+00000000
+00000000

@@ -1,7 +1,9 @@
 /*
- * @Date:               2019-10-29 14:38
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2019-11-07 22:12:30
+ * @Author: Y-BoBo
+ * @Date:   2019-10-28 15:51
+ * @Last Modified by: Y-BoBo
+ * @Last Modified time: 2019-11-08 09:33:48
+ * @Describe: Mem module, generate Dcache control signal
  */
 `include "../src/common/Define.v"
 module Mem
@@ -15,7 +17,7 @@ module Mem
     output wire  [1:0]      			  Mem_DcacheWidth, //To Dcache
     output wire  [`ADDR_WIDTH-1  :0]      Mem_DcacheAddr,   //To Dcache
     output wire                           Mem_DcacheSign ,  //To Dcache
-    output wire                          Csr_Memflush
+    input  wire                           Csr_Memflush
     ); 
 wire   St_EN;
 assign St_EN    = ( EXMem_StType == `ST_XXX )? 0 : 1;

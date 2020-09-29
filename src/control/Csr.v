@@ -1,3 +1,10 @@
+/*
+ * @Author: Kefan-Xu
+ * @Date:   2019-10-30 10:00
+ * @Last Modified by: Kefan-Xu
+ * @Last Modified time: 2019-10-30 10:00
+ * @Describe: csr  for all module
+ */
 `include "../src/common/Define.v"
 module Csr(
     input  wire                               clk,
@@ -11,7 +18,7 @@ module Csr(
     input  wire   [1:0]                       IDEX_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
     input  wire   [2:0]                       IDEX_LdType   ,
     input  wire                               EX_BranchFlag  ,//actually = branch flag                                                        
-    input  wire   [3:0]                       Decode_Flush   ,   //eret illegal  ebreak ecall      Decode_Flush[3]Çø·ÖÄ£Ê½
+    input  wire   [3:0]                       Decode_Flush   ,   //eret illegal  ebreak ecall      Decode_Flush[3]ï¿½ï¿½ï¿½ï¿½Ä£Ê½
  
     input  wire   [`ADDR_WIDTH-1:0]           IFID_NowPC, //IFID_NowPC 
     input  wire   [`ADDR_WIDTH-1:0]           IDEX_NowPC, //IDEX_NowPC in EX 
@@ -34,7 +41,7 @@ module Csr(
     input  wire   [2:0]                       EXMem_LdType,
     input  wire   [`ADDR_WIDTH-1:0]           EX_BranchPC,//new	
     input  wire   [`ADDR_WIDTH-1:0]           EXMEM_NowPC	,
-	input  wire			                      Decode_16BitFlag ,
+	  input  wire			                          Decode_16BitFlag ,
     output wire                               Fetchaddr_Invalid,
     input  wire  [31:0]                       IFID_Instr		
     );
@@ -46,7 +53,6 @@ module Csr(
       reg Staddr_Invalid;
 
 	  assign Fetchaddr_Invalid = EX_BranchFlag && EX_AluData[0];
-      //assign Fetchaddr_Invalid = Decode_16BitFlag? (EX_BranchFlag && EX_AluData[0]):EX_BranchFlag && (EX_BranchPC[0]|EX_BranchPC[1]);//ifu_misalgn 0 16bitmisalign
 
       wire [`CSR_DATA_WIDTH-1:0]  csr_mcause_q;  
  
@@ -188,7 +194,6 @@ assign flag_reg=flag_reg_t;
 						 default: dcause_code=3'b0;  
       endcase
      end
-//   reg[3:0]  dcause_code  ; reserved for debug_mode
   
 	    wire   int_req_valid   =ext_intena|sft_intena|tmr_intena;
         wire [`CSR_DATA_WIDTH-1:0]csr_mtvec_q;
@@ -199,21 +204,19 @@ wire csr_mepc_wen;
         wire csr_flush;
 
         assign   flush_valid_tmp[15:0] = (flag_valid & (~mask_tmp[15:0]));//mask for 1 clk 
-       // assign   csr_flush = (!Ctrl_Stall) & (|flush_valid_tmp[15:0]);//only flush when enter into exception
-       assign   csr_flush = (|flush_valid_tmp[15:0]);//new
+        assign   csr_flush = (|flush_valid_tmp[15:0]);//new
  assign   Csr_ExcpFlag = Decode_Flush[3]|csr_flush;//enter and eret
 
         wire   int_flush_req= Csr_ExcpFlag & (|flush_valid_tmp[9:7]);//interrupts flush
         wire   dbg_flush_req= Csr_ExcpFlag & (|flush_valid_tmp[6:2]);//dbg_flush_req 
-        wire   tail_valid   = Decode_Flush[3] & (|flag_data);//ÖÐ¶ÏÒ§Î² tail ÇÀÕ¼ per Ç¶Ì× nest  	    
-        assign Csr_Memflush = Csr_ExcpFlag & (flush_valid_tmp[15]|flush_valid_tmp[14]);//Êä³öµ½control??Î»ÐÅºÅÖ±½ÓÅÐ¶Ï£¬²»ÐèÒªÊä³öcause-code   change        
+        wire   tail_valid   = Decode_Flush[3] & (|flag_data);//ï¿½Ð¶ï¿½Ò§Î² tail ï¿½ï¿½Õ¼ per Ç¶ï¿½ï¿½ nest  	    
+        assign Csr_Memflush = Csr_ExcpFlag & (flush_valid_tmp[15]|flush_valid_tmp[14]);//ï¿½ï¿½ï¿½ï¿½ï¿½control??Î»ï¿½Åºï¿½Ö±ï¿½ï¿½ï¿½Ð¶Ï£ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½cause-code   change        
 
     // ------------------------------------
     //       mepc update logic
     // ------------------------------------	
          wire  [`CSR_DATA_WIDTH-1:0] csr_mepc_nxt;
          wire  csr_mepc_ena;         
-         //assign Csr_Epc = Decode_Flush[3] ?csr_mepc_q:`ADDR_WIDTH'h0 ;
          assign csr_mepc_nxt= tail_valid ?csr_mepc_q: Csr_Memflush ? EXMEM_NowPC: IFID_NowPC;//IDEX_NowPC-4 :
          assign csr_mepc_ena =csr_flush; 
 
@@ -234,7 +237,6 @@ wire csr_mepc_wen;
     // ------------------------------------
     //        mcause update logic
     // ------------------------------------	 
-        //assign Csr_mcause = int_flush_req ? {1'b1,20'b0, mcause_code} :{1'b0,20'b0, mcause_code};
          wire  [`CSR_DATA_WIDTH-1:0]csr_mcause_nxt;  
          wire   csr_mcause_ena;   
          assign csr_mcause_nxt = tail_valid? mcause_code: Decode_Flush[3]? 32'h0: mcause_code;
@@ -250,14 +252,14 @@ wire csr_mepc_wen;
     //    * access, or page-fault exceptionload  
     //   occurs, mtval is written with the  faulting virtual address (faulting address--mbadaddr). 
     //  and for other ways:
-    //    * On an illegal instruction trap, mtval may be written with the first XLEN or ILEN bits of the faulting instruction¡£
+    //    * On an illegal instruction trap, mtval may be written with the first XLEN or ILEN bits of the faulting instructionï¿½ï¿½
     //    * For other exceptions, mtval is set to zero, but a future standard may redefine mtval's
     //        setting for other exceptions.
     //
-         wire[31:0] faulting_virtual_address;//Reserve for mem
-		 assign faulting_virtual_address=EXMem_AluData;
+      wire[31:0] faulting_virtual_address;//Reserve for mem
+		  assign faulting_virtual_address=EXMem_AluData;
 	     wire  [`CSR_DATA_WIDTH-1:0]csr_mtval_nxt;  
-         wire   csr_mtval_ena;   
+        wire   csr_mtval_ena;   
          assign csr_mtval_nxt = Csr_Memflush ? faulting_virtual_address://ldst misalign
                                 flush_valid_tmp[12]? EX_BranchPC://ifetch misalign
 		                   flush_valid_tmp[11]?IFID_Instr://new:illegal inst(id_inst)
@@ -297,7 +299,6 @@ wire csr_mepc_wen;
           wire [`CSR_DATA_WIDTH-1:0]  csr_medeleg_q       ;
           wire [`CSR_DATA_WIDTH-1:0]  csr_mideleg_q       ;
           wire [`CSR_DATA_WIDTH-1:0]  csr_mip_q           ;
-         // reg [`CSR_DATA_WIDTH-1:0]  csr_mcause_q        ;
           wire [`CSR_DATA_WIDTH-1:0]  csr_mscratch_q      ;
           wire [`CSR_DATA_WIDTH-1:0]  csr_mtval_q         ;   
           wire [`CSR_DATA_WIDTH-1:0]  csr_mhartid_q      ;     
@@ -305,7 +306,8 @@ wire csr_mepc_wen;
           wire [`CSR_DATA_WIDTH-1:0]  csr_pmpaddr0_q     ; 
           wire [`CSR_DATA_WIDTH-1:0]  csr_stvec_q        ;     
           wire [`CSR_DATA_WIDTH-1:0]  csr_satp_q         ;   
-        
+          wire [`CSR_DATA_WIDTH-1:0]  csr_fcsr_q         ;  
+
           reg csr_hartid=32'b0;//constant defined
 
 
@@ -343,8 +345,11 @@ wire csr_mepc_wen;
           `CSR_PMPCFG0:           csr_read_data=csr_pmpcfg0_q  ;
           `CSR_PMPADDR:           csr_read_data=csr_pmpaddr0_q ;  
           `CSR_STVEC:             csr_read_data=csr_stvec_q ;   
-          `CSR_SATP:              csr_read_data=csr_satp_q  ;         
-         
+          `CSR_SATP:              csr_read_data=csr_satp_q  ;
+
+          `CSR_FCSR:              csr_read_data = {24'b0, csr_fcsr_q[7:0]};     
+          `CSR_FRM:               csr_read_data = {3'b0, csr_fcsr_q[7:5]};
+          `CSR_FFLAG:             csr_read_data = {5'b0, csr_fcsr_q[4:0]};
           default: csr_read_data = `CSR_DATA_WIDTH'b0;
          endcase
       end
@@ -371,6 +376,7 @@ wire csr_mepc_wen;
       wire csr_pmpaddr0_wen= csr_wrten &(IDEX_CsrAddr==`CSR_PMPADDR ); 
       wire csr_stvec_wen = csr_wrten &(IDEX_CsrAddr==`CSR_STVEC   ); 
       wire csr_satp_wen  = csr_wrten &(IDEX_CsrAddr==`CSR_SATP    ); 
+      wire csr_fcsr_wen  = csr_wrten & (IDEX_CsrAddr==`CSR_FCSR) | (IDEX_CsrAddr==`CSR_FRM ) | (IDEX_CsrAddr==`CSR_FFLAG ); 
      
  
 
@@ -384,10 +390,8 @@ wire csr_mepc_wen;
     // The MRET instruction commited       
     // The Trap is taken 
     //------------------------------------------  
-     //  wire status_mie_q= csr_mstatus_q[3];
        wire status_mpie_q= csr_mstatus_q[7];
 	   
-	   //wire csr_mstatus_wen  = csr_wrten &(IDEX_CsrAddr==`CSR_MSTATUS)|csr_mepc_ena ;
        wire status_mpie_d =csr_mepc_ena ?  status_mie_q    ://When the Trap is taken, the MPIE is updated with the current MIE value
                           (Decode_Flush[3]==1'b1)  ? 1'b1 ://When the MRET instruction commited, the MPIE is updated with 1
        				    csr_mstatus_wen? csr_wrt_data[7]: //CSR instructions  MPIE is in field 7 of mstatus 
@@ -415,7 +419,8 @@ wire csr_mepc_wen;
       wire [`CSR_DATA_WIDTH-1:0] csr_pmpaddr0_d =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_stvec_d    =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_satp_d     =csr_wrt_data;
-   
+      wire [`CSR_DATA_WIDTH-1:0] csr_fcsr_d     =csr_wrt_data;
+
  	 // ---------------------------
     // CSR  Updata logic
     // ---------------------------
@@ -437,7 +442,7 @@ wire csr_mepc_wen;
        sirv_gnrl_dfflr  pmpaddr0_dfflr (csr_pmpaddr0_wen, csr_pmpaddr0_d, csr_pmpaddr0_q, clk, rst_n);
        sirv_gnrl_dfflr  stvec_dfflr (csr_stvec_wen, csr_stvec_d, csr_stvec_q, clk, rst_n);
        sirv_gnrl_dfflr  satp_dfflr (csr_satp_wen, csr_satp_d, csr_satp_q, clk, rst_n);
-
+       sirv_gnrl_dfflr  fcsr_dfflr (csr_fcsr_wen, csr_fcsr_d, csr_fcsr_q, clk, rst_n);
 endmodule
 
 
@@ -452,7 +457,6 @@ module sirv_gnrl_dfflr # (
   input               clk,
   input               rst_n
 );
-//reg [DW-1:0] qout_r;
 always @(posedge clk or negedge rst_n)
 begin : DFFLR_PROC
   if (!rst_n)
@@ -460,7 +464,6 @@ begin : DFFLR_PROC
   else if (lden == 1'b1)
     qout <=  dnxt;
 end
-//assign qout = qout_r;
 endmodule
 
    
