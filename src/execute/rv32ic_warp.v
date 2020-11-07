@@ -1,48 +1,50 @@
 module rv32ic_warp(
-    input       [`DATA_WIDTH - 1:0]     s1,
-    input       [`DATA_WIDTH - 1:0]     s2,
-    input       [`DATA_WIDTH - 1:0]     forward_rs1,
-    input       [`DATA_WIDTH - 1:0]     forward_rs2,
-    input       [`ALU_OP_WIDTH - 1:0]   IDEX_AluOp,
-    input       [`ADDR_WIDTH - 1:0]     IDEX_NowPC,
-    input                               IDEX_16BitFlag,
+    input       [`SIMD_DATA_WIDTH - 1:0] s1,
+    input       [`SIMD_DATA_WIDTH - 1:0] s2,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs1,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs2,
+    input       [`ALU_OP_WIDTH - 1:0]    IDEX_AluOp,
+    input       [`ADDR_WIDTH - 1:0]      IDEX_NowPC,
+    input                                IDEX_16BitFlag,
+    input                                simd_ena,
+    input       [`SIMD_WIDTH - 1:0]      simd_ctl,
 
-    input       [`DATA_WIDTH - 1:0]     Csr_RdData,
-    input       [2:0]                   IDEX_LdType,
-    input       [1:0]                   IDEX_StType,
-    input                               Mem_DcacheEN,
+    input       [`DATA_WIDTH - 1:0]      Csr_RdData,
+    input       [2:0]                    IDEX_LdType,
+    input       [1:0]                    IDEX_StType,
+    input                                Mem_DcacheEN,
 
-    output      [`DATA_WIDTH - 1:0]     EX_AluData,
-    output      [`ADDR_WIDTH - 1:0]     EX_BranchPC,
-    output                              EX_BranchFlag,
-    output                              alu_ic_en,
-    output                              EX_LdStFlag
+    output      [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
+    output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
+    output                               EX_BranchFlag,
+    output                               alu_ic_en,
+    output                               EX_LdStFlag
 );
 
 //arithmetic
-wire            [`DATA_WIDTH - 1:0]     arithmetic_s1;
-wire            [`DATA_WIDTH - 1:0]     arithmetic_s2;
-wire            [2:0]                   arithop_sp;
-wire            [`DATA_WIDTH - 1:0]     arithmetic_result;
-wire            [`ADDR_WIDTH - 1:0]     branch_result;
+wire            [`SIMD_DATA_WIDTH - 1:0] arithmetic_s1;
+wire            [`SIMD_DATA_WIDTH - 1:0] arithmetic_s2;
+wire            [2:0]                    arithop_sp;
+wire            [`SIMD_DATA_WIDTH - 1:0] arithmetic_result;
+wire            [`ADDR_WIDTH - 1:0]      branch_result;
 
 //logic
-wire            [`DATA_WIDTH - 1:0]     logic_s1;
-wire            [`DATA_WIDTH - 1:0]     logic_s2;
-wire            [2:0]                   logic_op;
-wire            [`DATA_WIDTH - 1:0]     logic_result;
+wire            [`SIMD_DATA_WIDTH - 1:0] logic_s1;
+wire            [`SIMD_DATA_WIDTH - 1:0] logic_s2;
+wire            [2:0]                    logic_op;
+wire            [`SIMD_DATA_WIDTH - 1:0] logic_result;
 
 //compapator
-wire            [`DATA_WIDTH - 1:0]     comparator_s1;
-wire            [`DATA_WIDTH - 1:0]     comparator_s2;
-wire            [2:0]                   comparator_result;
-wire            [2:0]                   ucomparator_result;
+wire            [`DATA_WIDTH - 1:0]      comparator_s1;
+wire            [`DATA_WIDTH - 1:0]      comparator_s2;
+wire            [2:0]                    comparator_result;
+wire            [2:0]                    ucomparator_result;
 
 //shift
-wire            [`DATA_WIDTH - 1:0]     shift_s1;
-wire            [4:0]                   shift_s2;
-wire            [2:0]                   shift_type;
-wire            [`DATA_WIDTH - 1:0]     shift_result;
+wire            [`SIMD_DATA_WIDTH - 1:0] shift_s1;
+wire            [4:0]                    shift_s2;
+wire            [2:0]                    shift_type;
+wire            [`SIMD_DATA_WIDTH - 1:0] shift_result;
 
 alu_ic_dispatcher idp0(
                      .s1(s1),
@@ -82,6 +84,8 @@ arithmetic alu_arith(.arithmetic_s1(arithmetic_s1),
                      .IDEX_NowPC(IDEX_NowPC), 
                      .arithop_sp(arithop_sp), 
                      .IDEX_16BitFlag(IDEX_16BitFlag), 
+                     .simd_ena(simd_ena),
+                     .simd_ctl(simd_ctl),
                      .arithmetic_result(arithmetic_result), 
                      .branch_result(branch_result));
 

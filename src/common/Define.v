@@ -12,8 +12,15 @@
 `define	INSTR_WIDTH			`X_LEN
 `define	INSTR_WIDTH_16		16
 
+//simd
+`define SIMD_WIDTH          2
+`define SIMD_DATA_WIDTH     64
+`define SIMD16              2'b10
+`define SIMD32              2'b01
+
 /*----------Mux.v---------*/
-`define	DATA_WIDTH_LOG2		5
+`define	DATA_WIDTH_LOG2		 5
+`define SIMD_DATA_WIDTH_LOG2 6
 
 /*----------Fetch.v---------*/
 `define	START_PC			`X_LEN'h0000_0000
@@ -468,6 +475,6 @@
 
 /*----------Core.v---------*/
 `define PIPE_IFID_LEN 	`ADDR_WIDTH + `DATA_WIDTH
-`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`DATA_WIDTH + `DATA_WIDTH + `DATA_WIDTH + 1 + `ADDR_WIDTH
-`define PIPE_EXMem_LEN 	32 + 32 + `RF_ADDR_WIDTH + `DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH
-`define PIPE_MemWb_LEN 	5 + 1 + 32 + 32 + 1
+`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + `ADDR_WIDTH
+`define PIPE_EXMem_LEN 	`SIMD_DATA_WIDTH + `RF_ADDR_WIDTH + `SIMD_DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH + `ADDR_WIDTH
+`define PIPE_MemWb_LEN 	5 + 1 + 32 + `SIMD_DATA_WIDTH + 1

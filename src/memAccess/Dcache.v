@@ -16,7 +16,7 @@ module Dcache(
   input  wire                         		Mem_DcacheRd,    //To Dcache
   input  wire  [1:0]      			  	    	Mem_DcacheWidth, //To Dcache
   input  wire  [`ADDR_WIDTH-1  	:0]      	Mem_DcacheAddr,   //To Dcache
-  input  wire  [`DATA_WIDTH-1	:0]       	EXMem_Rs2Data,
+  input  wire  [`SIMD_DATA_WIDTH-1	:0]   EXMem_Rs2Data,
   input  wire                           	Mem_DcacheSign,
   output wire  [`DATA_WIDTH-1  	:0]      	Dcache_DataRd,
   //Icache	
@@ -70,7 +70,7 @@ always@(*)                       //choose word/half_word/byte from word
 assign Dcache_DataRd = Cache_core_data_reg; 
 
 //write
-always@(posedge clk)
+always@(posedge clk or negedge rst_n)
   begin
   if(~rst_n)
         for(i = 0 ; i < 9216 ;i = i + 1) data[i] <= 32'b0;//just for test here

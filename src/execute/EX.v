@@ -6,41 +6,43 @@
  * @Describe:EX  module
  */
 module EX(
-    input       [`DATA_WIDTH - 1:0]     IDEX_Rs1Data,
-    input       [`DATA_WIDTH - 1:0]     IDEX_Rs2Data,
+    input       [`SIMD_DATA_WIDTH - 1:0] IDEX_Rs1Data,
+    input       [`SIMD_DATA_WIDTH - 1:0] IDEX_Rs2Data,
     //signals for mux_aluinput
-    input                               IDEX_Sel1,
-    input       [`DATA_WIDTH - 1:0]     IDEX_NowPC,
-    input                               IDEX_Sel2,
-    input       [`DATA_WIDTH - 1:0]     IDEX_Imm,
+    input                                IDEX_Sel1,
+    input       [`ADDR_WIDTH - 1:0]      IDEX_NowPC,
+    input                                IDEX_Sel2,
+    input       [`DATA_WIDTH - 1:0]      IDEX_Imm,
     //other input
-    input       [`DATA_WIDTH - 1:0]     Csr_RdData,
-    input       [`ALU_OP_WIDTH - 1:0]   IDEX_AluOp,
-    input       [2:0]                   IDEX_LdType,
-    input       [1:0]                   IDEX_StType,
-    input                               Mem_DcacheEN,
-    input                               IDEX_16BitFlag,
-    input                               clk,
-    input                               rst_n,
+    input       [`DATA_WIDTH - 1:0]      Csr_RdData,
+    input       [`ALU_OP_WIDTH - 1:0]    IDEX_AluOp,
+    input       [2:0]                    IDEX_LdType,
+    input       [1:0]                    IDEX_StType,
+    input                                Mem_DcacheEN,
+    input                                IDEX_16BitFlag,
+    input                                clk,
+    input                                rst_n,
+    input                                simd_ena,
+    input       [`SIMD_WIDTH - 1:0]      simd_ctl,
     //output
-    output      [`DATA_WIDTH - 1:0]     EX_AluData,
-    output                              EX_BranchFlag,
-    output      [`ADDR_WIDTH - 1:0]     EX_BranchPC,
-    output                              EX_LdStFlag,
-    output                              EX_StallReq
+    output      [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
+    output                               EX_BranchFlag,
+    output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
+    output                               EX_LdStFlag,
+    output                               EX_StallReq
 );
 
 //extra signals
-wire            [`DATA_WIDTH - 1:0]     s1;
-wire            [`DATA_WIDTH - 1:0]     s2;
+wire            [`SIMD_DATA_WIDTH - 1:0] s1;
+wire            [`SIMD_DATA_WIDTH - 1:0] s2;
 
-wire                                    div_start;
-wire                                    div_ready;
+wire                                     div_start;
+wire                                     div_ready;
 
-wire                                    alu_ic_en;
-wire                                    alu_m_en;
-wire            [`DATA_WIDTH - 1:0]     AluData_ic;
-wire            [`DATA_WIDTH - 1:0]     AluData_m;
+wire                                     alu_ic_en;
+wire                                     alu_m_en;
+wire            [`SIMD_DATA_WIDTH - 1:0] AluData_ic;
+wire            [`SIMD_DATA_WIDTH - 1:0] AluData_m;
 
 mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1), 
                      .forward_rs1(IDEX_Rs1Data), 
@@ -59,6 +61,8 @@ rv32ic_warp rv32ic  (
                      .IDEX_AluOp(IDEX_AluOp),
                      .IDEX_NowPC(IDEX_NowPC),
                      .IDEX_16BitFlag(IDEX_16BitFlag),
+                     .simd_ena(simd_ena),
+                     .simd_ctl(simd_ctl),
                      .Csr_RdData(Csr_RdData),
                      .IDEX_LdType(IDEX_LdType),
                      .IDEX_StType(IDEX_StType),
@@ -76,6 +80,8 @@ rv32m_warp rv32m   (
                     .m_AluOp(IDEX_AluOp),
                     .clk(clk),
                     .rst_n(rst_n),
+                    .simd_ena(simd_ena),
+                    .simd_ctl(simd_ctl),
                     .div_start(div_start),
                     .div_ready(div_ready),
                     .alu_m_en(alu_m_en),
@@ -84,9 +90,9 @@ rv32m_warp rv32m   (
 
 ex_out       alu_out(
                      .issue_AluData_0(AluData_ic),
-                     .issue_AluData_1(32'b0),
+                     .issue_AluData_1(64'b0),
                      .issue_AluData_m_0(AluData_m),
-                     .issue_AluData_m_1(32'b0),
+                     .issue_AluData_m_1(64'b0),
                      .alu_ic_en_0(alu_ic_en),
                      .alu_ic_en_1(1'b0),
                      .alu_m_en_0(alu_m_en),

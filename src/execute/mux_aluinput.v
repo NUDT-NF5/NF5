@@ -6,19 +6,18 @@
  * @Describe: mux_aluinput  module
  */
 module mux_aluinput(
-    input              IDEX_Sel1,
-    input       [31:0] forward_rs1,
-    input       [31:0] IDEX_NowPC,
-    input              IDEX_Sel2,
-    input       [31:0] forward_rs2,
-    input       [31:0] IDEX_Imm,
+    input                                IDEX_Sel1,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs1,
+    input       [`ADDR_WIDTH - 1:0]      IDEX_NowPC,
+    input                                IDEX_Sel2,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs2,
+    input       [`DATA_WIDTH - 1:0]      IDEX_Imm,
 
-    output      [31:0] s1,
-    output      [31:0] s2
+    output      [`SIMD_DATA_WIDTH - 1:0] s1,
+    output      [`SIMD_DATA_WIDTH - 1:0] s2
 );
 
-
-assign s1 = IDEX_Sel1 ? forward_rs1 : IDEX_NowPC;
-assign s2 = IDEX_Sel2 ? forward_rs2 : IDEX_Imm;
+assign s1 = IDEX_Sel1 ? forward_rs1 : {{(`SIMD_DATA_WIDTH - `ADDR_WIDTH){1'b0}}, IDEX_NowPC};
+assign s2 = IDEX_Sel2 ? forward_rs2 : {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, IDEX_Imm};
 
 endmodule

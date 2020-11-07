@@ -13,15 +13,15 @@ module RegFile
 	input 								clk,
 	input 								rst_n,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	rAddr1,
-	output	[`DATA_WIDTH - 1 : 0]		rData1,
+	output	[`SIMD_DATA_WIDTH - 1 : 0]	rData1,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	rAddr2,
-	output	[`DATA_WIDTH - 1 : 0]		rData2,
+	output	[`SIMD_DATA_WIDTH - 1 : 0]	rData2,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	rAddr3,
-	output	[`DATA_WIDTH - 1 : 0]		rData3,
+	output	[`SIMD_DATA_WIDTH - 1 : 0]	rData3,
 
 	input								wEN,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	wAddr,
-	input	[`DATA_WIDTH - 1 : 0]		wData
+	input	[`SIMD_DATA_WIDTH - 1 : 0]	wData
 );
 	reg [`DATA_WIDTH - 1 : 0] regFiles [0 : `RF_NUMBER - 1];
 	

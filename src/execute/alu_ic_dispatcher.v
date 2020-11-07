@@ -7,42 +7,42 @@
  */
 `include "../src/common/Define.v"
 module alu_ic_dispatcher(
-    input       [`DATA_WIDTH - 1:0]     s1,
-    input       [`DATA_WIDTH - 1:0]     s2,
-    input       [`DATA_WIDTH - 1:0]     forward_rs1,
-    input       [`DATA_WIDTH - 1:0]     forward_rs2,
-    input       [`ALU_OP_WIDTH - 1:0]   IDEX_AluOp,
+    input       [`SIMD_DATA_WIDTH - 1:0] s1,
+    input       [`SIMD_DATA_WIDTH - 1:0] s2,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs1,
+    input       [`SIMD_DATA_WIDTH - 1:0] forward_rs2,
+    input       [`ALU_OP_WIDTH - 1:0]    IDEX_AluOp,
 
-    input       [`DATA_WIDTH - 1:0]     arithmetic_result,
-    input       [`DATA_WIDTH - 1:0]     branch_result,
-    input       [`DATA_WIDTH - 1:0]     logic_result,
-    input       [2:0]                   comparator_result,
-    input       [2:0]                   ucomparator_result,
-    input       [`DATA_WIDTH - 1:0]     shift_result,
+    input       [`SIMD_DATA_WIDTH - 1:0] arithmetic_result,
+    input       [`ADDR_WIDTH - 1:0]      branch_result,
+    input       [`SIMD_DATA_WIDTH - 1:0] logic_result,
+    input       [2:0]                    comparator_result,
+    input       [2:0]                    ucomparator_result,
+    input       [`SIMD_DATA_WIDTH - 1:0] shift_result,
 
-    input       [`DATA_WIDTH - 1:0]     Csr_RdData,
-    input       [2:0]                   IDEX_LdType,
-    input       [1:0]                   IDEX_StType,
-    input                               Mem_DcacheEN,
+    input       [`DATA_WIDTH - 1:0]      Csr_RdData,
+    input       [2:0]                    IDEX_LdType,
+    input       [1:0]                    IDEX_StType,
+    input                                Mem_DcacheEN,
 
-    output reg  [`DATA_WIDTH - 1:0]     arithmetic_s1,
-    output reg  [`DATA_WIDTH - 1:0]     arithmetic_s2,
-    output reg  [2:0]                   arithop_sp,
-    output reg  [`DATA_WIDTH - 1:0]     logic_s1,
-    output reg  [`DATA_WIDTH - 1:0]     logic_s2,
-    output reg  [2:0]                   logic_op, 
-    output reg  [`DATA_WIDTH - 1:0]     comparator_s1,
-    output reg  [`DATA_WIDTH - 1:0]     comparator_s2,
-    output reg  [`DATA_WIDTH - 1:0]     shift_s1,
-    output reg  [4:0]                   shift_s2,
-    output reg  [2:0]                   shift_type,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] arithmetic_s1,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] arithmetic_s2,
+    output reg  [2:0]                    arithop_sp,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] logic_s1,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] logic_s2,
+    output reg  [2:0]                    logic_op, 
+    output reg  [`DATA_WIDTH - 1:0]      comparator_s1,
+    output reg  [`DATA_WIDTH - 1:0]      comparator_s2,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] shift_s1,
+    output reg  [4:0]                    shift_s2,
+    output reg  [2:0]                    shift_type,
 
 
-    output reg  [`DATA_WIDTH - 1:0]     EX_AluData,
-    output      [`ADDR_WIDTH - 1:0]     EX_BranchPC,
-    output reg                          EX_BranchFlag,
-    output reg                          alu_ic_en,
-    output                              EX_LdStFlag
+    output reg  [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
+    output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
+    output reg                           EX_BranchFlag,
+    output reg                           alu_ic_en,
+    output                               EX_LdStFlag
 );
 
 //arithmetic input selection
@@ -146,36 +146,36 @@ end
 always @(*) begin
     case(IDEX_AluOp)
         `ALU_SLT: begin
-            comparator_s1 = s1;
-            comparator_s2 = s2;
+            comparator_s1 = s1[0+:`DATA_WIDTH];
+            comparator_s2 = s2[0+:`DATA_WIDTH];
         end
         `ALU_SLTU: begin
-            comparator_s1 = s1;
-            comparator_s2 = s2;
+            comparator_s1 = s1[0+:`DATA_WIDTH];
+            comparator_s2 = s2[0+:`DATA_WIDTH];
         end
         `ALU_BEQ: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         `ALU_BNE: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         `ALU_BLT: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         `ALU_BLTU: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         `ALU_BGE: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         `ALU_BGEU: begin
-            comparator_s1 = forward_rs1;
-            comparator_s2 = forward_rs2;
+            comparator_s1 = forward_rs1[0+:`DATA_WIDTH];
+            comparator_s2 = forward_rs2[0+:`DATA_WIDTH];
         end
         default : begin
             comparator_s1 = 32'b0;
@@ -313,7 +313,7 @@ always @(*) begin
     endcase
 end
 
-assign EX_BranchPC = (IDEX_AluOp == `ALU_JALR) ? logic_result : branch_result;
+assign EX_BranchPC = (IDEX_AluOp == `ALU_JALR) ? logic_result[0+:`ADDR_WIDTH] : branch_result[0+:`ADDR_WIDTH];
 assign EX_LdStFlag = ( | {IDEX_LdType, IDEX_StType}) && (~Mem_DcacheEN);  //IDEX_LdType or IDEX_StType contains 1 means the instruction is load or store 
 
 endmodule

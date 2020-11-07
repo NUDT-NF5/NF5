@@ -10,7 +10,7 @@ module Mem
 (
     input  wire  [`LD_TYPE_WIDTH-1:0]     EXMem_LdType,    //From EXMem stage, indicate load type 
     input  wire  [`ST_TYPE_WIDTH-1:0]     EXMem_StType,    //From EXMem stage, indicate store type
-    input  wire  [`DATA_WIDTH-1   :0]     EXMem_AluData,   //From EXMem stage, indicate Dcaceh Addr
+    input  wire  [`SIMD_DATA_WIDTH-1:0]   EXMem_AluData,   //From EXMem stage, indicate Dcaceh Addr
     output wire                           Mem_LdEN,        //To EX stage, generate forward control signal
     output wire                           Mem_DcacheEN,    //To Dcache
     output wire                           Mem_DcacheRd,    //To Dcache
@@ -27,6 +27,6 @@ assign Mem_DcacheRd    = Mem_LdEN ? 1 : 0;
 assign Mem_DcacheWidth = (( EXMem_LdType == `LD_LB ) || ( EXMem_LdType == `LD_LBU ) || ( EXMem_StType == `ST_SB ))? 2'b00 : 
                          (( EXMem_LdType == `LD_LH ) || ( EXMem_LdType == `LD_LHU ) || ( EXMem_StType == `ST_SH ))? 2'b01 : 
                                                         (( EXMem_LdType == `LD_LW ) || ( EXMem_StType == `ST_SW ))? 2'b10 : 2'b00;
-assign Mem_DcacheAddr  = Mem_DcacheEN ? EXMem_AluData : `DATA_WIDTH'b0;
+assign Mem_DcacheAddr  = Mem_DcacheEN ? EXMem_AluData[`DATA_WIDTH - 1:0] : `DATA_WIDTH'b0;
 assign Mem_DcacheSign = ((EXMem_LdType == `LD_LB)||(EXMem_LdType == `LD_LH))? 1:0;
 endmodule 

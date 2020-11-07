@@ -30,9 +30,9 @@ module Core(
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
 	wire	[2 - 1 : 0]						Decode_Fmt;
 	
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs3Data;
+	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs1Data;
+	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs2Data;
+	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs3Data;
 	wire	     							DecodeHazard_StallReq;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
@@ -52,24 +52,24 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		IDEX_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
-	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
-	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs1Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs2Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs3Data;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
-	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs1Data;
-	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs3Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		RF_Rs1Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		RF_Rs2Data;
+	wire	[`SIMD_DATA_WIDTH - 1 : 0]		RF_Rs3Data;
 	
-    wire    [31:0] 							EX_AluData;
+    wire    [`SIMD_DATA_WIDTH - 1 : 0] 		EX_AluData;
     wire           							EX_LdStFlag;
 	wire									EX_BranchFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 	wire									EX_StallReq;
 	
-    wire    [31:0] 							EXMem_AluData;
-    wire    [31:0] 							EXMem_Rs2Data;
+    wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_AluData;
+    wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_Rs2Data;
     wire           							EXMem_RdWrtEn;
     wire    [4:0]  							EXMem_RdAddr;
     wire           							EXMem_WbSel;
@@ -83,16 +83,16 @@ module Core(
     wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
 	wire									Mem_DcacheSign;   
 
-	wire  	[`DATA_WIDTH-1  :0]      		Dcache_DataRd;
+	wire  	[`DATA_WIDTH-1  :0]          	Dcache_DataRd;
 	wire  	[`DATA_WIDTH-1  :0]      		Icache_Instr;
 
     wire                       				MemWb_WbSel;
-    wire  	[`DATA_WIDTH-1 :0]   			MemWb_AluData;
-    wire  	[`DATA_WIDTH-1 :0]   			MemWb_DataRd;
+    wire  	[`SIMD_DATA_WIDTH-1 :0]   		MemWb_AluData;
+    wire  	[`DATA_WIDTH-1 :0]   	    	MemWb_DataRd;
     wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr;
 	
 	
-	wire  	[`DATA_WIDTH-1 :0]   			Wb_DataWrt;
+	wire  	[`SIMD_DATA_WIDTH-1 :0]   		Wb_DataWrt;
     wire                       				MemWb_RdWrtEn;
 
 	wire   	[4:0]   						Ctrl_Stall;	
@@ -282,6 +282,8 @@ module Core(
 		.IDEX_16BitFlag(IDEX_16BitFlag),
 		.clk(clk),
 		.rst_n(rst_n),
+		.simd_ena(1'b0),
+		.simd_ctl(2'b0),
 		.EX_AluData(EX_AluData),
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),

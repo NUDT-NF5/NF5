@@ -14,7 +14,7 @@ module Csr(
     input  wire   [4:0]                       DBG_interrupt , //
     input  wire                               NMI,
     input  wire                               RESET, 
-    input  wire   [`DATA_WIDTH-1:0]           EX_AluData     ,//jump ldst addr
+    input  wire   [`SIMD_DATA_WIDTH-1:0]      EX_AluData     ,//jump ldst addr
     input  wire   [1:0]                       IDEX_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
     input  wire   [2:0]                       IDEX_LdType   ,
     input  wire                               EX_BranchFlag  ,//actually = branch flag                                                        
@@ -27,7 +27,7 @@ module Csr(
     input  wire   [2:0]                       IDEX_CsrCmd    ,
     //input  wire   [`ADDR_WIDTH-1:0]           IDEX_PC        ,
     input  wire   [`DATA_WIDTH-1:0]           IDEX_Imm       ,
-    input  wire   [`DATA_WIDTH-1:0]           IDEX_Rs1Data   ,
+    input  wire   [`SIMD_DATA_WIDTH-1:0]      IDEX_Rs1Data   ,
     input  wire   [2:0]                       IDEX_ImmSel   ,    
     output wire   [`DATA_WIDTH-1:0]           Csr_RdData     , //write back
                                                
@@ -36,7 +36,7 @@ module Csr(
     output wire                               Csr_Memflush ,    //flush EX-MEM Only 
     output wire                               Csr_WFIClrFlag,
   
-    input  wire   [`DATA_WIDTH-1:0]           EXMem_AluData     ,//jump ldst addr
+    input  wire   [`SIMD_DATA_WIDTH-1:0]      EXMem_AluData     ,//jump ldst addr
     input  wire   [1:0]                       EXMem_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
     input  wire   [2:0]                       EXMem_LdType,
     input  wire   [`ADDR_WIDTH-1:0]           EX_BranchPC,//new	
@@ -257,7 +257,7 @@ wire csr_mepc_wen;
     //        setting for other exceptions.
     //
       wire[31:0] faulting_virtual_address;//Reserve for mem
-		  assign faulting_virtual_address=EXMem_AluData;
+		  assign faulting_virtual_address=EXMem_AluData[`DATA_WIDTH - 1:0];
 	     wire  [`CSR_DATA_WIDTH-1:0]csr_mtval_nxt;  
         wire   csr_mtval_ena;   
          assign csr_mtval_nxt = Csr_Memflush ? faulting_virtual_address://ldst misalign
@@ -275,7 +275,7 @@ wire csr_mepc_wen;
     // ------------------------------------
 
          reg  [`CSR_DATA_WIDTH-1:0]csr_read_data;                      
-         wire [`DATA_WIDTH-1:0] csr_op1 =( IDEX_ImmSel==`IMM_Z)? IDEX_Imm :IDEX_Rs1Data;
+         wire [`DATA_WIDTH-1:0] csr_op1 =( IDEX_ImmSel==`IMM_Z)? IDEX_Imm :IDEX_Rs1Data[`DATA_WIDTH - 1:0];
          wire [`DATA_WIDTH-1:0] csr_op2 =csr_read_data;   
          wire csr_rden  = IDEX_CsrCmd[0]| IDEX_CsrCmd[1];//read enable
          wire csr_wrten = (IDEX_CsrCmd == `CSR_S|IDEX_CsrCmd == `CSR_C)&csr_op1!=0 | IDEX_CsrCmd == `CSR_W;                                 

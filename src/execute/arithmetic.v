@@ -6,26 +6,32 @@
  * @Describe: arithmetic module
  */
 module arithmetic(
-    input       [31:0] arithmetic_s1,
-    input       [31:0] arithmetic_s2,
-    input       [31:0] IDEX_NowPC,
-    input       [2:0]  arithop_sp,       //if aluop == jalr, arithop_sp = 'b100, else if aluop == other branch,  arithop_sp = 'b001, else if aluop == sub, arithop_sp == 'b010
-    input              IDEX_16BitFlag,
-    output      [31:0] arithmetic_result,
-    output      [31:0] branch_result
+    input       [`SIMD_DATA_WIDTH - 1:0] arithmetic_s1,
+    input       [`SIMD_DATA_WIDTH - 1:0] arithmetic_s2,
+    input       [`ADDR_WIDTH - 1:0]      IDEX_NowPC,
+    input       [2:0]                    arithop_sp,       //if aluop == jalr, arithop_sp = 'b100, else if aluop == other branch,  arithop_sp = 'b001, else if aluop == sub, arithop_sp == 'b010
+    input                                IDEX_16BitFlag,
+    input                                simd_ena,
+    input       [`SIMD_WIDTH - 1:0]      simd_ctl,
+
+    output      [`SIMD_DATA_WIDTH - 1:0] arithmetic_result,
+    output      [`ADDR_WIDTH - 1:0]      branch_result
 );
 
-reg             [31:0] mainadder_s1;
-reg             [31:0] mainadder_s2;
-reg             [31:0] viceadder_s1;
-reg             [31:0] viceadder_s2;
+reg             [`SIMD_DATA_WIDTH - 1:0] mainadder_s1;
+reg             [`SIMD_DATA_WIDTH - 1:0] mainadder_s2;
+reg             [`SIMD_DATA_WIDTH - 1:0] viceadder_s1;
+reg             [`SIMD_DATA_WIDTH - 1:0] viceadder_s2;
 
 reg                   ci1;
 wire                  ci2;
+wire            [`SIMD_DATA_WIDTH - 1:0] branch_result64;
 
 //2 adders, one for arithmetic output, another for branch output
-adder32 adder_main(.a(mainadder_s1), .b(mainadder_s2), .ci(ci1), .s(arithmetic_result));
-adder32 adder_vice(.a(viceadder_s1), .b(viceadder_s2), .ci(ci2), .s(branch_result));
+adder_simd adder_main(.a(mainadder_s1), .b(mainadder_s2), .ci(ci1), .simd_ena(simd_ena), .simd_ctl(simd_ctl), .s(arithmetic_result));
+adder_simd adder_vice(.a(viceadder_s1), .b(viceadder_s2), .ci(ci2), .simd_ena(simd_ena), .simd_ctl(simd_ctl), .s(branch_result64));
+
+assign branch_result = branch_result64[0+:`ADDR_WIDTH];
 
 //if aluop == unconditional branch, arithmetic adder calculate PC + 4
 always @(*) begin
