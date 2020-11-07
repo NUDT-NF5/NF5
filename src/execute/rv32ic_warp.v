@@ -102,6 +102,8 @@ comparator alu_comp (.comparator_s1(comparator_s1),
 shift alu_shift     (.shift_s1(shift_s1), 
                      .shift_s2(shift_s2), 
                      .shift_type(shift_type), 
+                     .simd_ena(simd_ena),
+                     .simd_ctl(simd_ctl),
                      .shift_result(shift_result));
 
 endmodule

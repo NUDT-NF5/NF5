@@ -27,9 +27,10 @@ assign shift_result = (simd_ena && simd_ctl[0]) ?
                       shift_type[2] ? {($signed(shift_s1[63:48]) >>> shift_s2), ($signed(shift_s1[47:32]) >>> shift_s2), 
                                        ($signed(shift_s1[31:16]) >>> shift_s2), ($signed(shift_s1[15:0]) >>> shift_s2)} :
                       0):
-                      (shift_type[0] ? (shift_s1 << shift_s2) :
-                      shift_type[1] ? (shift_s1 >> shift_s2) :
-                      shift_type[2] ? (shift_s1 >>> shift_s2) :
+                      (shift_type[0] ? {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, (shift_s1[`DATA_WIDTH - 1:0] << shift_s2)} :
+                      shift_type[1] ? ({{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, shift_s1[`DATA_WIDTH - 1:0] >> shift_s2}) :
+                      shift_type[2] ? (shift_s1[`DATA_WIDTH - 1] ? ({32'hffffffff, shift_s1[`DATA_WIDTH - 1:0]} >> shift_s2) & 64'h00000000ffffffff :
+                                    {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, shift_s1[`DATA_WIDTH - 1:0] >> shift_s2}) :
                       0);
 
 endmodule
