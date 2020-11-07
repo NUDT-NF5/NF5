@@ -77,11 +77,9 @@ assert property (Pass_PC)	$fdisplay (fd, "ISA_test Pass when clk=%d, PC=%h ",clk
 assert property (Fail_PC)	$fdisplay (fd, "ISA_test Fail when clk=%d, PC=%h ",clk_count,i_Core.IFID_NowPC);
 assert property (Pass_PC) #15 $finish;
 assert property (Fail_PC) #15 $finish;
-/*
 initial
         begin            
             $dumpfile("test.vcd");
             $dumpvars(0,TbAll);
         end
-*/
 endmodule
