@@ -20,7 +20,7 @@ do
         echo "================选择使用的仿真工具======================"
         echo "    1  Open source tool：Icarus Verilog + Gtkwave       "
         echo "    2  Commercial  tool：Cadence NC-Verilog             "
-	echo "    3  Commercial  tool：Xilinx Vivado                  "
+	      echo "    3  Commercial  tool：Xilinx Vivado                  "
         echo "========================================================"
         echo "    PLease input the [Number] to chose the EDATool :    "
         echo  " "
@@ -79,6 +79,10 @@ do
           test_dir=$isa_test_dir/isa-compliance-test/test_0x0000
           number_0x_numb=3
           TB_dir=TB_compliance
+          if [ "$EDA_env_dir" = "$iverilog_dir" ]
+            then
+            TB_dir=TB_iverilog_compliance
+          fi
           break
         elif [ $number_0x -eq 4 ]
           then
@@ -86,6 +90,10 @@ do
           test_dir=$isa_test_dir/isa-compliance-test/test_0x8000 
           number_0x_numb=4
           TB_dir=TB_compliance
+          if [ "$EDA_env_dir" = "$iverilog_dir" ]
+            then
+            TB_dir=TB_iverilog_compliance
+          fi
           break
         else 
           echo "Wrong number"
