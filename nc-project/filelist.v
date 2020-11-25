@@ -8,6 +8,7 @@
 `include "/home/zenk/NF5_integerSIMD/NF5/src/control/Ctrl.v"
 `include "/home/zenk/NF5_integerSIMD/NF5/src/decode/Decode.v"
 `include "/home/zenk/NF5_integerSIMD/NF5/src/decode/DecodeHazard.v"
+`include "/home/zenk/NF5_integerSIMD/NF5/src/decode/OperandOrganizer.v"
 `include "/home/zenk/NF5_integerSIMD/NF5/src/execute/EX.v"
 `include "/home/zenk/NF5_integerSIMD/NF5/src/execute/adder32.v"
 `include "/home/zenk/NF5_integerSIMD/NF5/src/execute/adder_simd.v"

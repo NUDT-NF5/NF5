@@ -21,8 +21,8 @@ module alu_ic_dispatcher(
     input       [`SIMD_DATA_WIDTH - 1:0] shift_result,
 
     input       [`DATA_WIDTH - 1:0]      Csr_RdData,
-    input       [2:0]                    IDEX_LdType,
-    input       [1:0]                    IDEX_StType,
+    input       [`LD_TYPE_WIDTH - 1:0]   IDEX_LdType,
+    input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
     input                                Mem_DcacheEN,
 
     output reg  [`SIMD_DATA_WIDTH - 1:0] arithmetic_s1,

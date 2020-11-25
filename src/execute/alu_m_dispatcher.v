@@ -82,23 +82,23 @@ end*/
 always @(*) begin
     case(IDEX_AluOp) 
         `ALU_MUL    : begin
-            mul_s1 = s1;
-            mul_s2 = s2;
+            mul_s1 = (simd_ena) ? s1 : {{32{s1[31]}}, s1[31:0]};
+            mul_s2 = (simd_ena) ? s2 : {{32{s2[31]}}, s2[31:0]};
             mul_sign = 2'b0;
         end
         `ALU_MULH   : begin
-            mul_s1 = s1;
-            mul_s2 = s2;
+            mul_s1 = (simd_ena) ? s1 : {{32{s1[31]}}, s1[31:0]};
+            mul_s2 = (simd_ena) ? s2 : {{32{s2[31]}}, s2[31:0]};
             mul_sign = 2'b11;
         end
         `ALU_MULHSU : begin
-            mul_s1 = s1;
-            mul_s2 = s2;
+            mul_s1 = (simd_ena) ? s1 : {{32{s1[31]}}, s1[31:0]};
+            mul_s2 = (simd_ena) ? s2 : {{32{1'b0}}, s2[31:0]};
             mul_sign = 2'b10;
         end
         `ALU_MULHU  : begin
-            mul_s1 = s1;
-            mul_s2 = s2;
+            mul_s1 = (simd_ena) ? s1 : {{32{1'b0}}, s1[31:0]};;
+            mul_s2 = (simd_ena) ? s2 : {{32{1'b0}}, s2[31:0]};;
             mul_sign = 2'b0;
         end
         default : begin
@@ -165,10 +165,10 @@ always @(*) begin
                     2'b10:
                         EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
                     default:
-                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase
             else 
-                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
         end
         `ALU_MULHSU : begin
             alu_m_en = 1'b1;
@@ -179,10 +179,10 @@ always @(*) begin
                     2'b10:
                         EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
                     default:
-                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase
             else 
-                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
         end
         `ALU_MULHU  : begin
             alu_m_en = 1'b1;
@@ -193,10 +193,10 @@ always @(*) begin
                     2'b10:
                         EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
                     default:
-                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                        EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase
             else 
-                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
+                EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
         end
         `ALU_DIV    : begin
             alu_m_en = 1'b1;

@@ -26,7 +26,8 @@ assign Mem_DcacheEN    = Mem_LdEN || St_EN &(!Csr_Memflush);
 assign Mem_DcacheRd    = Mem_LdEN ? 1 : 0; 
 assign Mem_DcacheWidth = (( EXMem_LdType == `LD_LB ) || ( EXMem_LdType == `LD_LBU ) || ( EXMem_StType == `ST_SB ))? 2'b00 : 
                          (( EXMem_LdType == `LD_LH ) || ( EXMem_LdType == `LD_LHU ) || ( EXMem_StType == `ST_SH ))? 2'b01 : 
-                                                        (( EXMem_LdType == `LD_LW ) || ( EXMem_StType == `ST_SW ))? 2'b10 : 2'b00;
+                                                        (( EXMem_LdType == `LD_LW ) || ( EXMem_StType == `ST_SW ))? 2'b10 : 
+                                                        (( EXMem_LdType == `LD_LD ) || ( EXMem_StType == `ST_SD ))? 2'b11 :2'b00;
 assign Mem_DcacheAddr  = Mem_DcacheEN ? EXMem_AluData[`DATA_WIDTH - 1:0] : `DATA_WIDTH'b0;
 assign Mem_DcacheSign = ((EXMem_LdType == `LD_LB)||(EXMem_LdType == `LD_LH))? 1:0;
 endmodule 

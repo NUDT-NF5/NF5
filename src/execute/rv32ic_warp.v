@@ -10,8 +10,8 @@ module rv32ic_warp(
     input       [`SIMD_WIDTH - 1:0]      simd_ctl,
 
     input       [`DATA_WIDTH - 1:0]      Csr_RdData,
-    input       [2:0]                    IDEX_LdType,
-    input       [1:0]                    IDEX_StType,
+    input       [`LD_TYPE_WIDTH - 1:0]   IDEX_LdType,
+    input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
     input                                Mem_DcacheEN,
 
     output      [`SIMD_DATA_WIDTH - 1:0] EX_AluData,

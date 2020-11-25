@@ -16,8 +16,8 @@ module EX(
     //other input
     input       [`DATA_WIDTH - 1:0]      Csr_RdData,
     input       [`ALU_OP_WIDTH - 1:0]    IDEX_AluOp,
-    input       [2:0]                    IDEX_LdType,
-    input       [1:0]                    IDEX_StType,
+    input       [`LD_TYPE_WIDTH - 1:0]   IDEX_LdType,
+    input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
     input                                Mem_DcacheEN,
     input                                IDEX_16BitFlag,
     input                                clk,
@@ -97,6 +97,7 @@ ex_out       alu_out(
                      .alu_ic_en_1(1'b0),
                      .alu_m_en_0(alu_m_en),
                      .alu_m_en_1(1'b0),
+                     .simd_ena(simd_ena),
                      .EX_AluData_0(EX_AluData),
                      .EX_AluData_1()
 );

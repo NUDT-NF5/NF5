@@ -18,7 +18,7 @@ module Dcache(
   input  wire  [`ADDR_WIDTH-1  	:0]      	Mem_DcacheAddr,   //To Dcache
   input  wire  [`SIMD_DATA_WIDTH-1	:0]   EXMem_Rs2Data,
   input  wire                           	Mem_DcacheSign,
-  output wire  [`DATA_WIDTH-1  	:0]      	Dcache_DataRd,
+  output wire  [`SIMD_DATA_WIDTH-1  	:0] Dcache_DataRd,
   //Icache	
   input  wire  [`ADDR_WIDTH-1  	:0]      	Icache_NextPC,
   output wire  [`DATA_WIDTH-1  	:0]      	Icache_Instr
@@ -29,8 +29,9 @@ wire [4 :0]     sel_hw;
 wire [4 :0]     sel_byte;
 wire [6 :0]     sel_byte_start;
 wire [31:0]     sel_data_rd;
+wire [31:0]     sel_data_rd_extra;
 wire [31:0]     data_tmp;
-reg  [31:0]     Cache_core_data_reg;
+reg  [63:0]     Cache_core_data_reg;
 reg  [31:0]     data [0:9215];
   
 integer i;					
@@ -47,22 +48,24 @@ assign Icache_Instr = (Icache_NextPC[1]==1)? data_tmp: data[Icache_addr];
 
 //read
 assign sel_data_rd = data[addr];
+assign sel_data_rd_extra = data[addr+1];
 always@(*)                       //choose word/half_word/byte from word
   begin
     if( Mem_DcacheRd &&  Mem_DcacheEN )
         case(Mem_DcacheWidth)
           2'b00:     
                   if(Mem_DcacheSign)
-                      Cache_core_data_reg = {{24{sel_data_rd[sel_byte+'d7]}},sel_data_rd[sel_byte+:'d8]};  
+                      Cache_core_data_reg = {32'b0, {{24{sel_data_rd[sel_byte+'d7]}},sel_data_rd[sel_byte+:'d8]}};  
                   else
-                      Cache_core_data_reg = {24'b0,sel_data_rd[sel_byte+:'d8]};   
+                      Cache_core_data_reg = {32'b0, {24'b0,sel_data_rd[sel_byte+:'d8]}};   
           2'b01:   
                   if(Mem_DcacheSign)  
-                      Cache_core_data_reg = {{16{sel_data_rd[sel_hw+'d15]}} ,sel_data_rd[sel_hw+:'d16]};
+                      Cache_core_data_reg = {32'b0, {{16{sel_data_rd[sel_hw+'d15]}} ,sel_data_rd[sel_hw+:'d16]}};
                   else
-                      Cache_core_data_reg = {16'b0,sel_data_rd[sel_hw+:'d16]};
-          2'b10:      Cache_core_data_reg = sel_data_rd;
-          default:    Cache_core_data_reg = 32'b0;
+                      Cache_core_data_reg = {32'b0, {16'b0,sel_data_rd[sel_hw+:'d16]}};
+          2'b10:      Cache_core_data_reg = {32'b0, sel_data_rd};
+          2'b11:      Cache_core_data_reg = {sel_data_rd_extra, sel_data_rd};
+          default:    Cache_core_data_reg = 64'b0;
         endcase
     else
           Cache_core_data_reg = 32'b0;
@@ -79,6 +82,10 @@ always@(posedge clk or negedge rst_n)
         2'b00:     data[addr][sel_byte+:'d8]  <= EXMem_Rs2Data['d8-1:0];
         2'b01:     data[addr][sel_byte+:'d16] <= EXMem_Rs2Data['d16-1:0];
         2'b10:     data[addr][sel_byte+:'d32] <= EXMem_Rs2Data['d32-1:0];
+        2'b11: begin
+                   data[addr][sel_byte+:'d32]   <= EXMem_Rs2Data['d32-1:0];
+                   data[addr+1][sel_byte+:'d32] <= EXMem_Rs2Data['d32-1:0];
+        end
         default:   data[addr] <= data[addr];
 	    endcase
   end

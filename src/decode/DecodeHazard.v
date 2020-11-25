@@ -32,7 +32,7 @@ module DecodeHazard(
     input 	[`SIMD_DATA_WIDTH - 1 : 0]	EXMem_AluData,
 	
 	//Mem -> DecodeHazard
-    input   [`DATA_WIDTH - 1 : 0]   	Dcache_DataRd,
+    input   [`SIMD_DATA_WIDTH - 1 : 0]  Dcache_DataRd,
     input              					Mem_LdEn,
 	
 	//MemWb -> DecodeHazard
@@ -62,7 +62,7 @@ module DecodeHazard(
 		.DATA_WIDTH_LOG2(`SIMD_DATA_WIDTH_LOG2)
 	) i_Rs1Mux
 	(
-		.in({Wb_DataWrt, {{(`SIMD_DATA_WIDTH-`DATA_WIDTH){1'b0}},Dcache_DataRd}, EXMem_AluData, EX_AluData, RF_Rs1Data}),
+		.in({Wb_DataWrt, Dcache_DataRd, EXMem_AluData, EX_AluData, RF_Rs1Data}),
 		.sel(rs1Sel),
 		.out(DecodeHazard_Rs1Data)
 	);
@@ -74,7 +74,7 @@ module DecodeHazard(
 		.DATA_WIDTH_LOG2(`SIMD_DATA_WIDTH_LOG2)
 	) i_Rs2Mux
 	(
-		.in({Wb_DataWrt, {{(`SIMD_DATA_WIDTH-`DATA_WIDTH){1'b0}},Dcache_DataRd}, EXMem_AluData, EX_AluData, RF_Rs2Data}),
+		.in({Wb_DataWrt, Dcache_DataRd, EXMem_AluData, EX_AluData, RF_Rs2Data}),
 		.sel(rs2Sel),
 		.out(DecodeHazard_Rs2Data)
 	);
@@ -87,7 +87,7 @@ module DecodeHazard(
 		.DATA_WIDTH_LOG2(`SIMD_DATA_WIDTH_LOG2)
 	) i_Rs3Mux
 	(
-		.in({Wb_DataWrt, {{(`SIMD_DATA_WIDTH-`DATA_WIDTH){1'b0}},Dcache_DataRd}, EXMem_AluData, EX_AluData, RF_Rs3Data}),
+		.in({Wb_DataWrt, Dcache_DataRd, EXMem_AluData, EX_AluData, RF_Rs3Data}),
 		.sel(rs3Sel),
 		.out(DecodeHazard_Rs3Data)
 	);

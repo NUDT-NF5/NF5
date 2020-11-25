@@ -15,8 +15,6 @@
 //simd
 `define SIMD_WIDTH          2
 `define SIMD_DATA_WIDTH     64
-`define SIMD16              2'b10
-`define SIMD32              2'b01
 
 /*----------Mux.v---------*/
 `define	DATA_WIDTH_LOG2		 5
@@ -70,6 +68,8 @@
 `define OP_FDNMSUB          `OPCODE_WIDTH'b100_1011
 `define OP_FDNMADD          `OPCODE_WIDTH'b100_1111
 `define OP_FD               `OPCODE_WIDTH'b101_0011
+//SIMD opcode
+`define OP_R_SIMD           `OPCODE_WIDTH'b110_1011
 
 //funct3 encode
 `define FUNCT3_WIDTH		3
@@ -87,6 +87,27 @@
 `define FUNCT7_0			`FUNCT7_WIDTH'b000_0000
 `define FUNCT7_1			`FUNCT7_WIDTH'b000_0001
 `define FUNCT7_5			`FUNCT7_WIDTH'b010_0000
+
+//simd funct6 encode
+`define SIMD_ADD            6'b01_0010
+`define SIMD_SUB            6'b01_0000
+`define SIMD_MUL            6'b10_1010
+`define SIMD_UMUL           6'b10_1000
+`define SIMD_SRL            6'b01_0110
+`define SIMD_SLL            6'b01_0101
+`define SIMD_SRA            6'b01_0100
+`define SIMD_MV_S_I         6'b010_111
+`define SIMD_MV_I_S         6'b010_110
+
+//simd funct7bit encode
+`define SIMD_USE_MASK       1'b1
+
+//simd funct2 encode funct3's 1-2bit
+`define SIMD16             2'b10
+`define SIMD32             2'b01
+`define SIMD64             2'b00
+
+`define SIMD_HORIZONTAL    1'b1
 
 //exception encode 
 `define IMM_ECALL			`CSR_ADDR_WIDTH'b0000_0000_0000
@@ -139,11 +160,12 @@
 `define BR_NE  			`BR_TYPE_WIDTH'd6
 			
 // st_type
-`define ST_TYPE_WIDTH 	2   
+`define ST_TYPE_WIDTH 	3   
 `define ST_XXX 			`ST_TYPE_WIDTH'd0
 `define ST_SW  			`ST_TYPE_WIDTH'd1
 `define ST_SH  			`ST_TYPE_WIDTH'd2
 `define ST_SB  			`ST_TYPE_WIDTH'd3
+`define ST_SD  			`ST_TYPE_WIDTH'd4
 			
 // ld_type
 `define LD_TYPE_WIDTH 	3   
@@ -153,6 +175,7 @@
 `define LD_LB  			`LD_TYPE_WIDTH'd3
 `define LD_LHU 			`LD_TYPE_WIDTH'd4
 `define LD_LBU 			`LD_TYPE_WIDTH'd5
+`define LD_LD           `LD_TYPE_WIDTH'd6
 			
 // wb_sel	
 `define WB_SEL_WIDTH 	1  
@@ -191,7 +214,9 @@
 `define ALU_DIVU   	    `ALU_OP_WIDTH'd26
 `define ALU_REM   	    `ALU_OP_WIDTH'd27
 `define ALU_REMU   	    `ALU_OP_WIDTH'd28
-`define ALU_XXX    		`ALU_OP_WIDTH'd29
+`define ALU_SMVSI       `ALU_OP_WIDTH'd29
+`define ALU_SMVIS       `ALU_OP_WIDTH'd30
+`define ALU_XXX    		`ALU_OP_WIDTH'd31
 
 //csr_cmd
 `define CSR_CMD_WIDTH	3	
@@ -216,8 +241,9 @@
 `define FLUSH_ERET			`DECODE_FLUSH_WIDTH'b1000
 
 //control signal flowing in pipe
-`define All_CTRL_WIDTH	`A_SEL_WIDTH + `B_SEL_WIDTH + `ALU_OP_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `WB_SEL_WIDTH + `BOOL_WIDTH + `CSR_CMD_WIDTH + `BOOL_WIDTH 
-`define localAllCTRLWIDTH32  `PC_SEL_WIDTH + `A_SEL_WIDTH + `B_SEL_WIDTH + `IMM_SEL_WIDTH+ `ALU_OP_WIDTH + `BR_TYPE_WIDTH+ `BOOL_WIDTH + `ST_TYPE_WIDTH+ `LD_TYPE_WIDTH+ `WB_SEL_WIDTH + `BOOL_WIDTH+ `CSR_CMD_WIDTH+ `BOOL_WIDTH+ `DECODE_STALL_WIDTH + `DECODE_FLUSH_WIDTH + `XLEN_WIDTH_SEL
+`define All_CTRL_WIDTH	`A_SEL_WIDTH + `B_SEL_WIDTH + `ALU_OP_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `WB_SEL_WIDTH + `BOOL_WIDTH + `CSR_CMD_WIDTH + `BOOL_WIDTH + `BOOL_WIDTH
+`define All_CTRL_WIDTH16 `A_SEL_WIDTH + `B_SEL_WIDTH + `ALU_OP_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `WB_SEL_WIDTH + `BOOL_WIDTH + `CSR_CMD_WIDTH + `BOOL_WIDTH
+`define localAllCTRLWIDTH32  `PC_SEL_WIDTH + `A_SEL_WIDTH + `B_SEL_WIDTH + `IMM_SEL_WIDTH+ `ALU_OP_WIDTH + `BR_TYPE_WIDTH+ `BOOL_WIDTH + `ST_TYPE_WIDTH+ `LD_TYPE_WIDTH+ `WB_SEL_WIDTH + `BOOL_WIDTH+ `CSR_CMD_WIDTH+ `BOOL_WIDTH+ `DECODE_STALL_WIDTH + `DECODE_FLUSH_WIDTH + `XLEN_WIDTH_SEL + 1 + `SIMD_WIDTH
 `define localAllCTRLWIDTH16  `A_SEL_WIDTH + `B_SEL_WIDTH + `IMM_SEL_WIDTH+ `ALU_OP_WIDTH + `BR_TYPE_WIDTH + `ST_TYPE_WIDTH+ `LD_TYPE_WIDTH+ `WB_SEL_WIDTH + `BOOL_WIDTH+ `CSR_CMD_WIDTH+ `BOOL_WIDTH+ `DECODE_STALL_WIDTH + `DECODE_FLUSH_WIDTH + `XLEN_WIDTH_SEL + `RF_ADDR_TYPE_SEL
 
 //instr_op
@@ -335,6 +361,19 @@
 `define FCVT_WUD        `INSTR_ENCODE_WIDTH'd108
 `define FCVT_DW         `INSTR_ENCODE_WIDTH'd109
 `define FCVT_DWU        `INSTR_ENCODE_WIDTH'd110
+
+//integer SIMD
+`define S_ADD           `INSTR_ENCODE_WIDTH'd111
+`define S_SUB           `INSTR_ENCODE_WIDTH'd112
+`define S_MUL           `INSTR_ENCODE_WIDTH'd113
+`define S_UMUL          `INSTR_ENCODE_WIDTH'd114
+`define S_SRL           `INSTR_ENCODE_WIDTH'd115
+`define S_SLL           `INSTR_ENCODE_WIDTH'd116
+`define S_SRA           `INSTR_ENCODE_WIDTH'd117
+`define S_MV_S_I        `INSTR_ENCODE_WIDTH'd118
+`define S_MV_I_S        `INSTR_ENCODE_WIDTH'd119
+`define SD              `INSTR_ENCODE_WIDTH'd120
+`define LD              `INSTR_ENCODE_WIDTH'd121
 
 //instr_op  16-bit only
 `define INSTR_ENCODE_WIDTH	7
@@ -475,6 +514,6 @@
 
 /*----------Core.v---------*/
 `define PIPE_IFID_LEN 	`ADDR_WIDTH + `DATA_WIDTH
-`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + `ADDR_WIDTH
-`define PIPE_EXMem_LEN 	`SIMD_DATA_WIDTH + `RF_ADDR_WIDTH + `SIMD_DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH + `ADDR_WIDTH
-`define PIPE_MemWb_LEN 	5 + 1 + 32 + `SIMD_DATA_WIDTH + 1
+`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `FUNCT3_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + `ADDR_WIDTH
+`define PIPE_EXMem_LEN 	`SIMD_DATA_WIDTH + `RF_ADDR_WIDTH + `SIMD_DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH + `ADDR_WIDTH + 1 + `FUNCT3_WIDTH
+`define PIPE_MemWb_LEN 	`RF_ADDR_WIDTH + 1 + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + 1 + `FUNCT3_WIDTH

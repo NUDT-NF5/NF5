@@ -15,8 +15,8 @@ module Csr(
     input  wire                               NMI,
     input  wire                               RESET, 
     input  wire   [`SIMD_DATA_WIDTH-1:0]      EX_AluData     ,//jump ldst addr
-    input  wire   [1:0]                       IDEX_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
-    input  wire   [2:0]                       IDEX_LdType   ,
+    input  wire   [`LD_TYPE_WIDTH-1:0]        IDEX_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
+    input  wire   [`ST_TYPE_WIDTH-1:0]        IDEX_LdType   ,
     input  wire                               EX_BranchFlag  ,//actually = branch flag                                                        
     input  wire   [3:0]                       Decode_Flush   ,   //eret illegal  ebreak ecall      Decode_Flush[3]����ģʽ
  
@@ -37,8 +37,8 @@ module Csr(
     output wire                               Csr_WFIClrFlag,
   
     input  wire   [`SIMD_DATA_WIDTH-1:0]      EXMem_AluData     ,//jump ldst addr
-    input  wire   [1:0]                       EXMem_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
-    input  wire   [2:0]                       EXMem_LdType,
+    input  wire   [`LD_TYPE_WIDTH-1:0]        EXMem_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
+    input  wire   [`ST_TYPE_WIDTH-1:0]        EXMem_LdType,
     input  wire   [`ADDR_WIDTH-1:0]           EX_BranchPC,//new	
     input  wire   [`ADDR_WIDTH-1:0]           EXMEM_NowPC	,
 	  input  wire			                          Decode_16BitFlag ,

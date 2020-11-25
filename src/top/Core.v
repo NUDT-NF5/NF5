@@ -45,6 +45,8 @@ module Core(
 	wire	[`BOOL_WIDTH - 1 : 0 ]			IDEX_WbRdEn;
 	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		IDEX_CsrCmd;
 	wire	[`BOOL_WIDTH - 1 : 0 ]			IDEX_CsrIllegal;
+    wire	[`FUNCT3_WIDTH - 1 : 0]	        IDEX_Rm;
+    wire                                    IDEX_SimdEN;
 
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_RdAddr;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Imm;
@@ -71,10 +73,12 @@ module Core(
     wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_AluData;
     wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_Rs2Data;
     wire           							EXMem_RdWrtEn;
-    wire    [4:0]  							EXMem_RdAddr;
+    wire    [`RF_ADDR_WIDTH - 1 : 0]		EXMem_RdAddr;
     wire           							EXMem_WbSel;
-    wire    [1:0]  							EXMem_StType;
-    wire    [2:0]  							EXMem_LdType;
+    wire    [`LD_TYPE_WIDTH - 1:0]          EXMem_StType;
+    wire    [`ST_TYPE_WIDTH - 1:0]          EXMem_LdType;
+    wire	[`FUNCT3_WIDTH - 1 : 0]	        EXMEM_Rm;
+    wire                                    EXMEM_SimdEN;
 
     wire                          		 	Mem_LdEn;        
     wire                          		 	Mem_DcacheEn;    
@@ -83,13 +87,15 @@ module Core(
     wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
 	wire									Mem_DcacheSign;   
 
-	wire  	[`DATA_WIDTH-1  :0]          	Dcache_DataRd;
+	wire  	[`SIMD_DATA_WIDTH-1  :0]        Dcache_DataRd;
 	wire  	[`DATA_WIDTH-1  :0]      		Icache_Instr;
 
     wire                       				MemWb_WbSel;
     wire  	[`SIMD_DATA_WIDTH-1 :0]   		MemWb_AluData;
-    wire  	[`DATA_WIDTH-1 :0]   	    	MemWb_DataRd;
+    wire  	[`SIMD_DATA_WIDTH-1 :0]   	    MemWb_DataRd;
     wire  	[`RF_ADDR_WIDTH-1:0] 			MemWb_RdAddr;
+    wire	[`FUNCT3_WIDTH - 1 : 0]	        MemWb_Rm;
+    wire                                    MemWb_SimdEN;
 	
 	
 	wire  	[`SIMD_DATA_WIDTH-1 :0]   		Wb_DataWrt;
@@ -181,7 +187,10 @@ module Core(
 		.rData3(RF_Rs3Data),
 		.wEN(MemWb_RdWrtEn),
 		.wAddr(MemWb_RdAddr),
-		.wData(Wb_DataWrt)
+		.wData(Wb_DataWrt),
+        .simd_ena(MemWb_SimdEN),
+        .horizontal(MemWb_Rm[2]),
+        .simd_ctl(MemWb_Rm[1:0])
 	);
 
 	DecodeHazard i_DecodeHazard(
@@ -211,6 +220,22 @@ module Core(
 		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
 	);
 	
+wire [3:0]                    mask = 4'b1111;
+wire 						  mask_ena;
+wire [`FUNCT3_WIDTH - 1:0]    funct3;
+wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs1;
+wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
+
+	OperandOrganizer i_OperandOrganizer(
+		.rs1(DecodeHazard_Rs1Data),
+		.rs2(DecodeHazard_Rs2Data),
+		.mask(mask),
+		.mask_ena(Decode_Fmt[0]),
+		.simd_ena(Decode_AllCtr[0]),
+		.funct3(Decode_Rm),
+		.reorgnaized_rs1(reorgnaized_rs1),
+		.reorgnaized_rs2(reorgnaized_rs2)
+	);
 
    PipeStage #(
 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
@@ -223,14 +248,15 @@ module Core(
 		.in(
 			{
 				Decode_AllCtr,
+                Decode_Rm,
 				Decode_RdAddr,
 				Decode_Rs1Addr,
 				Decode_Rs2Addr,
 				Decode_Imm,
 				Decode_ImmSel,
 				Decode_CsrAddr,
-				DecodeHazard_Rs1Data,
-				DecodeHazard_Rs2Data,
+				reorgnaized_rs1,
+				reorgnaized_rs2,
 				DecodeHazard_Rs3Data,
 				Decode_16BitFlag,
 				IFID_NowPC
@@ -247,6 +273,8 @@ module Core(
 				IDEX_WbRdEn,
 				IDEX_CsrCmd,
 				IDEX_CsrIllegal,
+				IDEX_SimdEN,
+                IDEX_Rm,
 				IDEX_RdAddr,
 				IDEX_Rs1Addr,
 				IDEX_Rs2Addr,
@@ -282,8 +310,8 @@ module Core(
 		.IDEX_16BitFlag(IDEX_16BitFlag),
 		.clk(clk),
 		.rst_n(rst_n),
-		.simd_ena(1'b0),
-		.simd_ctl(2'b0),
+		.simd_ena(IDEX_SimdEN),
+		.simd_ctl(IDEX_Rm[1:0]),
 		.EX_AluData(EX_AluData),
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),
@@ -345,7 +373,9 @@ wire [31:0] EXMEM_NowPC;
 				IDEX_LdType,
 				IDEX_WbRdEn,
 				IDEX_WbSel,
-                IDEX_NowPC
+                IDEX_NowPC,
+                IDEX_SimdEN,
+                IDEX_Rm
 			} 
 		),
 		.out(
@@ -357,7 +387,9 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_LdType,				
 				EXMem_RdWrtEn,
 				EXMem_WbSel,
-                EXMEM_NowPC
+                EXMEM_NowPC,
+                EXMEM_SimdEN,
+                EXMEM_Rm
 			} 
 		)
 	);
@@ -403,7 +435,9 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_RdWrtEn,
 				EXMem_AluData,
 				Dcache_DataRd,
-				EXMem_WbSel
+				EXMem_WbSel,
+                EXMEM_SimdEN,
+                EXMEM_Rm
 			} 
 		),
 		.out(
@@ -412,7 +446,9 @@ wire [31:0] EXMEM_NowPC;
 				MemWb_RdWrtEn,
 				MemWb_AluData,
 				MemWb_DataRd,
-				MemWb_WbSel
+				MemWb_WbSel,
+                MemWb_SimdEN,
+                MemWb_Rm
 			} 
 		)
 	);
