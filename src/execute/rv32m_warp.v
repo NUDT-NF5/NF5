@@ -51,6 +51,7 @@ alu_m_dispatcher mdp1(
                     .div_s2(div_s2),
                     .div_start(div_start),
                     .alu_m_en(alu_m_en),
+                    .mul_sign(sign),
                     .EX_AluData(m_data)
 );
 
