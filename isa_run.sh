@@ -14,6 +14,7 @@ iverilog_dir=iverilog-project
 vivado_dir=vivado-project/NF5_System/NF5_System.sim/sim_1/behav/xsim
 vivado_sh_dir=vivado-project
 vivado_tb_dir=vivado-project/NF5_System/NF5_System.srcs/sim_1/imports/nf5_source
+vcs_dir=vcs-project
 TB_dir=TB_NC
 while :
 do
@@ -21,6 +22,7 @@ do
         echo "    1  Open source tool：Icarus Verilog + Gtkwave       "
         echo "    2  Commercial  tool：Cadence NC-Verilog             "
 	      echo "    3  Commercial  tool：Xilinx Vivado                  "
+        echo "    4  Commercial  tool：Synopsys VCS                   "
         echo "========================================================"
         echo "    PLease input the [Number] to chose the EDATool :    "
         echo  " "
@@ -42,6 +44,12 @@ do
             EDATool_run_dir=$vivado_sh_dir/vivado_nf5.sh
             EDA_env_dir=$vivado_dir
             TB_dir=TB_vivado
+            break
+        elif [ $number_nc_vivado -eq 4  ]
+          then
+            EDATool_run_dir=$vcs_dir/run.sh
+            EDA_env_dir=$vcs_dir
+            TB_dir=TB_NC
             break
         else
           echo "Wrong number"
