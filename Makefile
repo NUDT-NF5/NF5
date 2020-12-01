@@ -24,12 +24,18 @@ gen_filelist:
 	@find $(src_dir)/* -regex '.*\.v\|.*\.sv' | xargs perl $(iverilog_dir)/filelist_gen > $(iverilog_dir)/filelist.v
 compile:
 	#todo
+
+reorder_filelist:
+	bash $(nc_dir)/reorder.sh $(nc_dir)/filelist.v
+	bash $(iverilog_dir)/reorder.sh $(iverilog_dir)/filelist.v
+
 sim_default:
 	make gen_filelist
 	bash $(iverilog_dir)/run_default
 	
 sim:	
 	make gen_filelist	
+	make reorder_filelist
 	bash isa_run.sh
  	
 sim_gui_nc:
