@@ -48,6 +48,7 @@ do
         elif [ $number_nc_vivado -eq 4  ]
           then
             EDATool_run_dir=$vcs_dir/run.sh
+            chmod +x $EDATool_run_dir
             EDA_env_dir=$vcs_dir
             TB_dir=TB_NC
             break
