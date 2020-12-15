@@ -5,6 +5,7 @@
  * @Last Modified time: 2019-11-07 14:52:01
  * @Describe: simple TB for all module
  */
+`timescale 			1ns/1ps
 `include "../src/common/Define.v"
 module	TbAll;
 	reg								clk;

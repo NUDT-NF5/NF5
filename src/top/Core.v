@@ -55,6 +55,8 @@ module Core(
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
+	wire	[`FUNCT3_WIDTH - 1 : 0]	        IDEX_Rm;
+	wire    [2 - 1 : 0]                     IDEX_Fmt;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
@@ -67,14 +69,16 @@ module Core(
 	wire									EX_BranchFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 	wire									EX_StallReq;
+	wire    [`FPU_EXCEPTION_WIDTH - 1:0]    EX_FpuException;
+    wire                                    EX_FpuReady;
 	
-    wire    [31:0] 							EXMem_AluData;
-    wire    [31:0] 							EXMem_Rs2Data;
+    wire    [`DATA_WIDTH - 1 : 0] 			EXMem_AluData;
+    wire    [`DATA_WIDTH - 1 : 0] 			EXMem_Rs2Data;
     wire           							EXMem_RdWrtEn;
-    wire    [4:0]  							EXMem_RdAddr;
+    wire    [`RF_ADDR_WIDTH - 1 : 0]  		EXMem_RdAddr;
     wire           							EXMem_WbSel;
-    wire    [1:0]  							EXMem_StType;
-    wire    [2:0]  							EXMem_LdType;
+    wire    [`ST_TYPE_WIDTH - 1 : 0]  		EXMem_StType;
+    wire    [`LD_TYPE_WIDTH - 1 : 0]  		EXMem_LdType;
 
     wire                          		 	Mem_LdEn;        
     wire                          		 	Mem_DcacheEn;    
@@ -102,7 +106,8 @@ module Core(
     wire   [`ADDR_WIDTH-1:0]           		Csr_Evec;
     wire                               		Csr_ExcpFlag;
     wire                               		Csr_Memflush;
-    wire                                    Csr_WFIClrFlag;	
+    wire                                    Csr_WFIClrFlag;
+    wire    [`FRM_WIDTH - 1:0]              Csr_Frm;	
 		
 	Ctrl i_Ctrl(
 		.Icache_StallReq(1'b0),
@@ -232,6 +237,8 @@ module Core(
 				DecodeHazard_Rs1Data,
 				DecodeHazard_Rs2Data,
 				DecodeHazard_Rs3Data,
+				Decode_Rm,
+				Decode_Fmt,
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -256,6 +263,8 @@ module Core(
 				IDEX_Rs1Data,
 				IDEX_Rs2Data,
 				IDEX_Rs3Data,
+				IDEX_Rm,
+				IDEX_Fmt,
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
@@ -265,6 +274,7 @@ module Core(
 	EX i_EX (
 		.IDEX_Rs1Data(IDEX_Rs1Data),
 		.IDEX_Rs2Data(IDEX_Rs2Data),
+		.IDEX_Rs3Data(IDEX_Rs3Data),
 		.IDEX_Sel1(IDEX_Sel1),
 		.IDEX_NowPC(IDEX_NowPC),
 		.IDEX_Sel2(IDEX_Sel2),
@@ -274,6 +284,9 @@ module Core(
 		//.IDEX_Rs1Addr(IDEX_Rs1Addr), 
         //.IDEX_Rs2Addr(IDEX_Rs2Addr), 
 		//.EXMem_RdAddr(EXMem_RdAddr),
+		.IDEX_Rm(IDEX_Rm),
+		.IDEX_Fmt(IDEX_Fmt),
+		.Csr_Frm(Csr_Frm),
 		.Csr_RdData(Csr_RdData),
 		.IDEX_AluOp(IDEX_AluOp),
 		.IDEX_LdType(IDEX_LdType),
@@ -286,7 +299,9 @@ module Core(
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),
 		.EX_LdStFlag(EX_LdStFlag),
-		.EX_StallReq(EX_StallReq)
+		.EX_StallReq(EX_StallReq),
+		.EX_FpuException(EX_FpuException),
+		.EX_FpuReady(EX_FpuReady)
 	);
 
 wire [31:0] EXMEM_NowPC;	
@@ -318,6 +333,9 @@ wire [31:0] EXMEM_NowPC;
         .Csr_Evec(Csr_Evec),
         .Csr_Memflush(Csr_Memflush),
         .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
+		.EX_FpuException(EX_FpuException),
+		.EX_FpuReady(EX_FpuReady),
+		.Csr_Frm(Csr_Frm),
         .NMI(1'b0),
         .RESET(1'b0),
         .Core_interrupt(3'b0),

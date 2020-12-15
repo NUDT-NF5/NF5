@@ -94,7 +94,7 @@ module DecodeHazard(
 	
 //rs1 forward
 always @(*)
-    if(Decode_Rs1Addr != 5'b0)
+    if(Decode_Rs1Addr != 6'b0)
 		if(IDEX_WbRdEn && Decode_Rs1Addr == IDEX_RdAddr)
 			rs1Sel = `RS_SEL_EX;
 		else if(EXMem_RdWrtEn && Decode_Rs1Addr == EXMem_RdAddr)
@@ -114,7 +114,7 @@ always @(*)
 
 //rs2 forward
 always @(*)
-    if(Decode_Rs2Addr != 5'b0)
+    if(Decode_Rs2Addr != 6'b0)
 		if(IDEX_WbRdEn && Decode_Rs2Addr == IDEX_RdAddr)
 			rs2Sel = `RS_SEL_EX;
 		else if(EXMem_RdWrtEn && Decode_Rs2Addr == EXMem_RdAddr)
