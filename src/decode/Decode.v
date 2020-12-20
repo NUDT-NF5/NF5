@@ -241,26 +241,26 @@ module RFaddrMux16(
 	//rf sel
 	always @(*)
 		case(rfSel)
-			`RF_SHORT	:	begin rs1Addr = Rs1Short; rs2Addr = Rs2Short; rdAddr = RdShort	; end
-			`RF_LONG	:	begin rs1Addr = Rs1Long	; rs2Addr = Rs2Long	; rdAddr = RdLong	; end
+			`RF_SHORT	:	begin rs1Addr = {1'b0, Rs1Short}; rs2Addr = {1'b0, Rs2Short}; rdAddr = {1'b0, RdShort}	; end
+			`RF_LONG	:	begin rs1Addr = {1'b0, Rs1Long}	; rs2Addr = {1'b0, Rs2Long}	; rdAddr = {1'b0, RdLong}	; end
 			`RF_FIXED	:
 							case(iEncode)
-								`C_ADDI4SPN	: 	begin rs1Addr = 5'h2	; rs2Addr = 5'h0	; rdAddr = Rs2Short	; end
-								`C_LW		: 	begin rs1Addr = Rs1Short; rs2Addr = 5'h0	; rdAddr = Rs2Short	; end
-								`C_JAL		: 	begin rs1Addr = 5'h0	; rs2Addr = 5'h0	; rdAddr = 5'h1		; end
-								`C_LI		: 	begin rs1Addr = 5'h0	; rs2Addr = 5'h0	; rdAddr = RdLong	; end
-								`C_ADDI16SP	: 	begin rs1Addr = 5'h2	; rs2Addr = 5'h0	; rdAddr = 5'h2		; end
-								`C_J		: 	begin rs1Addr = 5'h0	; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
-								`C_BEQZ		: 	begin rs1Addr = Rs1Short; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
-								`C_BNEZ		: 	begin rs1Addr = Rs1Short; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
-								`C_LWSP		: 	begin rs1Addr = 5'h2	; rs2Addr = 5'h0	; rdAddr = RdLong	; end
-								`C_JR		: 	begin rs1Addr = Rs1Long	; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
-								`C_MV		: 	begin rs1Addr = 5'h0	; rs2Addr = Rs2Long	; rdAddr = RdLong	; end
-								`C_JALR		: 	begin rs1Addr = Rs1Long	; rs2Addr = 5'h0	; rdAddr = 5'h1		; end
-								`C_SWSP		: 	begin rs1Addr = 5'h2	; rs2Addr = Rs2Long	; rdAddr = 5'h0		; end
-								default 	: 	begin rs1Addr = 5'h0	; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
+								`C_ADDI4SPN	: 	begin rs1Addr = 6'h2	        ; rs2Addr = 6'h0	; rdAddr = {1'b0, Rs2Short}	; end
+								`C_LW		: 	begin rs1Addr = {1'b0, Rs1Short}; rs2Addr = 6'h0	; rdAddr = {1'b0, Rs2Short}	; end
+								`C_JAL		: 	begin rs1Addr = 6'h0	        ; rs2Addr = 6'h0	; rdAddr = 6'h1		        ; end
+								`C_LI		: 	begin rs1Addr = 6'h0	        ; rs2Addr = 6'h0	; rdAddr = {1'b0, RdLong}	; end
+								`C_ADDI16SP	: 	begin rs1Addr = 6'h2	        ; rs2Addr = 6'h0	; rdAddr = 6'h2	        	; end
+								`C_J		: 	begin rs1Addr = 6'h0	        ; rs2Addr = 6'h0	; rdAddr = 6'h0	        	; end
+								`C_BEQZ		: 	begin rs1Addr = {1'b0, Rs1Short}; rs2Addr = 6'h0	; rdAddr = 6'h0	        	; end
+								`C_BNEZ		: 	begin rs1Addr = {1'b0, Rs1Short}; rs2Addr = 6'h0	; rdAddr = 6'h0	        	; end
+								`C_LWSP		: 	begin rs1Addr = 6'h2	        ; rs2Addr = 6'h0	; rdAddr = {1'b0, RdLong}	; end
+								`C_JR		: 	begin rs1Addr = {1'b0, Rs1Long}	; rs2Addr = 6'h0	; rdAddr = 6'h0		        ; end
+								`C_MV		: 	begin rs1Addr = 6'h0	        ; rs2Addr = Rs2Long	; rdAddr = {1'b0, RdLong}	; end
+								`C_JALR		: 	begin rs1Addr = {1'b0, Rs1Long}	; rs2Addr = 6'h0	; rdAddr = 6'h1		        ; end
+								`C_SWSP		: 	begin rs1Addr = 6'h2	        ; rs2Addr = Rs2Long	; rdAddr = 6'h0		        ; end
+								default 	: 	begin rs1Addr = 6'h0	        ; rs2Addr = 6'h0	; rdAddr = 6'h0		        ; end
 							endcase
-			default 	: 	begin rs1Addr = 5'h0	; rs2Addr = 5'h0	; rdAddr = 5'h0		; end
+			default 	: 	begin rs1Addr = 6'h0	; rs2Addr = 6'h0	; rdAddr = 6'h0		; end
 		endcase
 	
 endmodule
