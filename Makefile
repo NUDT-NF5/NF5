@@ -47,9 +47,16 @@ sim_gui_nc:
 	cd $(nc_dir) && bash $(nc_dir)/set_gui && cd -
 	cd $(nc_dir) && bash $(nc_dir)/run_nc && cd -
 
-sim_gui_gtk:
+sim_gui_iverilog:
 	make gen_filelist
 	gtkwave $(iverilog_dir)/test.vcd
+
+sim_gui_vcs:
+	bash $(vcs_dir)/waveform.sh
+
+sim_gtk_vcs:
+	gtkwave $(vcs_dir)/test.vcd
+
 	
 #==================For C project [how to use]======================: 
 #1st step   make cproj_gen     soft_proj=helloword (#your C code name)

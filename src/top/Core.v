@@ -30,10 +30,10 @@ module Core(
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
 	wire	[2 - 1 : 0]						Decode_Fmt;
 	
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs3Data;
-	wire	     							DecodeHazard_StallReq;
+	wire  	[`DATA_WIDTH-1 :0]   			EXHazard_Rs1Data;
+	wire  	[`DATA_WIDTH-1 :0]   			EXHazard_Rs2Data;
+	wire  	[`DATA_WIDTH-1 :0]   			EXHazard_Rs3Data;
+	wire	     							DecodeHazard_StallReq = 1'b0;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
 	wire	[`A_SEL_WIDTH - 1 : 0 ]			IDEX_Sel1;
@@ -52,6 +52,7 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		IDEX_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
+	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs3Addr;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
@@ -77,11 +78,13 @@ module Core(
     wire    [2:0]  							EXMem_LdType;
 
     wire                          		 	Mem_LdEn;        
-    wire                          		 	Mem_DcacheEn;    
+    wire                          		 	Mem_DcacheEn; 
+
     wire                          		 	Mem_DcacheRd;    
-    wire  	[1:0]      			  			Mem_DcacheWidth; 
-    wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
-	wire									Mem_DcacheSign;   
+     
+    wire									Mem_DcacheSign;  
+	wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;  
+	wire  	[1:0]      			  			Mem_DcacheWidth; 
 
 	wire  	[`DATA_WIDTH-1  :0]      		Dcache_DataRd;
 	wire  	[`DATA_WIDTH-1  :0]      		Icache_Instr;
@@ -103,6 +106,7 @@ module Core(
     wire                               		Csr_ExcpFlag;
     wire                               		Csr_Memflush;
     wire                                    Csr_WFIClrFlag;	
+	wire   [2:0]                            Csr_Mcause;
 		
 	Ctrl i_Ctrl(
 		.Icache_StallReq(1'b0),
@@ -170,21 +174,7 @@ module Core(
 		.Decode_Fmt(Decode_Fmt)
 	);
 	
-	RegFile i_RegFile(
-		.clk(clk),
-		.rst_n(rst_n),
-		.rAddr1(Decode_Rs1Addr),
-		.rData1(RF_Rs1Data),
-		.rAddr2(Decode_Rs2Addr),
-		.rData2(RF_Rs2Data),
-		.rAddr3(Decode_Rs3Addr),
-		.rData3(RF_Rs3Data),
-		.wEN(MemWb_RdWrtEn),
-		.wAddr(MemWb_RdAddr),
-		.wData(Wb_DataWrt)
-	);
-
-	DecodeHazard i_DecodeHazard(
+/*	DecodeHazard i_DecodeHazard(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
@@ -209,7 +199,7 @@ module Core(
 		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
 		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data),
 		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
-	);
+	);*/
 	
 
    PipeStage #(
@@ -226,12 +216,13 @@ module Core(
 				Decode_RdAddr,
 				Decode_Rs1Addr,
 				Decode_Rs2Addr,
+				Decode_Rs3Addr,
 				Decode_Imm,
 				Decode_ImmSel,
 				Decode_CsrAddr,
-				DecodeHazard_Rs1Data,
+				/*DecodeHazard_Rs1Data,
 				DecodeHazard_Rs2Data,
-				DecodeHazard_Rs3Data,
+				DecodeHazard_Rs3Data,*/
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -250,21 +241,57 @@ module Core(
 				IDEX_RdAddr,
 				IDEX_Rs1Addr,
 				IDEX_Rs2Addr,
+				IDEX_Rs3Addr,
 				IDEX_Imm,
 				IDEX_ImmSel,
 				IDEX_CsrAddr,
-				IDEX_Rs1Data,
+				/*IDEX_Rs1Data,
 				IDEX_Rs2Data,
-				IDEX_Rs3Data,
+				IDEX_Rs3Data,*/
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
 		)
 	);
+
+	EXHazard i_EXHazard(
+		.IDEX_Rs1Addr(IDEX_Rs1Addr),
+		.IDEX_Rs2Addr(IDEX_Rs2Addr),
+		.IDEX_Rs3Addr(IDEX_Rs3Addr),	
+		.RF_Rs1Data(RF_Rs1Data),
+		.RF_Rs2Data(RF_Rs2Data),
+		.RF_Rs3Data(RF_Rs3Data),
+		.EXMem_RdAddr(EXMem_RdAddr),
+		.EXMem_AluData(EXMem_AluData),
+		.Dcache_DataRd(Dcache_DataRd),
+		.Mem_LdEN(Mem_LdEn),
+		.EXHazard_Rs1Data(EXHazard_Rs1Data),
+		.EXHazard_Rs2Data(EXHazard_Rs2Data),
+		.EXHazard_Rs3Data(EXHazard_Rs3Data)
+	);
+
+	RegFile i_RegFile(
+		.clk(clk),
+		.rst_n(rst_n),
+		.Csr_Mcause(Csr_Mcause),
+		.Csr_ExcpFlag(Csr_ExcpFlag),
+		.rAddr1(IDEX_Rs1Addr),
+		.rData1(RF_Rs1Data),
+		.rAddr2(IDEX_Rs2Addr),
+		.rData2(RF_Rs2Data),
+		.rAddr3(IDEX_Rs3Addr),
+		.rData3(RF_Rs3Data),
+		.wEN1(IDEX_WbRdEn),
+		.wAddr1(IDEX_RdAddr),
+		.wData1(EX_AluData),
+		.wEN2(EXMem_RdWrtEn),
+		.wAddr2(EXMem_RdAddr),
+		.wData2(Dcache_DataRd)
+	);
 	
 	EX i_EX (
-		.IDEX_Rs1Data(IDEX_Rs1Data),
-		.IDEX_Rs2Data(IDEX_Rs2Data),
+		.IDEX_Rs1Data(EXHazard_Rs1Data),
+		.IDEX_Rs2Data(EXHazard_Rs2Data),
 		.IDEX_Sel1(IDEX_Sel1),
 		.IDEX_NowPC(IDEX_NowPC),
 		.IDEX_Sel2(IDEX_Sel2),
@@ -301,7 +328,7 @@ wire [31:0] EXMEM_NowPC;
         .IDEX_CsrAddr(IDEX_CsrAddr),
         .IDEX_CsrCmd(IDEX_CsrCmd),
         .IDEX_Imm(IDEX_Imm),
-        .IDEX_Rs1Data(IDEX_Rs1Data),
+        .IDEX_Rs1Data(EXHazard_Rs1Data),
         .IDEX_ImmSel(IDEX_ImmSel),
         .IDEX_NowPC(IDEX_NowPC),
         .IDEX_StType(IDEX_StType),
@@ -322,11 +349,12 @@ wire [31:0] EXMEM_NowPC;
         .RESET(1'b0),
         .Core_interrupt(3'b0),
         .DBG_interrupt (5'b0),
-        .Fetchaddr_Invalid(Fetchaddr_Invalid)//unuse?
+        .Fetchaddr_Invalid(Fetchaddr_Invalid),//unuse?
+		.Csr_Mcause(Csr_Mcause)
 	);	
 		
 
-	PipeStage #(
+	PipeStageMem #(
 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
 	)
 	i_EXMem(
@@ -334,11 +362,13 @@ wire [31:0] EXMEM_NowPC;
 		.rst_n(rst_n),
 		.Stall(Ctrl_Stall[3]),
 		.Flush(Csr_Memflush|Flush[2]),	
+        .IDEX_StType(IDEX_StType),
+        .IDEX_LdType(IDEX_LdType),
 		.in(
 			{
 				EX_AluData,
 				IDEX_RdAddr,
-				IDEX_Rs2Data,
+				EXHazard_Rs2Data,
 				IDEX_StType,
 				IDEX_LdType,
 				IDEX_WbRdEn,
@@ -367,9 +397,9 @@ wire [31:0] EXMEM_NowPC;
 		.Mem_LdEN(Mem_LdEn),        
 		.Mem_DcacheEN(Mem_DcacheEn),    
 		.Mem_DcacheRd(Mem_DcacheRd),  
-		.Mem_DcacheSign(Mem_DcacheSign),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
+		.Mem_DcacheSign(Mem_DcacheSign),
         .Csr_Memflush(Csr_Memflush)//new   
     ); 	
 	
@@ -387,7 +417,7 @@ wire [31:0] EXMEM_NowPC;
 		.Icache_Instr(Icache_Instr)
 	);
 	
-	PipeStage #(
+/*	PipeStage #(
 		.STAGE_WIDTH(`PIPE_MemWb_LEN)
 	)
 	i_MemWb(
@@ -420,6 +450,6 @@ wire [31:0] EXMEM_NowPC;
 		.MemWb_AluData(MemWb_AluData),
 		.MemWb_DataRd(MemWb_DataRd),
 		.Wb_DataWrt(Wb_DataWrt)
-    );
+    );*/
 		
 endmodule

@@ -7,6 +7,7 @@
 //Design      : system_test_wrapper
 //Purpose     : IP block netlist
 //--------------------------------------------------------------------------------
+`timescale 			1ns/1ps
 `include "../src/common/Define.v"
 module	TbAll;
 	reg								clk;
@@ -60,9 +61,9 @@ module	TbAll;
 		end
 //Test Program  Chek
 //pass_pc_addr
-  parameter pass_pc=32'h000002f4 ;
+  parameter pass_pc=32'h000001ec ;
 //fail_pc_addr
-  parameter fail_pc=32'h000002e0 ;
+  parameter fail_pc=32'h000001d8 ;
 
 wire [31:0] ifidpc=i_Core.IFID_NowPC;
 reg  [31:0] count_pass;
@@ -84,23 +85,32 @@ always@(posedge clk)
   
 always@(posedge clk) 
     begin
-        if((count_pass == 2)&&(ifidpc == pass_pc+'h8))
+        if((count_pass == 1)&&(ifidpc == pass_pc+'h4))
         begin
             $fdisplay (fd, "ISA_test Pass when clk=%d, PC=%h ",clk_count,ifidpc);
             $finish;
         end
-        else if((count_fail == 2)&&(ifidpc == fail_pc+'h8))
+        else if((count_fail == 1)&&(ifidpc == fail_pc+'h4))
         begin
             $fdisplay (fd, "ISA_test Fail when clk=%d, PC=%h ",clk_count,ifidpc);
             #15 $finish;
         end
     end
 
-initial
-        begin            
-            $dumpfile("test.vcd");
-            $dumpvars(0,TbAll);
-        end
+`ifdef DUMP_FSDB
+    initial begin
+        $fsdbDumpfile("test.fsdb");
+        $fsdbDumpvars(0, TbAll, "+all");
+        $fsdbDumpMDA(0, TbAll);
+        $dumpfile("test.vcd");
+        $dumpvars(0,TbAll);
+    end
+`elsif DUMP_VCD
+    initial begin            
+        $dumpfile("test.vcd");
+        $dumpvars(0,TbAll);
+    end
+`endif
 
 endmodule
 

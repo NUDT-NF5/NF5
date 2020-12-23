@@ -43,7 +43,8 @@ module Csr(
     input  wire   [`ADDR_WIDTH-1:0]           EXMEM_NowPC	,
 	  input  wire			                          Decode_16BitFlag ,
     output wire                               Fetchaddr_Invalid,
-    input  wire  [31:0]                       IFID_Instr		
+    input  wire  [31:0]                       IFID_Instr,
+    output wire  [2:0]                        Csr_Mcause
     );
 	
 	//assign Csr_memflush
@@ -183,6 +184,8 @@ assign flag_reg=flag_reg_t;
 						 default: begin mcause_code=5'h1f;  mask_tmp=16'b0;                  end   
       endcase
      end		
+
+     assign Csr_Mcause = mcause_code[2:0];
 
    always@(*) begin                     
       casex(flag_valid) 

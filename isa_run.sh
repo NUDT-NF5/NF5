@@ -16,12 +16,37 @@ vivado_sh_dir=vivado-project
 vivado_tb_dir=vivado-project/NF5_System/NF5_System.srcs/sim_1/imports/nf5_source
 vcs_dir=vcs-project
 TB_dir=TB_NC
+
+changeTbAll(){
+  linenum=$(cat $1 | grep -n "<pass>:" | awk -F ":" '{print $1}')
+  line=$(sed -n ${linenum}p $1)
+  line=$(echo $line | cut -c -8)
+  sed -i 's/0000025c/'$line'/' $src_dir/top/TbAll.sv
+
+  linenum=$(cat $1 | grep -n "<fail>:" | awk -F ":" '{print $1}')
+  line=$(sed -n ${linenum}p $1)
+  line=$(echo $line | cut -c -8)
+  sed -i 's/00000248/'$line'/' $src_dir/top/TbAll.sv
+}
+
+changeTbAllCompliance(){
+  linenum=$(cat $1 | grep -n "<begin_signature>:" | awk -F ":" '{print $1}')
+  line=$(sed -n ${linenum}p $1)
+  line=$(echo $line | cut -c -8)
+  sed -i 's/00002030/'$line'/' $src_dir/top/TbAll.sv
+
+  linenum=$(cat $1 | grep -n "<end_signature>:" | awk -F ":" '{print $1}')
+  line=$(sed -n ${linenum}p $1)
+  line=$(echo $line | cut -c -8)
+  sed -i 's/000020e0/'$line'/' $src_dir/top/TbAll.sv
+}
+
 while :
 do
         echo "================选择使用的仿真工具======================"
-        echo "    1  Open source tool：Icarus Verilog + Gtkwave       "
-        echo "    2  Commercial  tool：Cadence NC-Verilog             "
-	      echo "    3  Commercial  tool：Xilinx Vivado                  "
+        echo "    1  Open source tool：Icarus Verilog + Gtkwave (Cannot compile FPU, do not use) "
+        echo "    2  Commercial  tool：Cadence NC-Verilog (Cannot compile FPU, do not use) "
+	      echo "    3  Commercial  tool：Xilinx Vivado (Temporarily unavailable) "
         echo "    4  Commercial  tool：Synopsys VCS                   "
         echo "========================================================"
         echo "    PLease input the [Number] to chose the EDATool :    "
@@ -158,14 +183,11 @@ if [ $number_single_all -eq 1 ]
                                       then
                                         cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-vivado.sv  $vivado_tb_dir/system_test_tb.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
-                                    elif [ $TB_dir = TB_iverilog ]
-                                      then
-                                        cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-iverilog.sv  $src_dir/top/TbAll.sv
-                                        cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                     else
-                                        cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-nc.sv  $src_dir/top/TbAll.sv
+                                        cp  $TVM_test/test.sv  $src_dir/top/TbAll.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
-                                    fi          
+                                    fi 
+                                    changeTbAll $test_dir/$ISA_TVM_testcase/dump/$list_testcase.*       
                                     $EDATool_run_dir
                                     echo  "Test $list_testcase is running  "
                                     cp $EDA_env_dir/mySim.log  $out_dir/Result/Result_funct/$list_testcase.log      #产生的日志文件复制到result文件夹中
@@ -189,7 +211,12 @@ if [ $number_single_all -eq 1 ]
                             cat $out_dir/Report/Report_funct.txt  | column -t  > $out_dir/Report/Report_funct_New.txt      
                             rm -rf $out_dir/Report/Report_funct.txt
                             mv $out_dir/Report/Report_funct_New.txt  $out_dir/Report/Report_funct.txt
-                            gedit $out_dir/Report/Report_funct.txt
+                            if command -v code >/dev/null 2>&1; 
+                              then
+                                code $out_dir/Report/Report_funct.txt
+                            else
+                                gedit $out_dir/Report/Report_funct.txt
+                            fi
                   #===================compliance===================
                   elif [ $number_0x_numb -eq 3 ] || [ $number_0x_numb -eq 4 ]
                     then
@@ -206,14 +233,11 @@ if [ $number_single_all -eq 1 ]
                                   then
                                     cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $vivado_tb_dir/system_test_tb.sv
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
-                                elif [ $TB_dir = TB_iverilog ]
-                                  then
-                                    cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
-                                    cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                 else
-                                    cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
+                                    cp  $TVM_test/test.sv $src_dir/top/TbAll.sv
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
-                                fi                     
+                                fi
+                                changeTbAllCompliance   $test_dir/$ISA_TVM_testcase/dump/$list_testcase.*
                                 $EDATool_run_dir
                                 cp $EDA_env_dir/mySim.log $out_dir/Result/Result_compliance/$list_testcase.log
                                 diff  $test_dir/$ISA_TVM_testcase/signature/"$list_testcase".* $out_dir/Result/Result_compliance/$list_testcase.log
@@ -233,7 +257,12 @@ if [ $number_single_all -eq 1 ]
                             cat $out_dir/Report/Report_compliance.txt  | column -t  > $out_dir/Report/report_compliance_1.txt  
                             rm -rf $out_dir/Report/Report_compliance.txt
                             mv $out_dir/Report/report_compliance_1.txt $out_dir/Report/Report_compliance.txt
-                            gedit $out_dir/Report/Report_compliance.txt 
+                            if command -v code >/dev/null 2>&1; 
+                              then
+                                code $out_dir/Report/Report_compliance.txt
+                            else 
+                                gedit  $out_dir/Report/Report_compliance.txt
+                            fi
                   else
                     echo "Wrong"
                   fi
@@ -258,18 +287,20 @@ elif [ $number_single_all -eq 2 ]
                               then
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-vivado.sv  $vivado_tb_dir/system_test_tb.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
-                            elif [ $TB_dir = TB_iverilog ]
-                              then
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-iverilog.sv  $src_dir/top/TbAll.sv
-                                cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-nc.sv  $src_dir/top/TbAll.sv
+                                cp  $TVM_test/test.sv $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             fi                
+                            changeTbAll $test_dir/$ISA_TVM_testcase/dump/$single_test_name.*
                             $EDATool_run_dir
                             echo  "Test $single_test_name is running  "
                             cp $EDA_env_dir/mySim.log $out_dir/Result/Result_funct_self/$single_test_name.txt
-                            gedit $out_dir/Result/Result_funct_self/$single_test_name.txt
+                            if command -v code >/dev/null 2>&1; 
+                              then
+                                code $out_dir/Result/Result_funct_self/$single_test_name.txt
+                            else 
+                                gedit  $out_dir/Result/Result_funct_self/$single_test_name.txt
+                            fi
             #===================compliance===================
             elif [ $number_0x_numb -eq 3 ] || [ $number_0x_numb -eq 4 ]
               then
@@ -287,14 +318,11 @@ elif [ $number_single_all -eq 2 ]
                               then
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $vivado_tb_dir/system_test_tb.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
-                            elif [ $TB_dir = TB_iverilog ]
-                              then
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
-                                cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
+                                cp  $TVM_test/test.sv $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
-                            fi   
+                            fi
+                            changeTbAllCompliance   $test_dir/$ISA_TVM_testcase/dump/$single_test_name.*
                             $EDATool_run_dir
                             diff  $test_dir/$ISA_TVM_testcase/signature/"$single_test_name".* $EDA_env_dir/mySim.log
                             if  [ $? -eq 0 ]
@@ -306,7 +334,12 @@ elif [ $number_single_all -eq 2 ]
                             else 
                                 echo "Wrong"
                             fi
-                            gedit $out_dir/Result/Result_compliance_self/$single_test_name.txt 
+                            if command -v code >/dev/null 2>&1; 
+                              then 
+                                code $out_dir/Result/Result_compliance_self/$single_test_name.txt 
+                            else
+                                gedit $out_dir/Result/Result_compliance_self/$single_test_name.txt 
+                            fi
                             rm -rf $isa_test_dir/TbAll_tmp.txt
             else
               echo "Wrong number!"

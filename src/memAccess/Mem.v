@@ -17,7 +17,7 @@ module Mem
     output wire  [1:0]      			  Mem_DcacheWidth, //To Dcache
     output wire  [`ADDR_WIDTH-1  :0]      Mem_DcacheAddr,   //To Dcache
     output wire                           Mem_DcacheSign ,  //To Dcache
-    input  wire                           Csr_Memflush
+    input  wire                           Csr_Memflush                       
     ); 
 wire   St_EN;
 assign St_EN    = ( EXMem_StType == `ST_XXX )? 0 : 1;
