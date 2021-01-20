@@ -6,43 +6,61 @@
  * @Describe:EX  module
  */
 module EX(
-    input       [`SIMD_DATA_WIDTH - 1:0] IDEX_Rs1Data,
-    input       [`SIMD_DATA_WIDTH - 1:0] IDEX_Rs2Data,
+    input  [`SIMD_DATA_WIDTH - 1:0]     IDEX_Rs1Data,
+    input  [`SIMD_DATA_WIDTH - 1:0]     IDEX_Rs2Data,
+    input  [`SIMD_DATA_WIDTH - 1:0]     IDEX_Rs3Data,
     //signals for mux_aluinput
-    input                                IDEX_Sel1,
-    input       [`ADDR_WIDTH - 1:0]      IDEX_NowPC,
-    input                                IDEX_Sel2,
-    input       [`DATA_WIDTH - 1:0]      IDEX_Imm,
+    input                               IDEX_Sel1,
+    input  [`ADDR_WIDTH - 1:0]          IDEX_NowPC,
+    input                               IDEX_Sel2,
+    input  [`DATA_WIDTH - 1:0]          IDEX_Imm,
+    //input for FPU
+    input  [`FUNCT3_WIDTH - 1:0]        IDEX_Rm,
+    input  [1:0]                        IDEX_Fmt,
+    input  [`FRM_WIDTH - 1:0]           Csr_Frm,
     //other input
-    input       [`DATA_WIDTH - 1:0]      Csr_RdData,
-    input       [`ALU_OP_WIDTH - 1:0]    IDEX_AluOp,
-    input       [`LD_TYPE_WIDTH - 1:0]   IDEX_LdType,
-    input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
-    input                                Mem_DcacheEN,
-    input                                IDEX_16BitFlag,
-    input                                clk,
-    input                                rst_n,
-    input                                simd_ena,
-    input       [`SIMD_WIDTH - 1:0]      simd_ctl,
+    input  [`DATA_WIDTH - 1:0]          Csr_RdData,
+    input  [`ALU_OP_WIDTH - 1:0]        IDEX_AluOp,
+    input  [`LD_TYPE_WIDTH - 1:0]       IDEX_LdType,
+    input  [`ST_TYPE_WIDTH - 1:0]       IDEX_StType,
+    input                               Mem_DcacheEN,
+    input                               IDEX_16BitFlag,
+    input                               clk,
+    input                               rst_n,
+    input                               simd_ena,
+    input  [`SIMD_WIDTH - 1:0]          simd_ctl,
     //output
-    output      [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
-    output                               EX_BranchFlag,
-    output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
-    output                               EX_LdStFlag,
-    output                               EX_StallReq
+    output [`SIMD_DATA_WIDTH - 1:0]     EX_AluData,
+    output                              EX_BranchFlag,
+    output [`ADDR_WIDTH - 1:0]          EX_BranchPC,
+    output                              EX_LdStFlag,
+    output                              EX_StallReq,
+    output [`FPU_EXCEPTION_WIDTH - 1:0] EX_FpuException,
+    output                              EX_FpuReady
 );
 
 //extra signals
-wire            [`SIMD_DATA_WIDTH - 1:0] s1;
-wire            [`SIMD_DATA_WIDTH - 1:0] s2;
+wire       [`SIMD_DATA_WIDTH - 1:0]     s1;
+wire       [`SIMD_DATA_WIDTH - 1:0]     s2;
 
-wire                                     div_start;
-wire                                     div_ready;
+wire                                    div_start;
+wire                                    div_ready;
 
-wire                                     alu_ic_en;
-wire                                     alu_m_en;
-wire            [`SIMD_DATA_WIDTH - 1:0] AluData_ic;
-wire            [`SIMD_DATA_WIDTH - 1:0] AluData_m;
+wire                                    alu_ic_en;
+wire                                    alu_m_en;
+wire       [`SIMD_DATA_WIDTH - 1:0]     AluData_ic;
+wire       [`SIMD_DATA_WIDTH - 1:0]     AluData_m;
+
+wire                                    fpu_vec_i = 1'b0;
+wire       [1:0]                        fpu_fmt_i; 
+wire       [2:0]                        fpu_rm_i;
+wire       [2:0]                        fpu_frm_i;
+wire       [`FPU_EXCEPTION_WIDTH - 1:0] fpu_exception;
+wire       [`SIMD_DATA_WIDTH - 1:0]     fpu_result;
+wire                                    fpu_stall;
+wire                                    fpu_in_valid;
+wire                                    fpu_out_valid;
+wire                                    fpu_en;
 
 mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1), 
                      .forward_rs1(IDEX_Rs1Data), 
@@ -88,20 +106,46 @@ rv32m_warp rv32m   (
                     .m_data(AluData_m)
 );
 
+fpu_warp   rv32f   (
+                    .clk_i(clk),
+                    .rst_ni(rst_n),
+                    .flush_i(1'b0),
+                    //.fpu_valid_i(fpu_valid),
+                    .fpu_ready_o(),
+                    .vec_ena(1'b0),
+                    .fpu_op_i(IDEX_AluOp),
+                    .operand_0(s1[`DATA_WIDTH - 1:0]),
+                    .operand_1(s2[`DATA_WIDTH - 1:0]),
+                    .operand_2(IDEX_Rs3Data[`DATA_WIDTH - 1:0]),
+                    .fpu_vec_i(fpu_vec_i),
+                    .fpu_fmt_i(IDEX_Fmt),
+                    .fpu_rm_i(IDEX_Rm),
+                    .fpu_frm_i(Csr_Frm),
+                    .fpu_result(fpu_result),
+                    .fpu_stall(fpu_stall),
+                    .fpu_exception(EX_FpuException),
+                    .fpu_in_valid(fpu_in_valid),
+                    .fpu_out_valid(fpu_out_valid)
+);
+
 ex_out       alu_out(
                      .issue_AluData_0(AluData_ic),
                      .issue_AluData_1(64'b0),
                      .issue_AluData_m_0(AluData_m),
                      .issue_AluData_m_1(64'b0),
+                     .FpuData(fpu_result),
                      .alu_ic_en_0(alu_ic_en),
                      .alu_ic_en_1(1'b0),
                      .alu_m_en_0(alu_m_en),
                      .alu_m_en_1(1'b0),
+                     .fpu_en(fpu_en),
                      .simd_ena(simd_ena),
                      .EX_AluData_0(EX_AluData),
                      .EX_AluData_1()
 );
 
-assign EX_StallReq = div_start && (~div_ready);
+assign EX_FpuReady = fpu_en;
+assign EX_StallReq = div_start && (~div_ready) || fpu_stall;
+assign fpu_en = fpu_in_valid && fpu_out_valid;
 
 endmodule // EX

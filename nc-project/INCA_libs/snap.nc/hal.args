@@ -1,9 +1,0 @@
-//
-// File created by:  ncverilog
-// Do not modify this file
-//
--assert
--NOWARN
-CUNGL1
--NOWARN
-NONPRT

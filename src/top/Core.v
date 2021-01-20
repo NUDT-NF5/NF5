@@ -30,10 +30,10 @@ module Core(
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
 	wire	[2 - 1 : 0]						Decode_Fmt;
 	
-	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs1Data;
-	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs2Data;
-	wire  	[`SIMD_DATA_WIDTH-1 :0]   		DecodeHazard_Rs3Data;
-	wire	     							DecodeHazard_StallReq;
+    wire    [`SIMD_DATA_WIDTH-1 :0]         EXHazard_Rs1Data;
+    wire    [`SIMD_DATA_WIDTH-1 :0]         EXHazard_Rs2Data;
+    wire    [`SIMD_DATA_WIDTH-1 :0]         EXHazard_Rs3Data;
+    wire                                    DecodeHazard_StallReq = 1'b0;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
 	wire	[`A_SEL_WIDTH - 1 : 0 ]			IDEX_Sel1;
@@ -45,7 +45,6 @@ module Core(
 	wire	[`BOOL_WIDTH - 1 : 0 ]			IDEX_WbRdEn;
 	wire	[`CSR_CMD_WIDTH - 1 : 0 ]		IDEX_CsrCmd;
 	wire	[`BOOL_WIDTH - 1 : 0 ]			IDEX_CsrIllegal;
-    wire	[`FUNCT3_WIDTH - 1 : 0]	        IDEX_Rm;
     wire                                    IDEX_SimdEN;
 
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_RdAddr;
@@ -54,9 +53,12 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		IDEX_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
+    wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs3Addr;
 	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs1Data;
 	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs2Data;
 	wire	[`SIMD_DATA_WIDTH - 1 : 0]		IDEX_Rs3Data;
+	wire	[`FUNCT3_WIDTH - 1 : 0]	        IDEX_Rm;
+	wire    [2 - 1 : 0]                     IDEX_Fmt;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
@@ -69,6 +71,8 @@ module Core(
 	wire									EX_BranchFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			EX_BranchPC;
 	wire									EX_StallReq;
+	wire    [`FPU_EXCEPTION_WIDTH - 1:0]    EX_FpuException;
+    wire                                    EX_FpuReady;
 	
     wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_AluData;
     wire    [`SIMD_DATA_WIDTH - 1 : 0]      EXMem_Rs2Data;
@@ -109,6 +113,8 @@ module Core(
     wire                               		Csr_ExcpFlag;
     wire                               		Csr_Memflush;
     wire                                    Csr_WFIClrFlag;	
+    wire   [`FRM_WIDTH - 1:0]               Csr_Frm;
+    wire   [2:0]                            Csr_Mcause;
 		
 	Ctrl i_Ctrl(
 		.Icache_StallReq(1'b0),
@@ -160,6 +166,8 @@ module Core(
 	
 	Decode i_Decode(
 		.IFID_Instr(IFID_Instr),
+		.clk(clk),
+		.rst_n(rst_n),
 		.Decode_AllCtr(Decode_AllCtr),
 		.Decode_RdAddr(Decode_RdAddr),
 		.Decode_Imm(Decode_Imm),
@@ -176,66 +184,6 @@ module Core(
 		.Decode_Fmt(Decode_Fmt)
 	);
 	
-	RegFile i_RegFile(
-		.clk(clk),
-		.rst_n(rst_n),
-		.rAddr1(Decode_Rs1Addr),
-		.rData1(RF_Rs1Data),
-		.rAddr2(Decode_Rs2Addr),
-		.rData2(RF_Rs2Data),
-		.rAddr3(Decode_Rs3Addr),
-		.rData3(RF_Rs3Data),
-		.wEN(MemWb_RdWrtEn),
-		.wAddr(MemWb_RdAddr),
-		.wData(Wb_DataWrt),
-        .simd_ena(MemWb_SimdEN),
-        .horizontal(MemWb_Rm[2]),
-        .simd_ctl(MemWb_Rm[1:0])
-	);
-
-	DecodeHazard i_DecodeHazard(
-		.clk(clk),
-		.rst_n(rst_n),
-		.Decode_Rs1Addr(Decode_Rs1Addr),
-		.Decode_Rs2Addr(Decode_Rs2Addr),
-		.Decode_Rs3Addr(Decode_Rs3Addr),	
-		.RF_Rs1Data(RF_Rs1Data),
-		.RF_Rs2Data(RF_Rs2Data),
-		.RF_Rs3Data(RF_Rs3Data),
-		.IDEX_RdAddr(IDEX_RdAddr),
-		.IDEX_WbRdEn(IDEX_WbRdEn),
-		.EX_AluData(EX_AluData),
-		.EXMem_RdAddr(EXMem_RdAddr),
-		.EXMem_RdWrtEn(EXMem_RdWrtEn),
-		.EXMem_AluData(EXMem_AluData),
-		.Dcache_DataRd(Dcache_DataRd),
-		.Mem_LdEn(Mem_LdEn),
-		.MemWb_RdAddr(MemWb_RdAddr),
-		.MemWb_RdWrtEn(MemWb_RdWrtEn),
-		.Wb_DataWrt(Wb_DataWrt),
-		.Decode_LdType(Decode_LdType),
-		.DecodeHazard_StallReq(DecodeHazard_StallReq),
-		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
-		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data),
-		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
-	);
-	
-wire [3:0]                    mask = 4'b1111;
-wire 						  mask_ena;
-wire [`FUNCT3_WIDTH - 1:0]    funct3;
-wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs1;
-wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
-
-	OperandOrganizer i_OperandOrganizer(
-		.rs1(DecodeHazard_Rs1Data),
-		.rs2(DecodeHazard_Rs2Data),
-		.mask(mask),
-		.mask_ena(Decode_Fmt[0]),
-		.simd_ena(Decode_AllCtr[0]),
-		.funct3(Decode_Rm),
-		.reorgnaized_rs1(reorgnaized_rs1),
-		.reorgnaized_rs2(reorgnaized_rs2)
-	);
 
    PipeStage #(
 		.STAGE_WIDTH(`PIPE_IDEX_LEN)
@@ -248,16 +196,15 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		.in(
 			{
 				Decode_AllCtr,
-                Decode_Rm,
 				Decode_RdAddr,
 				Decode_Rs1Addr,
 				Decode_Rs2Addr,
+                Decode_Rs3Addr,
 				Decode_Imm,
 				Decode_ImmSel,
 				Decode_CsrAddr,
-				reorgnaized_rs1,
-				reorgnaized_rs2,
-				DecodeHazard_Rs3Data,
+                Decode_Rm,
+                Decode_Fmt,
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -274,25 +221,75 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 				IDEX_CsrCmd,
 				IDEX_CsrIllegal,
 				IDEX_SimdEN,
-                IDEX_Rm,
 				IDEX_RdAddr,
 				IDEX_Rs1Addr,
 				IDEX_Rs2Addr,
+                IDEX_Rs3Addr,
 				IDEX_Imm,
 				IDEX_ImmSel,
 				IDEX_CsrAddr,
-				IDEX_Rs1Data,
-				IDEX_Rs2Data,
-				IDEX_Rs3Data,
+                IDEX_Rm,
+				IDEX_Fmt,
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
 		)
 	);
-	
+
+wire [3:0]                    mask = 4'b1111;
+wire 						  mask_ena;
+wire [`FUNCT3_WIDTH - 1:0]    funct3;
+wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs1;
+wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
+
+	RegFile i_RegFile(
+		.clk(clk),
+		.rst_n(rst_n),
+        .Csr_Mcause(Csr_Mcause),
+        .Csr_ExcpFlag(Csr_ExcpFlag),
+		.rAddr1(IDEX_Rs1Addr),
+		.rData1(RF_Rs1Data),
+		.rAddr2(IDEX_Rs2Addr),
+		.rData2(RF_Rs2Data),
+		.rAddr3(IDEX_Rs3Addr),
+		.rData3(RF_Rs3Data),
+        .horizontal(MemWb_Rm[2]),
+        .simd_ctl(MemWb_Rm[1:0]),
+		.rd_high(1'b0),
+		.wEN1(IDEX_WbRdEn),
+		.wAddr1(IDEX_RdAddr),
+		.wData1(EX_AluData),
+        .simd_ena1(IDEX_SimdEN),
+		.wEN2(EXMem_RdWrtEn),
+		.wAddr2(EXMem_RdAddr),
+		.wData2(Dcache_DataRd),
+        .simd_ena2(EXMem_SimdEN)
+	);
+
+	EXHazard i_EXHazard(
+		.IDEX_Rs1Addr(IDEX_Rs1Addr),
+		.IDEX_Rs2Addr(IDEX_Rs2Addr),
+		.IDEX_Rs3Addr(IDEX_Rs3Addr),	
+		.RF_Rs1Data(RF_Rs1Data),
+		.RF_Rs2Data(RF_Rs2Data),
+		.RF_Rs3Data(RF_Rs3Data),
+        .mask(mask),
+		.mask_ena(IDEX_Fmt[0]),
+		.simd_ena(IDEX_SimdEN),
+		.funct3(IDEX_Rm),
+		.EXMem_RdAddr(EXMem_RdAddr),
+		.EXMem_AluData(EXMem_AluData),
+		.Dcache_DataRd(Dcache_DataRd),
+		.Mem_LdEN(Mem_LdEn),
+		.EXHazard_Rs1Data(EXHazard_Rs1Data),
+		.EXHazard_Rs2Data(EXHazard_Rs2Data),
+		.EXHazard_Rs3Data(EXHazard_Rs3Data)
+	);
+
 	EX i_EX (
-		.IDEX_Rs1Data(IDEX_Rs1Data),
-		.IDEX_Rs2Data(IDEX_Rs2Data),
+		.IDEX_Rs1Data(EXHazard_Rs1Data),
+		.IDEX_Rs2Data(EXHazard_Rs2Data),
+		.IDEX_Rs3Data(EXHazard_Rs3Data),
 		.IDEX_Sel1(IDEX_Sel1),
 		.IDEX_NowPC(IDEX_NowPC),
 		.IDEX_Sel2(IDEX_Sel2),
@@ -302,6 +299,9 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		//.IDEX_Rs1Addr(IDEX_Rs1Addr), 
         //.IDEX_Rs2Addr(IDEX_Rs2Addr), 
 		//.EXMem_RdAddr(EXMem_RdAddr),
+        .IDEX_Rm(IDEX_Rm),
+        .IDEX_Fmt(IDEX_Fmt),
+        .Csr_Frm(Csr_Frm),
 		.Csr_RdData(Csr_RdData),
 		.IDEX_AluOp(IDEX_AluOp),
 		.IDEX_LdType(IDEX_LdType),
@@ -316,7 +316,9 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),
 		.EX_LdStFlag(EX_LdStFlag),
-		.EX_StallReq(EX_StallReq)
+		.EX_StallReq(EX_StallReq),
+		.EX_FpuException(EX_FpuException),
+		.EX_FpuReady(EX_FpuReady)
 	);
 
 wire [31:0] EXMEM_NowPC;	
@@ -331,7 +333,7 @@ wire [31:0] EXMEM_NowPC;
         .IDEX_CsrAddr(IDEX_CsrAddr),
         .IDEX_CsrCmd(IDEX_CsrCmd),
         .IDEX_Imm(IDEX_Imm),
-        .IDEX_Rs1Data(IDEX_Rs1Data),
+        .IDEX_Rs1Data(EXHazard_Rs1Data),
         .IDEX_ImmSel(IDEX_ImmSel),
         .IDEX_NowPC(IDEX_NowPC),
         .IDEX_StType(IDEX_StType),
@@ -348,15 +350,19 @@ wire [31:0] EXMEM_NowPC;
         .Csr_Evec(Csr_Evec),
         .Csr_Memflush(Csr_Memflush),
         .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
+        .EX_FpuException(EX_FpuException),
+        .EX_FpuReady(EX_FpuReady),
+        .Csr_Frm(Csr_Frm),
         .NMI(1'b0),
         .RESET(1'b0),
         .Core_interrupt(3'b0),
         .DBG_interrupt (5'b0),
-        .Fetchaddr_Invalid(Fetchaddr_Invalid)//unuse?
+        .Fetchaddr_Invalid(Fetchaddr_Invalid),//unuse?
+        .Csr_Mcause(Csr_Mcause)
 	);	
 		
 
-	PipeStage #(
+	PipeStageMem #(
 		.STAGE_WIDTH(`PIPE_EXMem_LEN)
 	)
 	i_EXMem(
@@ -364,11 +370,13 @@ wire [31:0] EXMEM_NowPC;
 		.rst_n(rst_n),
 		.Stall(Ctrl_Stall[3]),
 		.Flush(Csr_Memflush|Flush[2]),	
+        .IDEX_StType(IDEX_StType),
+        .IDEX_LdType(IDEX_LdType),
 		.in(
 			{
 				EX_AluData,
 				IDEX_RdAddr,
-				IDEX_Rs2Data,
+				EXHazard_Rs2Data,
 				IDEX_StType,
 				IDEX_LdType,
 				IDEX_WbRdEn,
@@ -420,44 +428,5 @@ wire [31:0] EXMEM_NowPC;
 		.Icache_NextPC(Fetch_NextPC),
 		.Icache_Instr(Icache_Instr)
 	);
-	
-	PipeStage #(
-		.STAGE_WIDTH(`PIPE_MemWb_LEN)
-	)
-	i_MemWb(
-		.clk(clk),
-		.rst_n(rst_n),
-		.Stall(Ctrl_Stall[4]),
-		.Flush(Csr_Memflush|Flush[3]),
-		.in(
-			{
-				EXMem_RdAddr,
-				EXMem_RdWrtEn,
-				EXMem_AluData,
-				Dcache_DataRd,
-				EXMem_WbSel,
-                EXMEM_SimdEN,
-                EXMEM_Rm
-			} 
-		),
-		.out(
-			{
-				MemWb_RdAddr,
-				MemWb_RdWrtEn,
-				MemWb_AluData,
-				MemWb_DataRd,
-				MemWb_WbSel,
-                MemWb_SimdEN,
-                MemWb_Rm
-			} 
-		)
-	);
-
-	Wb i_Wb(
-		.MemWb_WbSel(MemWb_WbSel),
-		.MemWb_AluData(MemWb_AluData),
-		.MemWb_DataRd(MemWb_DataRd),
-		.Wb_DataWrt(Wb_DataWrt)
-    );
 		
 endmodule

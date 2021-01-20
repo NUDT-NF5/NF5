@@ -1,0 +1,23 @@
+//
+// File created by:  xrun
+// Do not modify this file
+//
+-XLMODE
+./xcelium.d/run.lnx86.18.03.d
+-RUNMODE
+filelist.v
+-sv
+-assert
+-NOWARN
+CUNGL1
+-NOWARN
+NONPRT
+-CDSLIB
+./xcelium.d/run.lnx86.18.03.d/cdsrun.lib
+-HDLVAR
+./xcelium.d/run.lnx86.18.03.d/hdlrun.var
+-MESSAGES
+-UPDATE
+-XLLIBSTORE
+./xcelium.d/run.lnx86.18.03.d/xllibs
+-ALLOWUNBOUND

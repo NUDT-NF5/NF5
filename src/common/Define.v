@@ -32,8 +32,8 @@
 `define	IFID_WIDTH			`ADDR_WIDTH + `INSTR_WIDTH		//Fetch_NextPC + Icache_Instr
 
 /*----------RegFile.v---------*/
-`define	RF_ADDR_WIDTH		5
-`define	RF_NUMBER			32
+`define	RF_ADDR_WIDTH		6
+`define	RF_NUMBER			64
 
 /*----------DecodeHazard.v---------*/
 `define	RS1_SEL_WIDTH		3
@@ -184,7 +184,7 @@
 `define WB_XXX 			`WB_SEL_WIDTH'd0
 
 //alu_op
-`define ALU_OP_WIDTH	5
+`define ALU_OP_WIDTH	6
 `define ALU_ADD    		`ALU_OP_WIDTH'd0
 `define ALU_SUB    		`ALU_OP_WIDTH'd1
 `define ALU_AND    		`ALU_OP_WIDTH'd2
@@ -217,6 +217,27 @@
 `define ALU_SMVSI       `ALU_OP_WIDTH'd29
 `define ALU_SMVIS       `ALU_OP_WIDTH'd30
 `define ALU_XXX    		`ALU_OP_WIDTH'd31
+
+`define FPU_FADD        `ALU_OP_WIDTH'd32
+`define FPU_FSUB        `ALU_OP_WIDTH'd33
+`define FPU_FMUL        `ALU_OP_WIDTH'd34
+`define FPU_FDIV        `ALU_OP_WIDTH'd35
+`define FPU_FMIN_MAX    `ALU_OP_WIDTH'd36
+`define FPU_FSQRT       `ALU_OP_WIDTH'd37
+`define FPU_FMADD       `ALU_OP_WIDTH'd38
+`define FPU_FMSUB       `ALU_OP_WIDTH'd39
+`define FPU_FNMSUB      `ALU_OP_WIDTH'd40
+`define FPU_FNMADD      `ALU_OP_WIDTH'd41
+`define FPU_FCVT_F2I    `ALU_OP_WIDTH'd42
+`define FPU_FCVT_F2IU   `ALU_OP_WIDTH'd43
+`define FPU_FCVT_I2F    `ALU_OP_WIDTH'd44
+`define FPU_FCVT_IU2F   `ALU_OP_WIDTH'd45
+`define FPU_FCVT_F2F    `ALU_OP_WIDTH'd46
+`define FPU_FSGNJ       `ALU_OP_WIDTH'd47
+`define FPU_FMV_F2X     `ALU_OP_WIDTH'd48
+`define FPU_FMV_X2F     `ALU_OP_WIDTH'd49
+`define FPU_FCMP        `ALU_OP_WIDTH'd50
+`define FPU_FCLASS      `ALU_OP_WIDTH'd51
 
 //csr_cmd
 `define CSR_CMD_WIDTH	3	
@@ -362,6 +383,14 @@
 `define FCVT_DW         `INSTR_ENCODE_WIDTH'd109
 `define FCVT_DWU        `INSTR_ENCODE_WIDTH'd110
 
+//fpu exception
+`define FPU_EXCEPTION_WIDTH 5
+`define NV                  `FPU_EXCEPTION_WIDTH'b10000
+`define DZ                  `FPU_EXCEPTION_WIDTH'b01000
+`define OF                  `FPU_EXCEPTION_WIDTH'b00100
+`define UF                  `FPU_EXCEPTION_WIDTH'b00010
+`define NX                  `FPU_EXCEPTION_WIDTH'b00001
+
 //integer SIMD
 `define S_ADD           `INSTR_ENCODE_WIDTH'd111
 `define S_SUB           `INSTR_ENCODE_WIDTH'd112
@@ -483,9 +512,10 @@
 /*----------csr_idx---------*/
 `define	CSR_ADDR_WIDTH		12
 `define	CSR_DATA_WIDTH	  32
+`define FRM_WIDTH         3
 `define	CSR_USTATUS       12'h000
-`define CSR_FRM           12'h001
-`define CSR_FFLAG         12'h002
+`define CSR_FFLAG         12'h001
+`define CSR_FRM           12'h002
 `define CSR_FCSR          12'h003 //Floating-Point Control and Status Register (frm + fflags).
 
 `define CSR_STVEC         12'h105 //Supervisor trap handler base address.
@@ -514,6 +544,6 @@
 
 /*----------Core.v---------*/
 `define PIPE_IFID_LEN 	`ADDR_WIDTH + `DATA_WIDTH
-`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `FUNCT3_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + `ADDR_WIDTH
+`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH + 1 + `ADDR_WIDTH + `FUNCT3_WIDTH + 2
 `define PIPE_EXMem_LEN 	`SIMD_DATA_WIDTH + `RF_ADDR_WIDTH + `SIMD_DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH + `ADDR_WIDTH + 1 + `FUNCT3_WIDTH
 `define PIPE_MemWb_LEN 	`RF_ADDR_WIDTH + 1 + `SIMD_DATA_WIDTH + `SIMD_DATA_WIDTH + 1 + 1 + `FUNCT3_WIDTH

@@ -25,8 +25,8 @@ always @*
                 rs2_temp = {rs1[31:0],  rs2[31:0]};
             end
             default : begin
-                rs1_temp = reorgnaized_rs1;
-                rs2_temp = reorgnaized_rs2;
+                rs1_temp = rs1;
+                rs2_temp = rs2;
             end
         endcase
     else begin

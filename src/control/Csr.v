@@ -35,6 +35,11 @@ module Csr(
     output wire                               Csr_ExcpFlag   , //flush IF ID  
     output wire                               Csr_Memflush ,    //flush EX-MEM Only 
     output wire                               Csr_WFIClrFlag,
+
+    //FPU
+    input         [`FPU_EXCEPTION_WIDTH-1:0]  EX_FpuException,
+    input                                     EX_FpuReady,
+    output        [`FRM_WIDTH - 1:0]          Csr_Frm,
   
     input  wire   [`SIMD_DATA_WIDTH-1:0]      EXMem_AluData     ,//jump ldst addr
     input  wire   [`LD_TYPE_WIDTH-1:0]        EXMem_StType   ,//EX detect the illegal addr  =Ex_Sttype  //change to:EX_StType
@@ -43,7 +48,8 @@ module Csr(
     input  wire   [`ADDR_WIDTH-1:0]           EXMEM_NowPC	,
 	  input  wire			                          Decode_16BitFlag ,
     output wire                               Fetchaddr_Invalid,
-    input  wire  [31:0]                       IFID_Instr		
+    input  wire  [31:0]                       IFID_Instr,
+    output wire  [2:0]                        Csr_Mcause
     );
 	
 	//assign Csr_memflush
@@ -184,6 +190,8 @@ assign flag_reg=flag_reg_t;
       endcase
      end		
 
+     assign Csr_Mcause = mcause_code[2:0];
+
    always@(*) begin                     
       casex(flag_valid) 
         16'bxxxx_xxxx_xxxx_x100 : dcause_code=3'd0;  
@@ -257,7 +265,7 @@ wire csr_mepc_wen;
     //        setting for other exceptions.
     //
       wire[31:0] faulting_virtual_address;//Reserve for mem
-		  assign faulting_virtual_address=EXMem_AluData[`DATA_WIDTH - 1:0];
+		  assign faulting_virtual_address=EXMem_AluData;
 	     wire  [`CSR_DATA_WIDTH-1:0]csr_mtval_nxt;  
         wire   csr_mtval_ena;   
          assign csr_mtval_nxt = Csr_Memflush ? faulting_virtual_address://ldst misalign
@@ -275,7 +283,7 @@ wire csr_mepc_wen;
     // ------------------------------------
 
          reg  [`CSR_DATA_WIDTH-1:0]csr_read_data;                      
-         wire [`DATA_WIDTH-1:0] csr_op1 =( IDEX_ImmSel==`IMM_Z)? IDEX_Imm :IDEX_Rs1Data[`DATA_WIDTH - 1:0];
+         wire [`DATA_WIDTH-1:0] csr_op1 =( IDEX_ImmSel==`IMM_Z)? IDEX_Imm :IDEX_Rs1Data;
          wire [`DATA_WIDTH-1:0] csr_op2 =csr_read_data;   
          wire csr_rden  = IDEX_CsrCmd[0]| IDEX_CsrCmd[1];//read enable
          wire csr_wrten = (IDEX_CsrCmd == `CSR_S|IDEX_CsrCmd == `CSR_C)&csr_op1!=0 | IDEX_CsrCmd == `CSR_W;                                 
@@ -290,7 +298,7 @@ wire csr_mepc_wen;
     // ------------------------------------
     //        CSRs interface
     // ------------------------------------
-          wire [`CSR_DATA_WIDTH-1:0] csr_debug_mode_q;  
+          wire [`CSR_DATA_WIDTH-1:0] csr_debug_mode_q = 'b0;  
           wire [`CSR_DATA_WIDTH-1:0] csr_dcsr_q      ;  
           wire [`CSR_DATA_WIDTH-1:0] csr_dpc_q       ;  
           wire [`CSR_DATA_WIDTH-1:0] csr_dscratch_q ;  
@@ -355,6 +363,9 @@ wire csr_mepc_wen;
       end
     end   
 
+    assign Csr_Frm = csr_fcsr_q[7:5];
+    wire [4:0] Csr_Fflags = csr_fcsr_q[4:0];
+
     // ---------------------------
     // CSR Write ena
     // ---------------------------
@@ -376,8 +387,8 @@ wire csr_mepc_wen;
       wire csr_pmpaddr0_wen= csr_wrten &(IDEX_CsrAddr==`CSR_PMPADDR ); 
       wire csr_stvec_wen = csr_wrten &(IDEX_CsrAddr==`CSR_STVEC   ); 
       wire csr_satp_wen  = csr_wrten &(IDEX_CsrAddr==`CSR_SATP    ); 
-      wire csr_fcsr_wen  = csr_wrten & (IDEX_CsrAddr==`CSR_FCSR) | (IDEX_CsrAddr==`CSR_FRM ) | (IDEX_CsrAddr==`CSR_FFLAG ); 
-     
+      wire csr_fcsr_wen_FPU = EX_FpuReady && (| EX_FpuException);
+      wire csr_fcsr_wen  = csr_fcsr_wen_FPU || csr_wrten && (IDEX_CsrAddr==`CSR_FCSR) | (IDEX_CsrAddr==`CSR_FRM ) | (IDEX_CsrAddr==`CSR_FFLAG ); 
  
 
 	 // ---------------------------
@@ -419,7 +430,10 @@ wire csr_mepc_wen;
       wire [`CSR_DATA_WIDTH-1:0] csr_pmpaddr0_d =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_stvec_d    =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_satp_d     =csr_wrt_data;
-      wire [`CSR_DATA_WIDTH-1:0] csr_fcsr_d     =csr_wrt_data;
+      wire [`CSR_DATA_WIDTH-1:0] csr_fcsr_d     =(csr_fcsr_wen_FPU) ?       {24'b0, Csr_Frm, EX_FpuException} :
+                                                 (IDEX_CsrAddr==`CSR_FRM) ? {24'b0, csr_wrt_data[2:0], Csr_Fflags} :
+                                                 (IDEX_CsrAddr==`CSR_FFLAG) ? {24'b0, Csr_Frm, csr_wrt_data[4:0]} :
+                                                                            csr_wrt_data;
 
  	 // ---------------------------
     // CSR  Updata logic
