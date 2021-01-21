@@ -44,7 +44,6 @@
 ../src/top/Core.v
 ../src/top/TbAll.sv
 ../src/common/PipeStageMem.v
-../src/common/PipeStage2.v
 ../src/common/Mux.v
 ../src/common/PipeStage.v
 ../src/common/Define.v
@@ -52,9 +51,6 @@
 ../src/common/PipeStage3.v
 ../src/memAccess/Dcache.v
 ../src/memAccess/Mem.v
-../src/writeBack/Wb.v
 ../src/control/Ctrl.v
 ../src/control/Csr.v
 ../src/decode/Decode.v
-../src/decode/DecodeHazard.v
-../src/decode/OperandOrganizer.v
