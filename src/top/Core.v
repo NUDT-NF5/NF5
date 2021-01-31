@@ -22,17 +22,14 @@ module Core(
 	wire	[`CSR_ADDR_WIDTH - 1 : 0]		Decode_CsrAddr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs1Addr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs2Addr;
-	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_Rs3Addr;
 	wire	[`FUNCT3_WIDTH - 1 : 0]	        Decode_Rm;
 	wire	[2 - 1 : 0]						Decode_Stall;
 	wire	[4 - 1 : 0]						Decode_Flush;
 	wire									Decode_16BitFlag;
 	wire 	[`LD_TYPE_WIDTH - 1 : 0 ]		Decode_LdType;
-	wire	[2 - 1 : 0]						Decode_Fmt;
 	
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs1Data;
 	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs2Data;
-	wire  	[`DATA_WIDTH-1 :0]   			DecodeHazard_Rs3Data;
 	wire	     							DecodeHazard_StallReq;
 	
 	wire	[`PC_SEL_WIDTH - 1 : 0 ]		IDEX_PcSel;
@@ -54,13 +51,11 @@ module Core(
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		IDEX_Rs2Addr;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			IDEX_Rs3Data;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
 				
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs1Data;
 	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs2Data;
-	wire	[`DATA_WIDTH - 1 : 0]			RF_Rs3Data;
 	
     wire    [31:0] 							EX_AluData;
     wire           							EX_LdStFlag;
@@ -103,10 +98,114 @@ module Core(
     wire                               		Csr_ExcpFlag;
     wire                               		Csr_Memflush;
     wire                                    Csr_WFIClrFlag;	
+  
+//=============Xbar===============
+//Xbar
+wire          Bus_0_dBitsReady  ; 
+wire          Bus_0_dBitsValid  ; 
+wire [2:0]    Bus_0_dBitsOpcode ; 
+wire [31:0]   Bus_0_dBitsData   ; 
+wire [1:0]    Bus_0_dBitsParam  ; 
+wire [4:0]    Bus_0_dBitsSource ; 
+wire [1:0]    Bus_0_dBitsSink   ; 
+wire          Bus_0_dBitsDennied; 
+wire          Bus_0_dBitsCorrupt; 
+wire [3:0]    Bus_0_dBitsSize   ; 
+
+wire          Bus_0_aBitsReady  ; 
+wire          Bus_0_aBitsValid  ; 
+wire [31:0]   Bus_0_aBitsAddress; 
+wire [2:0]    Bus_0_aBitsOpcode ; 
+wire [3:0]    Bus_0_aBitsSize   ; 
+wire [3:0]    Bus_0_aBitsMask   ; 
+wire [31:0]   Bus_0_aBitsData   ; 
+wire [2:0]    Bus_0_aBitsParam  ; 
+wire [4:0]    Bus_0_aBitsSource ; 
+wire          Bus_0_aBitsCorrupt; 
+
+wire          Bus_1_dBitsReady  ; 
+wire          Bus_1_dBitsValid  ; 
+wire [2:0]    Bus_1_dBitsOpcode ; 
+wire [31:0]   Bus_1_dBitsData   ; 
+wire [1:0]    Bus_1_dBitsParam  ; 
+wire [4:0]    Bus_1_dBitsSource ; 
+wire [1:0]    Bus_1_dBitsSink   ; 
+wire          Bus_1_dBitsDennied; 
+wire          Bus_1_dBitsCorrupt; 
+wire [3:0]    Bus_1_dBitsSize   ; 
+
+wire          Bus_1_aBitsReady  ; 
+wire          Bus_1_aBitsValid  ; 
+wire [31:0]   Bus_1_aBitsAddress; 
+wire [2:0]    Bus_1_aBitsOpcode ; 
+wire [3:0]    Bus_1_aBitsSize   ; 
+wire [3:0]    Bus_1_aBitsMask   ; 
+wire [31:0]   Bus_1_aBitsData   ; 
+wire [2:0]    Bus_1_aBitsParam  ; 
+wire [4:0]    Bus_1_aBitsSource ; 
+wire          Bus_1_aBitsCorrupt; 
+
+wire          Bus_D_dBitsReady  ; 
+wire          Bus_D_dBitsValid  ; 
+wire [2:0]    Bus_D_dBitsOpcode ; 
+wire [31:0]   Bus_D_dBitsData   ; 
+wire [1:0]    Bus_D_dBitsParam  ; 
+wire [4:0]    Bus_D_dBitsSource ; 
+wire [1:0]    Bus_D_dBitsSink   ; 
+wire          Bus_D_dBitsDennied; 
+wire          Bus_D_dBitsCorrupt; 
+wire [3:0]    Bus_D_dBitsSize   ; 
+
+wire          Bus_D_aBitsReady  ; 
+wire          Bus_D_aBitsValid  ; 
+wire [31:0]   Bus_D_aBitsAddress; 
+wire [2:0]    Bus_D_aBitsOpcode ; 
+wire [3:0]    Bus_D_aBitsSize   ; 
+wire [3:0]    Bus_D_aBitsMask   ; 
+wire [31:0]   Bus_D_aBitsData   ; 
+wire [2:0]    Bus_D_aBitsParam  ; 
+wire [4:0]    Bus_D_aBitsSource ; 
+wire          Bus_D_aBitsCorrupt; 
+
+wire          Bus_I_dBitsReady  ; 
+wire          Bus_I_dBitsValid  ; 
+wire [2:0]    Bus_I_dBitsOpcode ; 
+wire [31:0]   Bus_I_dBitsData   ; 
+wire [1:0]    Bus_I_dBitsParam  ; 
+wire [4:0]    Bus_I_dBitsSource ; 
+wire [1:0]    Bus_I_dBitsSink   ; 
+wire          Bus_I_dBitsDennied; 
+wire          Bus_I_dBitsCorrupt; 
+wire [3:0]    Bus_I_dBitsSize   ; 
+
+wire          Bus_I_aBitsReady  ; 
+wire          Bus_I_aBitsValid  ; 
+wire [31:0]   Bus_I_aBitsAddress; 
+wire [2:0]    Bus_I_aBitsOpcode ; 
+wire [3:0]    Bus_I_aBitsSize   ; 
+wire [3:0]    Bus_I_aBitsMask   ; 
+wire [31:0]   Bus_I_aBitsData   ; 
+wire [2:0]    Bus_I_aBitsParam  ; 
+wire [4:0]    Bus_I_aBitsSource ; 
+wire          Bus_I_aBitsCorrupt; 
+//================================
+ 
+//Cache snooping
+wire  [31:0]  Dcache_DataRd_snoop;
+wire          Dcache_Dirty      ;  
+wire  [31:0]  Icache_PC	        ;
+//Cache stall
+wire          Icache_StallReq   ;
+wire          Dcache_StallReq   ;
+
+//Xbar addr judgement
+wire  [31:0]  Core_CacheAddr_xbar_D;
+wire  [31:0]  Core_CacheAddr_xbar_I;
+wire          St_EN;
 		
 	Ctrl i_Ctrl(
-		.Icache_StallReq(1'b0),
-		.Dcache_StallReq(1'b0),
+		.Icache_StallReq(Icache_StallReq),
+		.Dcache_StallReq(Dcache_StallReq),
 		.Decode_Stall   (Decode_Stall),
 		.Mem_LdStFlag   (Mem_DcacheEn),
         .DecodeHazard_StallReq(DecodeHazard_StallReq),//data_hazard
@@ -161,13 +260,11 @@ module Core(
 		.Decode_CsrAddr(Decode_CsrAddr),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
 		.Decode_Rs2Addr(Decode_Rs2Addr),
-		.Decode_Rs3Addr(Decode_Rs3Addr),
         .Decode_Rm(Decode_Rm),
 		.Decode_Stall(Decode_Stall),
 		.Decode_Flush(Decode_Flush),
 		.Decode_16BitFlag(Decode_16BitFlag),
-		.Decode_LdType(Decode_LdType),
-		.Decode_Fmt(Decode_Fmt)
+		.Decode_LdType(Decode_LdType)
 	);
 	
 	RegFile i_RegFile(
@@ -177,8 +274,6 @@ module Core(
 		.rData1(RF_Rs1Data),
 		.rAddr2(Decode_Rs2Addr),
 		.rData2(RF_Rs2Data),
-		.rAddr3(Decode_Rs3Addr),
-		.rData3(RF_Rs3Data),
 		.wEN(MemWb_RdWrtEn),
 		.wAddr(MemWb_RdAddr),
 		.wData(Wb_DataWrt)
@@ -188,11 +283,9 @@ module Core(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Decode_Rs1Addr(Decode_Rs1Addr),
-		.Decode_Rs2Addr(Decode_Rs2Addr),
-		.Decode_Rs3Addr(Decode_Rs3Addr),	
+		.Decode_Rs2Addr(Decode_Rs2Addr),	
 		.RF_Rs1Data(RF_Rs1Data),
 		.RF_Rs2Data(RF_Rs2Data),
-		.RF_Rs3Data(RF_Rs3Data),
 		.IDEX_RdAddr(IDEX_RdAddr),
 		.IDEX_WbRdEn(IDEX_WbRdEn),
 		.EX_AluData(EX_AluData),
@@ -205,10 +298,10 @@ module Core(
 		.MemWb_RdWrtEn(MemWb_RdWrtEn),
 		.Wb_DataWrt(Wb_DataWrt),
 		.Decode_LdType(Decode_LdType),
+        .IDEX_LdType(IDEX_LdType),
 		.DecodeHazard_StallReq(DecodeHazard_StallReq),
 		.DecodeHazard_Rs1Data(DecodeHazard_Rs1Data),
-		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data),
-		.DecodeHazard_Rs3Data(DecodeHazard_Rs3Data)
+		.DecodeHazard_Rs2Data(DecodeHazard_Rs2Data)
 	);
 	
 
@@ -231,7 +324,6 @@ module Core(
 				Decode_CsrAddr,
 				DecodeHazard_Rs1Data,
 				DecodeHazard_Rs2Data,
-				DecodeHazard_Rs3Data,
 				Decode_16BitFlag,
 				IFID_NowPC
 			} 
@@ -255,7 +347,6 @@ module Core(
 				IDEX_CsrAddr,
 				IDEX_Rs1Data,
 				IDEX_Rs2Data,
-				IDEX_Rs3Data,
 				IDEX_16BitFlag,
 				IDEX_NowPC
 			} 
@@ -279,6 +370,7 @@ module Core(
 		.IDEX_LdType(IDEX_LdType),
 		.IDEX_StType(IDEX_StType),
 		.Mem_DcacheEN(Mem_DcacheEn),
+        .Dcache_StallReq(Dcache_StallReq),
 		.IDEX_16BitFlag(IDEX_16BitFlag),
 		.clk(clk),
 		.rst_n(rst_n),
@@ -288,41 +380,40 @@ module Core(
 		.EX_LdStFlag(EX_LdStFlag),
 		.EX_StallReq(EX_StallReq)
 	);
-
 wire [31:0] EXMEM_NowPC;	
 	Csr i_Csr (
         .clk(clk),
         .rst_n(rst_n),
         .Ctrl_Stall(Ctrl_Stall),
-        .IFID_NowPC(IFID_NowPC),
-		.IFID_Instr(IFID_Instr),
-        .Decode_Flush(Decode_Flush),
-		.Decode_16BitFlag(Decode_16BitFlag),
         .IDEX_CsrAddr(IDEX_CsrAddr),
         .IDEX_CsrCmd(IDEX_CsrCmd),
-        .IDEX_Imm(IDEX_Imm),
-        .IDEX_Rs1Data(IDEX_Rs1Data),
-        .IDEX_ImmSel(IDEX_ImmSel),
-        .IDEX_NowPC(IDEX_NowPC),
-        .IDEX_StType(IDEX_StType),
-        .IDEX_LdType(IDEX_LdType),
-		.EX_BranchPC(EX_BranchPC), //new 
-        .EX_BranchFlag(EX_BranchFlag), 
-        .EX_AluData(EX_AluData),
-		.EXMem_LdType(EXMem_LdType),    
-		.EXMem_StType(EXMem_StType),    
-		.EXMem_AluData(EXMem_AluData) ,
-        .EXMEM_NowPC(EXMEM_NowPC),
         .Csr_RdData(Csr_RdData),
         .Csr_ExcpFlag(Csr_ExcpFlag),
         .Csr_Evec(Csr_Evec),
         .Csr_Memflush(Csr_Memflush),
-        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
         .NMI(1'b0),
         .RESET(1'b0),
+        .IDEX_NowPC(IDEX_NowPC),
+        .IFID_NowPC(IFID_NowPC),
+        .IDEX_Imm(IDEX_Imm),
+        .IDEX_Rs1Data(IDEX_Rs1Data),
+        .IDEX_ImmSel(IDEX_ImmSel),
         .Core_interrupt(3'b0),
         .DBG_interrupt (5'b0),
-        .Fetchaddr_Invalid(Fetchaddr_Invalid)//unuse?
+        .EX_AluData(EX_AluData),
+        .IDEX_StType(IDEX_StType),
+        .IDEX_LdType(IDEX_LdType),
+        .EX_BranchFlag(EX_BranchFlag),
+        .Decode_Flush(Decode_Flush),
+        .Csr_WFIClrFlag  (Csr_WFIClrFlag ) ,
+		.EXMem_LdType(EXMem_LdType),    
+		.EXMem_StType(EXMem_StType),    
+		.EXMem_AluData(EXMem_AluData) ,
+		.EX_BranchPC(EX_BranchPC), //new   
+               .EXMEM_NowPC(EXMEM_NowPC),
+		.Decode_16BitFlag(Decode_16BitFlag),
+               .Fetchaddr_Invalid(Fetchaddr_Invalid),
+.IFID_Instr(IFID_Instr)
 	);	
 		
 
@@ -333,7 +424,7 @@ wire [31:0] EXMEM_NowPC;
 		.clk(clk),
 		.rst_n(rst_n),
 		.Stall(Ctrl_Stall[3]),
-		.Flush(Csr_Memflush|Flush[2]),	
+		.Flush(Csr_Memflush|Flush[3]),	
 		.in(
 			{
 				EX_AluData,
@@ -343,7 +434,7 @@ wire [31:0] EXMEM_NowPC;
 				IDEX_LdType,
 				IDEX_WbRdEn,
 				IDEX_WbSel,
-                IDEX_NowPC
+                          IDEX_NowPC
 			} 
 		),
 		.out(
@@ -355,7 +446,7 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_LdType,				
 				EXMem_RdWrtEn,
 				EXMem_WbSel,
-                EXMEM_NowPC
+                          EXMEM_NowPC
 			} 
 		)
 	);
@@ -364,16 +455,17 @@ wire [31:0] EXMEM_NowPC;
 		.EXMem_LdType(EXMem_LdType),    
 		.EXMem_StType(EXMem_StType),    
 		.EXMem_AluData(EXMem_AluData),   
-		.Mem_LdEN(Mem_LdEn),        
+		.Mem_LdEN(Mem_LdEn),
+        .St_EN(St_EN), 
 		.Mem_DcacheEN(Mem_DcacheEn),    
 		.Mem_DcacheRd(Mem_DcacheRd),  
 		.Mem_DcacheSign(Mem_DcacheSign),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
-        .Csr_Memflush(Csr_Memflush)//new   
+            .Csr_Memflush(Csr_Memflush)//new   
     ); 	
 	
-	Dcache i_Dcache(
+	/*Dcache i_Dcache(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Mem_DcacheEN(Mem_DcacheEn),    
@@ -385,7 +477,7 @@ wire [31:0] EXMEM_NowPC;
 		.Dcache_DataRd(Dcache_DataRd),
 		.Icache_NextPC(Fetch_NextPC),
 		.Icache_Instr(Icache_Instr)
-	);
+	);*/
 	
 	PipeStage #(
 		.STAGE_WIDTH(`PIPE_MemWb_LEN)
@@ -421,5 +513,255 @@ wire [31:0] EXMEM_NowPC;
 		.MemWb_DataRd(MemWb_DataRd),
 		.Wb_DataWrt(Wb_DataWrt)
     );
+
+
+//====================Cache-tilelink======================
+  L1D_Cache i_L1D_Cache(
+        .clk             	(clk             	),
+        .rst_n           	(rst_n           	),
+        //core 	 
+        .Core_CacheRd    	(Mem_DcacheRd    	),	            
+        .Core_CacheEn    	(Mem_DcacheEn    	),	        
+        .Core_CacheSign  	(Mem_DcacheSign  	),	          
+        .Core_CacheAddr  	(Mem_DcacheAddr  	),	             
+        .Core_CacheData  	(EXMem_Rs2Data  	),	            
+        .Core_CacheWidth 	(Mem_DcacheWidth 	),	             
+        .Cache_DataRd    	(Dcache_DataRd    	),	            
+        .Cache_StallReq  	(Dcache_StallReq  	),
+                .Core_CacheAddr_xbar  	(Core_CacheAddr_xbar_D  	),
+        //Xbar Dcache A channel
+        .Bus_aBitsReady  	(Bus_0_aBitsReady  	),	          
+        .Bus_aBitsValid  	(Bus_0_aBitsValid  	),	             
+        .Bus_aBitsAddress	(Bus_0_aBitsAddress	),	            
+        .Bus_aBitsOpcode 	(Bus_0_aBitsOpcode 	),	             
+        .Bus_aBitsSize   	(Bus_0_aBitsSize   	),	             
+        .Bus_aBitsMask   	(Bus_0_aBitsMask   	),	             
+        .Bus_aBitsData   	(Bus_0_aBitsData   	),	             
+        .Bus_aBitsParam  	(Bus_0_aBitsParam  	),	             
+        .Bus_aBitsSource 	(Bus_0_aBitsSource 	),	             
+        .Bus_aBitsCorrupt	(Bus_0_aBitsCorrupt	),
+
+        //Xbar Dcache A channel
+        .Bus_dBitsReady  	(Bus_0_dBitsReady   ),	             
+        .Bus_dBitsValid  	(Bus_0_dBitsValid   ),	          
+        .Bus_dBitsOpcode 	(Bus_0_dBitsOpcode  ),	             
+        .Bus_dBitsData   	(Bus_0_dBitsData    ),	             
+        .Bus_dBitsParam  	(Bus_0_dBitsParam   ),	             
+        .Bus_dBitsSource 	(Bus_0_dBitsSource  ),	             
+        .Bus_dBitsSink   	(Bus_0_dBitsSink    ),	            
+        .Bus_dBitsDennied	(Bus_0_dBitsDennied ),	             
+        .Bus_dBitsCorrupt	(Bus_0_dBitsCorrupt ),	             
+        .Bus_dBitsSize   	(Bus_0_dBitsSize    ),
+        //Snooping Icache
+        .Icache_PC       	(Icache_PC       	),
+        .Dcache_DataRd   	(Dcache_DataRd_snoop),
+        .Dcache_Dirty		(Dcache_Dirty		)
+    );	
+
+
+/*Dcache i_Dcache(
+        .clk(clk),
+        .rst_n(rst_n),
+        .Mem_DcacheEN(Mem_DcacheEn),    
+        .Mem_DcacheRd(Mem_DcacheRd),    
+        .Mem_DcacheWidth(Mem_DcacheWidth), 
+        .Mem_DcacheAddr(Mem_DcacheAddr),   
+        .EXMem_Rs2Data(EXMem_Rs2Data),
+        .Mem_DcacheSign(Mem_DcacheSign), 
+        .Dcache_DataRd(Dcache_DataRd),
+        .Icache_NextPC(Fetch_NextPC),
+        .Icache_Instr(Icache_Instr)
+    );*/
+
+    L1I_Cache i_L1I_Cache(
+        .clk				 (clk               ),
+        .rst_n				 (rst_n             ),
+        //core	
+        .Core_CacheRd  	 	 (1                 ),  //always read Icache			
+        .Core_CacheEn		 (    ~EX_BranchFlag             ),  //always enable Icache			
+        .Core_CacheSign	 	 (0                 ),	//every instruction is unsigned		
+        .Core_CacheAddr	 	 (Fetch_NextPC	    ),			
+        .Core_CacheData 	 (0 	            ),  //always don't write data				
+        .Core_CacheWidth	 (2'b10	            ),	//always read 32bits instruction, *this cache cannot support 16bits instructions provisionaly			
+        .Cache_DataRd   	 (Icache_Instr   	),				
+        .Cache_StallReq 	 (Icache_StallReq 	),
+                .Core_CacheAddr_xbar 	 (Core_CacheAddr_xbar_I 	),
+        //Xbar Icache A channel				
+        .Bus_aBitsReady	 	 (Bus_1_aBitsReady  ),			
+        .Bus_aBitsValid 	 (Bus_1_aBitsValid  ),				
+        .Bus_aBitsAddress	 (Bus_1_aBitsAddress),				
+        .Bus_aBitsOpcode	 (Bus_1_aBitsOpcode ),				
+        .Bus_aBitsSize  	 (Bus_1_aBitsSize   ),				
+        .Bus_aBitsMask  	 (Bus_1_aBitsMask   ),				
+        .Bus_aBitsData  	 (Bus_1_aBitsData   ),				
+        .Bus_aBitsParam 	 (Bus_1_aBitsParam  ),				
+        .Bus_aBitsSource	 (Bus_1_aBitsSource ),				
+        .Bus_aBitsCorrupt	 (Bus_1_aBitsCorrupt),
+        //Xbar Icache D channel				
+        .Bus_dBitsReady 	 (Bus_1_dBitsReady  ),				
+        .Bus_dBitsValid	 	 (Bus_1_dBitsValid  ),			
+        .Bus_dBitsOpcode	 (Bus_1_dBitsOpcode ),				
+        .Bus_dBitsData  	 (Bus_1_dBitsData   ),				
+        .Bus_dBitsParam 	 (Bus_1_dBitsParam  ),				
+        .Bus_dBitsSource	 (Bus_1_dBitsSource ),				
+        .Bus_dBitsSink  	 (Bus_1_dBitsSink   ),				
+        .Bus_dBitsDennied	 (Bus_1_dBitsDennied),				
+        .Bus_dBitsCorrupt	 (Bus_1_dBitsCorrupt),				
+        .Bus_dBitsSize  	 (Bus_1_dBitsSize   ),
+
+        //Snooping Dcache				
+        .Dcache_DataRd		 (Dcache_DataRd_snoop),			
+        .Dcache_Dirty   	 (Dcache_Dirty   	),				
+        .Icache_PC			 (Icache_PC			)		
+    );
+
+SRAM_Top i_SRAM_Top(
+       .clk               (clk                ),
+       .rst_n             (rst_n              ),
+        //Dcache D cahnnel
+       .Bus_D_dBitsReady  (Bus_D_dBitsReady  ),
+       .Bus_D_dBitsValid  (Bus_D_dBitsValid  ),
+       .Bus_D_dBitsOpcode (Bus_D_dBitsOpcode ),
+       .Bus_D_dBitsData   (Bus_D_dBitsData   ),
+       .Bus_D_dBitsParam  (Bus_D_dBitsParam  ),
+       .Bus_D_dBitsSource (Bus_D_dBitsSource ),
+       .Bus_D_dBitsSink   (Bus_D_dBitsSink   ),
+       .Bus_D_dBitsDennied(Bus_D_dBitsDennied),
+       .Bus_D_dBitsCorrupt(Bus_D_dBitsCorrupt),
+       .Bus_D_dBitsSize   (Bus_D_dBitsSize   ),
+        //Dcache A channel
+       .Bus_D_aBitsReady  (Bus_D_aBitsReady  ),
+       .Bus_D_aBitsValid  (Bus_D_aBitsValid  ),
+       .Bus_D_aBitsAddress(Bus_D_aBitsAddress),
+       .Bus_D_aBitsOpcode (Bus_D_aBitsOpcode ),
+       .Bus_D_aBitsSize   (Bus_D_aBitsSize   ),
+       .Bus_D_aBitsMask   (Bus_D_aBitsMask   ),
+       .Bus_D_aBitsData   (Bus_D_aBitsData   ),
+       .Bus_D_aBitsParam  (Bus_D_aBitsParam  ),
+       .Bus_D_aBitsSource (Bus_D_aBitsSource ),
+       .Bus_D_aBitsCorrupt(Bus_D_aBitsCorrupt),
+        //Icache D channel
+       .Bus_I_dBitsReady  (Bus_I_dBitsReady   ),
+       .Bus_I_dBitsValid  (Bus_I_dBitsValid   ),
+       .Bus_I_dBitsOpcode (Bus_I_dBitsOpcode  ),
+       .Bus_I_dBitsData   (Bus_I_dBitsData    ),
+       .Bus_I_dBitsParam  (Bus_I_dBitsParam   ),
+       .Bus_I_dBitsSource (Bus_I_dBitsSource  ),
+       .Bus_I_dBitsSink   (Bus_I_dBitsSink    ),
+       .Bus_I_dBitsDennied(Bus_I_dBitsDennied ),
+       .Bus_I_dBitsCorrupt(Bus_I_dBitsCorrupt ),
+       .Bus_I_dBitsSize   (Bus_I_dBitsSize    ),
+        //Icache A channel
+       .Bus_I_aBitsReady  (Bus_I_aBitsReady   ),
+       .Bus_I_aBitsValid  (Bus_I_aBitsValid   ),
+       .Bus_I_aBitsAddress(Bus_I_aBitsAddress ),
+       .Bus_I_aBitsOpcode (Bus_I_aBitsOpcode  ),
+       .Bus_I_aBitsSize   (Bus_I_aBitsSize    ),
+       .Bus_I_aBitsMask   (Bus_I_aBitsMask    ),
+       .Bus_I_aBitsData   (Bus_I_aBitsData    ),
+       .Bus_I_aBitsParam  (Bus_I_aBitsParam   ),
+       .Bus_I_aBitsSource (Bus_I_aBitsSource  ),
+       .Bus_I_aBitsCorrupt(Bus_I_aBitsCorrupt )
+);
+
+    Xbar i_Xbar(
+        .clk               (clk               ),
+        .rst_n             (rst_n             ),
+    //-------Dcache--------
+        //Dcache D cahnnel
+        .Bus_0_dBitsReady  (Bus_0_dBitsReady  ),
+        .Bus_0_dBitsValid  (Bus_0_dBitsValid  ),
+        .Bus_0_dBitsOpcode (Bus_0_dBitsOpcode ),
+        .Bus_0_dBitsData   (Bus_0_dBitsData   ),
+        .Bus_0_dBitsParam  (Bus_0_dBitsParam  ),
+        .Bus_0_dBitsSource (Bus_0_dBitsSource ),
+        .Bus_0_dBitsSink   (Bus_0_dBitsSink   ),
+        .Bus_0_dBitsDennied(Bus_0_dBitsDennied),
+        .Bus_0_dBitsCorrupt(Bus_0_dBitsCorrupt),
+        .Bus_0_dBitsSize   (Bus_0_dBitsSize   ),
+        //Dcache A channel
+        .Bus_0_aBitsReady  (Bus_0_aBitsReady  ),
+        .Bus_0_aBitsValid  (Bus_0_aBitsValid  ),
+        .Bus_0_aBitsAddress(Bus_0_aBitsAddress),
+                .Core_CacheAddr_xbar_D(Core_CacheAddr_xbar_D),
+        .Bus_0_aBitsOpcode (Bus_0_aBitsOpcode ),
+        .Bus_0_aBitsSize   (Bus_0_aBitsSize   ),
+        .Bus_0_aBitsMask   (Bus_0_aBitsMask   ),
+        .Bus_0_aBitsData   (Bus_0_aBitsData   ),
+        .Bus_0_aBitsParam  (Bus_0_aBitsParam  ),
+        .Bus_0_aBitsSource (Bus_0_aBitsSource ),
+        .Bus_0_aBitsCorrupt(Bus_0_aBitsCorrupt),
+    //--------Icache--------
+        //Icache D channel
+        .Bus_1_dBitsReady  (Bus_1_dBitsReady  ),
+        .Bus_1_dBitsValid  (Bus_1_dBitsValid  ),
+        .Bus_1_dBitsOpcode (Bus_1_dBitsOpcode ),
+        .Bus_1_dBitsData   (Bus_1_dBitsData   ),
+        .Bus_1_dBitsParam  (Bus_1_dBitsParam  ),
+        .Bus_1_dBitsSource (Bus_1_dBitsSource ),
+        .Bus_1_dBitsSink   (Bus_1_dBitsSink   ),
+        .Bus_1_dBitsDennied(Bus_1_dBitsDennied),
+        .Bus_1_dBitsCorrupt(Bus_1_dBitsCorrupt),
+        .Bus_1_dBitsSize   (Bus_1_dBitsSize   ),
+        //Icache A channel
+        .Bus_1_aBitsReady  (Bus_1_aBitsReady  ),
+        .Bus_1_aBitsValid  (Bus_1_aBitsValid  ),
+        .Bus_1_aBitsAddress(Bus_1_aBitsAddress),
+                .Core_CacheAddr_xbar_I(Core_CacheAddr_xbar_I),
+        .Bus_1_aBitsOpcode (Bus_1_aBitsOpcode ),
+        .Bus_1_aBitsSize   (Bus_1_aBitsSize   ),
+        .Bus_1_aBitsMask   (Bus_1_aBitsMask   ),
+        .Bus_1_aBitsData   (Bus_1_aBitsData   ),
+        .Bus_1_aBitsParam  (Bus_1_aBitsParam  ),
+        .Bus_1_aBitsSource (Bus_1_aBitsSource ),
+        .Bus_1_aBitsCorrupt(Bus_1_aBitsCorrupt),
+    //-------SRAM-----
+        //SRAM Dcache D channel
+        .Bus_D_dBitsReady  (Bus_D_dBitsReady  ),
+        .Bus_D_dBitsValid  (Bus_D_dBitsValid  ),
+        .Bus_D_dBitsOpcode (Bus_D_dBitsOpcode ),
+        .Bus_D_dBitsData   (Bus_D_dBitsData   ),
+        .Bus_D_dBitsParam  (Bus_D_dBitsParam  ),
+        .Bus_D_dBitsSource (Bus_D_dBitsSource ),
+        .Bus_D_dBitsSink   (Bus_D_dBitsSink   ),
+        .Bus_D_dBitsDennied(Bus_D_dBitsDennied),
+        .Bus_D_dBitsCorrupt(Bus_D_dBitsCorrupt),
+        .Bus_D_dBitsSize   (Bus_D_dBitsSize   ),
+        //SRAM Dcache A channel     
+        .Bus_D_aBitsReady  (Bus_D_aBitsReady  ),
+        .Bus_D_aBitsValid  (Bus_D_aBitsValid  ),
+        .Bus_D_aBitsAddress(Bus_D_aBitsAddress),
+        .Bus_D_aBitsOpcode (Bus_D_aBitsOpcode ),
+        .Bus_D_aBitsSize   (Bus_D_aBitsSize   ),
+        .Bus_D_aBitsMask   (Bus_D_aBitsMask   ),
+        .Bus_D_aBitsData   (Bus_D_aBitsData   ),
+        .Bus_D_aBitsParam  (Bus_D_aBitsParam  ),
+        .Bus_D_aBitsSource (Bus_D_aBitsSource ),
+        .Bus_D_aBitsCorrupt(Bus_D_aBitsCorrupt),
+        //SRAM Icache D channel
+        .Bus_I_dBitsReady  (Bus_I_dBitsReady  ),
+        .Bus_I_dBitsValid  (Bus_I_dBitsValid  ),
+        .Bus_I_dBitsOpcode (Bus_I_dBitsOpcode ),
+        .Bus_I_dBitsData   (Bus_I_dBitsData   ),
+        .Bus_I_dBitsParam  (Bus_I_dBitsParam  ),
+        .Bus_I_dBitsSource (Bus_I_dBitsSource ),
+        .Bus_I_dBitsSink   (Bus_I_dBitsSink   ),
+        .Bus_I_dBitsDennied(Bus_I_dBitsDennied),
+        .Bus_I_dBitsCorrupt(Bus_I_dBitsCorrupt),
+        .Bus_I_dBitsSize   (Bus_I_dBitsSize   ),
+        //SRAM Icache A channel
+        .Bus_I_aBitsReady  (Bus_I_aBitsReady  ),
+        .Bus_I_aBitsValid  (Bus_I_aBitsValid  ),
+        .Bus_I_aBitsAddress(Bus_I_aBitsAddress),
+        .Bus_I_aBitsOpcode (Bus_I_aBitsOpcode ),
+        .Bus_I_aBitsSize   (Bus_I_aBitsSize   ),
+        .Bus_I_aBitsMask   (Bus_I_aBitsMask   ),
+        .Bus_I_aBitsData   (Bus_I_aBitsData   ),
+        .Bus_I_aBitsParam  (Bus_I_aBitsParam  ),
+        .Bus_I_aBitsSource (Bus_I_aBitsSource ),
+        .Bus_I_aBitsCorrupt(Bus_I_aBitsCorrupt)
+    );    
+//====================================================    
+      
 		
 endmodule

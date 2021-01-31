@@ -12,14 +12,14 @@ module Mem
     input  wire  [`ST_TYPE_WIDTH-1:0]     EXMem_StType,    //From EXMem stage, indicate store type
     input  wire  [`DATA_WIDTH-1   :0]     EXMem_AluData,   //From EXMem stage, indicate Dcaceh Addr
     output wire                           Mem_LdEN,        //To EX stage, generate forward control signal
+    output wire                           St_EN,  
     output wire                           Mem_DcacheEN,    //To Dcache
     output wire                           Mem_DcacheRd,    //To Dcache
     output wire  [1:0]      			  Mem_DcacheWidth, //To Dcache
     output wire  [`ADDR_WIDTH-1  :0]      Mem_DcacheAddr,   //To Dcache
     output wire                           Mem_DcacheSign ,  //To Dcache
-    input  wire                           Csr_Memflush
+    output wire                          Csr_Memflush
     ); 
-wire   St_EN;
 assign St_EN    = ( EXMem_StType == `ST_XXX )? 0 : 1;
 assign Mem_LdEN = ( EXMem_LdType == `LD_XXX ) ? 0 : 1;
 assign Mem_DcacheEN    = Mem_LdEN || St_EN &(!Csr_Memflush); 

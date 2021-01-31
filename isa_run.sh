@@ -14,18 +14,15 @@ iverilog_dir=iverilog-project
 vivado_dir=vivado-project/NF5_System/NF5_System.sim/sim_1/behav/xsim
 vivado_sh_dir=vivado-project
 vivado_tb_dir=vivado-project/NF5_System/NF5_System.srcs/sim_1/imports/nf5_source
-vcs_dir=vcs-project
 TB_dir=TB_NC
 while :
 do
-        echo "================选择使用的仿真工具======================"
+        echo "================选择使用的仿真工具======================="
         echo "    1  Open source tool：Icarus Verilog + Gtkwave       "
         echo "    2  Commercial  tool：Cadence NC-Verilog             "
-	      echo "    3  Commercial  tool：Xilinx Vivado                  "
-        echo "    4  Commercial  tool：Synopsys VCS                   "
+	echo "    3  Commercial  tool：Xilinx Vivado                  "
         echo "========================================================"
         echo "    PLease input the [Number] to chose the EDATool :    "
-        echo  " "
         read number_nc_vivado
         if   [ $number_nc_vivado -eq 1 ]
           then 
@@ -45,13 +42,6 @@ do
             EDA_env_dir=$vivado_dir
             TB_dir=TB_vivado
             break
-        elif [ $number_nc_vivado -eq 4  ]
-          then
-            EDATool_run_dir=$vcs_dir/run.sh
-            chmod +x $EDATool_run_dir
-            EDA_env_dir=$vcs_dir
-            TB_dir=TB_NC
-            break
         else
           echo "Wrong number"
           continue
@@ -61,14 +51,13 @@ done
 cd $nc_dir && ./set_no_gui && cd -
 while :
 do
-        echo  "================选择测试测试集名称和相应的地址===================="
+        echo  "================选择测试测试集名称和相应的地址======================="
         echo  "   1   Test_name : functional-test    Test_Addr_start : 0x0000    "
         echo  "   2   Test_name : functional-test    Test_Addr_start : 0x8000    "
         echo  "   3   Test_name : compliance-test    Test_Addr_start : 0x0000    "
         echo  "   4   Test_name : compliance-test    Test_Addr_start : 0x8000    "
         echo  "=================================================================="
         echo  "   PLease input the [Number] to chose the Test Name and Address : "
-        echo  " "
         read number_0x 
         if   [ $number_0x -eq 1 ]
           then
@@ -87,22 +76,14 @@ do
           TVM_test=$isa_test_dir/isa-compliance-test
           test_dir=$isa_test_dir/isa-compliance-test/test_0x0000
           number_0x_numb=3
-          TB_dir=TB_compliance
-          if [ "$EDA_env_dir" = "$iverilog_dir" ]
-            then
-            TB_dir=TB_iverilog_compliance
-          fi
+          # TB_dir=TB_compliance
           break
         elif [ $number_0x -eq 4 ]
           then
           TVM_test=$isa_test_dir/isa-compliance-test
           test_dir=$isa_test_dir/isa-compliance-test/test_0x8000 
           number_0x_numb=4
-          TB_dir=TB_compliance
-          if [ "$EDA_env_dir" = "$iverilog_dir" ]
-            then
-            TB_dir=TB_iverilog_compliance
-          fi
+          # TB_dir=TB_compliance
           break
         else 
           echo "Wrong number"
@@ -120,21 +101,20 @@ do
 done < $TVM_test/TVM_name.txt  
 
 #--------------列出基础功能测试集的名称-----------------
-echo  "=====================选择基础功能测试集的名称======================"
+echo  "==============================================================================="
 cat -n $TVM_test/TVM_name.txt
-echo  "==================================================================="
-echo  "Please input the Number of [TVM model and Target Environment Name] : "
-echo  " "
+echo  "==============================================================================="
+echo  "Please input the Number of [TVM model and Target Environment Name] to select : "
+echo  "==============================================================================="
 #-------------选择基础测试 ？中的某一个子集进行遍历测试-----
 read number_TVM_model
 
 ISA_TVM_testcase=$(sed -n "$number_TVM_model p" $TVM_test/TVM_name.txt)
-echo  "=======选择测试方式=========="
+echo  "============================"
 echo  "     1   Test way :    all                             "
 echo  "     2   Test way :    single                      "
 echo  "============================"
 echo  "     Please select the Way to Test:  "
-echo  " "
 timer_start=`date "+%Y-%m-%d %H:%M:%S"`
 
 while :
@@ -163,7 +143,7 @@ if [ $number_single_all -eq 1 ]
                                         cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-iverilog.sv  $src_dir/top/TbAll.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                     else
-                                        cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-nc.sv  $src_dir/top/TbAll.sv
+                                        cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
                                         cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                     fi          
                                     $EDATool_run_dir
@@ -208,7 +188,7 @@ if [ $number_single_all -eq 1 ]
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                 elif [ $TB_dir = TB_iverilog ]
                                   then
-                                    cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
+                                    cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase-iverilog.sv  $src_dir/top/TbAll.sv
                                     cp $test_dir/$ISA_TVM_testcase/verilogtxt/$list_testcase  $EDA_env_dir/Instructions.list
                                 else
                                     cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$list_testcase.sv  $src_dir/top/TbAll.sv
@@ -247,11 +227,11 @@ elif [ $number_single_all -eq 2 ]
                             rm -rf $out_dir/Result/Result_funct_self/*
                             mkdir -p $out_dir/Result/Result_funct_self
                             #===================循环运行仿真===================
-                            echo  "=====================选择单一测试程序============================="
+                            echo  "==============================================================="
                             cat -n  $test_dir/$ISA_TVM_testcase/testcase_list.txt
                             echo  "==============================================================="
                             echo  "     Please select the single instruction test file to test :  "
-                            echo  " "
+                            echo  "==============================================================="    
                             read number_test_once  #输入需要进行单独测试的文件编号
                             single_test_name=$(sed -n "$number_test_once p" $test_dir/$ISA_TVM_testcase/testcase_list.txt)   #根据输入的编号进入list.txt文件查找对应的名称
                             if [ $TB_dir = TB_vivado ]
@@ -263,7 +243,7 @@ elif [ $number_single_all -eq 2 ]
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-iverilog.sv  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-nc.sv  $src_dir/top/TbAll.sv
+                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             fi                
                             $EDATool_run_dir
@@ -276,11 +256,11 @@ elif [ $number_single_all -eq 2 ]
                             rm -rf $out_dir/Result/Result_compliance_self/*
                             mkdir -p $out_dir/Result/Result_compliance_self
                             #===================循环运行仿真===================
-                            echo  "=====================选择单一测试程序============================="
+                            echo  "==============================================================="
                             cat -n  $test_dir/$ISA_TVM_testcase/testcase_list.txt
                             echo  "==============================================================="
                             echo  "     Please select the single instruction test file to test :  "
-                            echo  " "
+                            echo  "==============================================================="
                             read number_test_once    #输入需要进行单独测试的文件编号         
                             single_test_name=$(sed -n "$number_test_once p" $test_dir/$ISA_TVM_testcase/testcase_list.txt)   #根据输入的编号进入list.txt文件查找对应的名称
                             if [ $TB_dir = TB_vivado ]
@@ -289,7 +269,7 @@ elif [ $number_single_all -eq 2 ]
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             elif [ $TB_dir = TB_iverilog ]
                               then
-                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv
+                                cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name-iverilog.sv  $src_dir/top/TbAll.sv
                                 cp $test_dir/$ISA_TVM_testcase/verilogtxt/$single_test_name  $EDA_env_dir/Instructions.list
                             else
                                 cp  $test_dir/$ISA_TVM_testcase/$TB_dir/$single_test_name.sv  $src_dir/top/TbAll.sv

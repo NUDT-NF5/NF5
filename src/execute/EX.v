@@ -19,6 +19,7 @@ module EX(
     input       [2:0]                   IDEX_LdType,
     input       [1:0]                   IDEX_StType,
     input                               Mem_DcacheEN,
+    input                               Dcache_StallReq,
     input                               IDEX_16BitFlag,
     input                               clk,
     input                               rst_n,
@@ -30,17 +31,46 @@ module EX(
     output                              EX_StallReq
 );
 
-//extra signals
+//mux_aluinput to alu_io
 wire            [`DATA_WIDTH - 1:0]     s1;
 wire            [`DATA_WIDTH - 1:0]     s2;
 
+//arithmetic
+wire            [`DATA_WIDTH - 1:0]     arithmetic_s1;
+wire            [`DATA_WIDTH - 1:0]     arithmetic_s2;
+wire            [2:0]                   arithop_sp;
+wire            [`DATA_WIDTH - 1:0]     arithmetic_result;
+wire            [`ADDR_WIDTH - 1:0]     branch_result;
+
+//logic
+wire            [`DATA_WIDTH - 1:0]     logic_s1;
+wire            [`DATA_WIDTH - 1:0]     logic_s2;
+wire            [2:0]                   logic_op;
+wire            [`DATA_WIDTH - 1:0]     logic_result;
+
+//compapator
+wire            [`DATA_WIDTH - 1:0]     comparator_s1;
+wire            [`DATA_WIDTH - 1:0]     comparator_s2;
+wire            [2:0]                   comparator_result;
+wire            [2:0]                   ucomparator_result;
+
+//shift
+wire            [`DATA_WIDTH - 1:0]     shift_s1;
+wire            [4:0]                   shift_s2;
+wire            [2:0]                   shift_type;
+wire            [`DATA_WIDTH - 1:0]     shift_result;
+
+//multiplier
+wire            [`DATA_WIDTH - 1:0]     mul_s1;
+wire            [`DATA_WIDTH - 1:0]     mul_s2;
+wire            [2 * `DATA_WIDTH - 1:0] mul_result;
+//divider
+wire            [`DATA_WIDTH:0]         div_s1;
+wire            [`DATA_WIDTH:0]         div_s2;
+wire            [`DATA_WIDTH:0]     div_quotient;
+wire            [`DATA_WIDTH:0]     div_remainder;
 wire                                    div_start;
 wire                                    div_ready;
-
-wire                                    alu_ic_en;
-wire                                    alu_m_en;
-wire            [`DATA_WIDTH - 1:0]     AluData_ic;
-wire            [`DATA_WIDTH - 1:0]     AluData_m;
 
 mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1), 
                      .forward_rs1(IDEX_Rs1Data), 
@@ -51,49 +81,84 @@ mux_aluinput aluin  (.IDEX_Sel1(IDEX_Sel1),
                      .s1(s1), 
                      .s2(s2));
 
-rv32ic_warp rv32ic  (
-                     .s1(s1),
-                     .s2(s2),
-                     .forward_rs1(IDEX_Rs1Data),
-                     .forward_rs2(IDEX_Rs2Data),
-                     .IDEX_AluOp(IDEX_AluOp),
-                     .IDEX_NowPC(IDEX_NowPC),
-                     .IDEX_16BitFlag(IDEX_16BitFlag),
-                     .Csr_RdData(Csr_RdData),
-                     .IDEX_LdType(IDEX_LdType),
-                     .IDEX_StType(IDEX_StType),
-                     .Mem_DcacheEN(Mem_DcacheEN),
-                     .EX_AluData(AluData_ic),
+alu_dispatcher alu_dp(.s1(s1), 
+                     .s2(s2), 
+                     .IDEX_AluOp(IDEX_AluOp), 
+                     .forward_rs1(IDEX_Rs1Data), 
+                     .forward_rs2(IDEX_Rs2Data), 
+                     .arithmetic_result(arithmetic_result), 
+                     .branch_result(branch_result), 
+                     .logic_result(logic_result), 
+                     .comparator_result(comparator_result), 
+                     .ucomparator_result(ucomparator_result), 
+                     .shift_result(shift_result), 
+                     .Csr_RdData(Csr_RdData), 
+                     .IDEX_LdType(IDEX_LdType), 
+                     .IDEX_StType(IDEX_StType), 
+                     .Mem_DcacheEN(Mem_DcacheEN), 
+                     .Dcache_StallReq(Dcache_StallReq),
+                     .arithmetic_s1(arithmetic_s1), 
+                     .arithmetic_s2(arithmetic_s2), 
+                     .arithop_sp(arithop_sp), 
+                     .logic_s1(logic_s1), 
+                     .logic_s2(logic_s2), 
+                     .logic_op(logic_op), 
+                     .comparator_s1(comparator_s1), 
+                     .comparator_s2(comparator_s2), 
+                     .shift_s1(shift_s1), 
+                     .shift_s2(shift_s2), 
+                     .shift_type(shift_type), 
+                     .mul_s1(mul_s1), 
+                     .mul_s2(mul_s2),
+                     .mul_result(mul_result),
+                     .div_s1(div_s1), 
+                     .div_s2(div_s2),
+                     .div_quotient(div_quotient),
+                     .div_remainder(div_remainder),
+                     .div_start(div_start),
+                     .EX_AluData(EX_AluData), 
                      .EX_BranchPC(EX_BranchPC),
-                     .EX_BranchFlag(EX_BranchFlag),
-                     .alu_ic_en(alu_ic_en),
-                     .EX_LdStFlag(EX_LdStFlag)
-);
+                     .EX_BranchFlag(EX_BranchFlag), 
+                     .EX_LdStFlag(EX_LdStFlag));
+            
+arithmetic alu_arith(.arithmetic_s1(arithmetic_s1), 
+                     .arithmetic_s2(arithmetic_s2), 
+                     .IDEX_NowPC(IDEX_NowPC), 
+                     .arithop_sp(arithop_sp), 
+                     .IDEX_16BitFlag(IDEX_16BitFlag), 
+                     .arithmetic_result(arithmetic_result), 
+                     .branch_result(branch_result));
 
-rv32m_warp rv32m   (
-                    .s1(s1),
-                    .s2(s2),
-                    .m_AluOp(IDEX_AluOp),
-                    .clk(clk),
-                    .rst_n(rst_n),
-                    .div_start(div_start),
-                    .div_ready(div_ready),
-                    .alu_m_en(alu_m_en),
-                    .m_data(AluData_m)
-);
+logicm alu_logic    (.logic_s1(logic_s1), 
+                     .logic_s2(logic_s2), 
+                     .logic_op(logic_op), 
+                     .logic_result(logic_result));
 
-ex_out       alu_out(
-                     .issue_AluData_0(AluData_ic),
-                     .issue_AluData_1(32'b0),
-                     .issue_AluData_m_0(AluData_m),
-                     .issue_AluData_m_1(32'b0),
-                     .alu_ic_en_0(alu_ic_en),
-                     .alu_ic_en_1(1'b0),
-                     .alu_m_en_0(alu_m_en),
-                     .alu_m_en_1(1'b0),
-                     .EX_AluData_0(EX_AluData),
-                     .EX_AluData_1()
-);
+comparator alu_comp (.comparator_s1(comparator_s1), 
+                     .comparator_s2(comparator_s2), 
+                     .comparator_result(comparator_result),
+                     .ucomparator_result(ucomparator_result));
+ 
+shift alu_shift     (.shift_s1(shift_s1), 
+                     .shift_s2(shift_s2), 
+                     .shift_type(shift_type), 
+                     .shift_result(shift_result));
+
+multiplier alu_mul  (.mul_s1(mul_s1), 
+                     .mul_s2(mul_s2),
+                     .mul_result(mul_result));
+
+divider            #(.DLEN(`DATA_WIDTH + 1),
+                     .RLEN(`DATA_WIDTH + 1))
+                     alu_div
+                    (.clk(clk),
+                     .rst_n(rst_n),
+                     .div_s1(div_s1),
+                     .div_s2(div_s2),
+                     .div_start(div_start),
+                     .div_quotient(div_quotient),
+                     .div_remainder(div_remainder),
+                     .div_ready(div_ready));
 
 assign EX_StallReq = div_start && (~div_ready);
 

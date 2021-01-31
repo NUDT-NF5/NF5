@@ -41,7 +41,7 @@ module Csr(
     input  wire   [2:0]                       EXMem_LdType,
     input  wire   [`ADDR_WIDTH-1:0]           EX_BranchPC,//new	
     input  wire   [`ADDR_WIDTH-1:0]           EXMEM_NowPC	,
-	  input  wire			                          Decode_16BitFlag ,
+	input  wire			                      Decode_16BitFlag ,
     output wire                               Fetchaddr_Invalid,
     input  wire  [31:0]                       IFID_Instr		
     );
@@ -256,10 +256,10 @@ wire csr_mepc_wen;
     //    * For other exceptions, mtval is set to zero, but a future standard may redefine mtval's
     //        setting for other exceptions.
     //
-      wire[31:0] faulting_virtual_address;//Reserve for mem
-		  assign faulting_virtual_address=EXMem_AluData;
+         wire[31:0] faulting_virtual_address;//Reserve for mem
+		 assign faulting_virtual_address=EXMem_AluData;
 	     wire  [`CSR_DATA_WIDTH-1:0]csr_mtval_nxt;  
-        wire   csr_mtval_ena;   
+         wire   csr_mtval_ena;   
          assign csr_mtval_nxt = Csr_Memflush ? faulting_virtual_address://ldst misalign
                                 flush_valid_tmp[12]? EX_BranchPC://ifetch misalign
 		                   flush_valid_tmp[11]?IFID_Instr://new:illegal inst(id_inst)
@@ -306,8 +306,7 @@ wire csr_mepc_wen;
           wire [`CSR_DATA_WIDTH-1:0]  csr_pmpaddr0_q     ; 
           wire [`CSR_DATA_WIDTH-1:0]  csr_stvec_q        ;     
           wire [`CSR_DATA_WIDTH-1:0]  csr_satp_q         ;   
-          wire [`CSR_DATA_WIDTH-1:0]  csr_fcsr_q         ;  
-
+        
           reg csr_hartid=32'b0;//constant defined
 
 
@@ -345,11 +344,8 @@ wire csr_mepc_wen;
           `CSR_PMPCFG0:           csr_read_data=csr_pmpcfg0_q  ;
           `CSR_PMPADDR:           csr_read_data=csr_pmpaddr0_q ;  
           `CSR_STVEC:             csr_read_data=csr_stvec_q ;   
-          `CSR_SATP:              csr_read_data=csr_satp_q  ;
-
-          `CSR_FCSR:              csr_read_data = {24'b0, csr_fcsr_q[7:0]};     
-          `CSR_FRM:               csr_read_data = {3'b0, csr_fcsr_q[7:5]};
-          `CSR_FFLAG:             csr_read_data = {5'b0, csr_fcsr_q[4:0]};
+          `CSR_SATP:              csr_read_data=csr_satp_q  ;         
+         
           default: csr_read_data = `CSR_DATA_WIDTH'b0;
          endcase
       end
@@ -376,7 +372,6 @@ wire csr_mepc_wen;
       wire csr_pmpaddr0_wen= csr_wrten &(IDEX_CsrAddr==`CSR_PMPADDR ); 
       wire csr_stvec_wen = csr_wrten &(IDEX_CsrAddr==`CSR_STVEC   ); 
       wire csr_satp_wen  = csr_wrten &(IDEX_CsrAddr==`CSR_SATP    ); 
-      wire csr_fcsr_wen  = csr_wrten & (IDEX_CsrAddr==`CSR_FCSR) | (IDEX_CsrAddr==`CSR_FRM ) | (IDEX_CsrAddr==`CSR_FFLAG ); 
      
  
 
@@ -419,8 +414,7 @@ wire csr_mepc_wen;
       wire [`CSR_DATA_WIDTH-1:0] csr_pmpaddr0_d =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_stvec_d    =csr_wrt_data;
       wire [`CSR_DATA_WIDTH-1:0] csr_satp_d     =csr_wrt_data;
-      wire [`CSR_DATA_WIDTH-1:0] csr_fcsr_d     =csr_wrt_data;
-
+   
  	 // ---------------------------
     // CSR  Updata logic
     // ---------------------------
@@ -442,7 +436,7 @@ wire csr_mepc_wen;
        sirv_gnrl_dfflr  pmpaddr0_dfflr (csr_pmpaddr0_wen, csr_pmpaddr0_d, csr_pmpaddr0_q, clk, rst_n);
        sirv_gnrl_dfflr  stvec_dfflr (csr_stvec_wen, csr_stvec_d, csr_stvec_q, clk, rst_n);
        sirv_gnrl_dfflr  satp_dfflr (csr_satp_wen, csr_satp_d, csr_satp_q, clk, rst_n);
-       sirv_gnrl_dfflr  fcsr_dfflr (csr_fcsr_wen, csr_fcsr_d, csr_fcsr_q, clk, rst_n);
+
 endmodule
 
 

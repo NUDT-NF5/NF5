@@ -1,0 +1,41 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  --include "../../../../NF5_System.srcs/sources_1/imports/NF5_core/common" --include "../../../../NF5_System.srcs/sources_1/bd/NF5_System/ipshared/ec67/hdl" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/control/Csr.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/control/Ctrl.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/decode/Decode.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/decode/DecodeHazard.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/EX.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/fetch/Fetch.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1D_Cache/L1D_Bus_hand.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1D_Cache/L1D_Cache.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1D_Cache/L1D_FSM.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1D_Cache/L1D_RAM.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1D_Cache/L1D_Transform.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1I_Cache/L1I_Bus_hand.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1I_Cache/L1I_Cache.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1I_Cache/L1I_FSM.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1I_Cache/L1I_RAM.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/L1I_Cache/L1I_Transform.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/memAccess/Mem.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/common/Mux.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/common/PipeStage.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/common/PipeStage3.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/common/RegFile.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/writeBack/Wb.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/adder32.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/alu_dispatcher.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/arithmetic.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/comparator.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/divider.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/logicm.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/multiplier.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/mux_aluinput.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/shift.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/execute/u_comparator.v" \
+"../../../../NF5_System.srcs/sources_1/imports/NF5_core/top/Core.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

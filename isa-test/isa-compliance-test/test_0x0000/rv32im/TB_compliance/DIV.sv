@@ -55,7 +55,7 @@ module	TbAll;
 	initial begin
 		fd = $fopen ("mySim.log", "w");
 		//$fdisplay(fd,"====== NF5 sim start ======");
-		#5000
+		#4000
 		for (dxx=begin_signature;dxx<end_signature;dxx=dxx+1)begin
             $fdisplay(fd,"%h",i_Core.i_Dcache.data[dxx]);
             end        

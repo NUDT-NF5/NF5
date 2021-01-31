@@ -1,7 +1,6 @@
 base_dir = $(shell pwd)
 test_dir = $(base_dir)/isa-test
 nc_dir = $(base_dir)/nc-project
-vcs_dir = $(base_dir)/vcs-project
 report_dir = $(nc_dir)/report
 result_dir = $(nc_dir)/result
 src_dir = $(base_dir)/src
@@ -23,23 +22,14 @@ gen_filelist:
 	@echo "=====generate filelist====="
 	@find $(src_dir)/* -regex '.*\.v\|.*\.sv' | xargs perl $(nc_dir)/filelist_gen > $(nc_dir)/filelist.v
 	@find $(src_dir)/* -regex '.*\.v\|.*\.sv' | xargs perl $(iverilog_dir)/filelist_gen > $(iverilog_dir)/filelist.v
-	bash $(vcs_dir)/filelist_gen.sh
-
 compile:
 	#todo
-
-reorder_filelist:
-	bash $(nc_dir)/reorder.sh $(nc_dir)/filelist.v
-	bash $(iverilog_dir)/reorder.sh $(iverilog_dir)/filelist.v
-	bash $(vcs_dir)/reorder.sh
-
 sim_default:
 	make gen_filelist
 	bash $(iverilog_dir)/run_default
 	
 sim:	
 	make gen_filelist	
-	make reorder_filelist
 	bash isa_run.sh
  	
 sim_gui_nc:
@@ -72,7 +62,7 @@ asproj_compile:
 	bash $(soft_scripts)/soft_run.sh
 
 hardclean:
-	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work vc_hdrs.h simv.daidir csrc ucli.key
+	@rm -rf xncsim *.shm *.log *.diag dumpdata.txt *.key .simvision INCA_libs filelist.v cov_work
 
 clean: hardclean
 

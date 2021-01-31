@@ -16,7 +16,7 @@
 `define	DATA_WIDTH_LOG2		5
 
 /*----------Fetch.v---------*/
-`define	START_PC			`X_LEN'h0000_0000
+`define	START_PC			`X_LEN'h8000_0000
 
 /*----------SimMemory.v---------*/
 `define	SIM_MEM_WIDTH		32
@@ -438,10 +438,6 @@
 `define	CSR_ADDR_WIDTH		12
 `define	CSR_DATA_WIDTH	  32
 `define	CSR_USTATUS       12'h000
-`define CSR_FRM           12'h001
-`define CSR_FFLAG         12'h002
-`define CSR_FCSR          12'h003 //Floating-Point Control and Status Register (frm + fflags).
-
 `define CSR_STVEC         12'h105 //Supervisor trap handler base address.
 `define CSR_SATP          12'h180 //Supervisor address translation and protection.
 
@@ -468,6 +464,6 @@
 
 /*----------Core.v---------*/
 `define PIPE_IFID_LEN 	`ADDR_WIDTH + `DATA_WIDTH
-`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`DATA_WIDTH + `DATA_WIDTH + `DATA_WIDTH + 1 + `ADDR_WIDTH
+`define PIPE_IDEX_LEN 	`All_CTRL_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `RF_ADDR_WIDTH + `DATA_WIDTH + `IMM_SEL_WIDTH + `CSR_ADDR_WIDTH +`DATA_WIDTH + `DATA_WIDTH + 1 + `ADDR_WIDTH
 `define PIPE_EXMem_LEN 	32 + 32 + `RF_ADDR_WIDTH + `DATA_WIDTH + `ST_TYPE_WIDTH + `LD_TYPE_WIDTH + `BOOL_WIDTH + `WB_SEL_WIDTH
 `define PIPE_MemWb_LEN 	5 + 1 + 32 + 32 + 1

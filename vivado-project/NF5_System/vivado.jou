@@ -1,0 +1,14 @@
+#-----------------------------------------------------------
+# Vivado v2018.2 (64-bit)
+# SW Build 2258646 on Thu Jun 14 20:02:38 MDT 2018
+# IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+# Start of session at: Sun Jan 31 10:08:36 2021
+# Process ID: 97228
+# Current directory: /home/ubuntu/vivado/NF5_Cache_jzk_ex/vivado-project/NF5_System
+# Command line: vivado -mode tcl -source vivado_nf5.tcl
+# Log file: /home/ubuntu/vivado/NF5_Cache_jzk_ex/vivado-project/NF5_System/vivado.log
+# Journal file: /home/ubuntu/vivado/NF5_Cache_jzk_ex/vivado-project/NF5_System/vivado.jou
+#-----------------------------------------------------------
+source vivado_nf5.tcl
+open_wave_config /home/ubuntu/vivado/NF5_Cache_jzk_ex/vivado-project/NF5_System/system_test_tb_behav.wcfg
+source system_test_tb.tcl

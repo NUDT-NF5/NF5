@@ -42,17 +42,22 @@ assign Flush=ctrl_flush|stage_flush ;
 /////////////stall_last ////////
  always @ (*) begin
 	if(WFI_Req) 
-        Ctrl_Stall = 5'b11111;
+       Ctrl_Stall = 5'b11111;
+
+    else if(Dcache_StallReq)
+       Ctrl_Stall = 5'b01111;
+    else if(Idfence_MemReq)
+       Ctrl_Stall = 5'b00111;
     else if(DecodeHazard_Stall)
-        Ctrl_Stall = 5'b00011;
-    else if(Dcache_StallReq |Idfence_MemReq)
-        Ctrl_Stall = 5'b00111;
-    else if(Idfence_ExReq)
-        Ctrl_Stall = 5'b00011;
-    else if(Icache_StallReq)
-        Ctrl_Stall = 5'b00001; 
+       Ctrl_Stall = 5'b00011;
+     else if(Idfence_ExReq)
+       Ctrl_Stall = 5'b00011;
+    //else if(Icache_StallReq&&(~EX_BranchFlag))
     else if(EX_StallReq)
-        Ctrl_Stall = 5'b00111;
+       Ctrl_Stall = 5'b00111;    
+    else if(Icache_StallReq)
+       Ctrl_Stall = 5'b00001;       //changed 'd1-->'d7 01.02  18:50 
+
     else 
 	   Ctrl_Stall = 5'b0;
   end

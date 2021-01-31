@@ -119,11 +119,13 @@ always@(posedge clk)
         if((count_pass == 2)&&(ifidpc == pass_pc+'h8))
         begin
             $fdisplay (fd, "ISA_test Pass when clk=%d, PC=%h ",clk_count,ifidpc);
+            $fclose(fd);
             $finish;
         end
         else if((count_fail == 2)&&(ifidpc == fail_pc+'h8))
         begin
             $fdisplay (fd, "ISA_test Fail when clk=%d, PC=%h ",clk_count,ifidpc);
+            $fclose(fd);
             #15 $finish;
         end
     end
