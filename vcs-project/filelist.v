@@ -3,6 +3,7 @@
 ../src/execute/fpu/common_cells/assertions.svh
 ../src/execute/fpu/fpnew_pkg.sv
 ../src/fetch/Fetch.v
+../src/fetch/BranchPredictor.v
 ../src/execute/divider.v
 ../src/execute/alu_m_dispatcher.v
 ../src/execute/fpu/fpnew_rounding.sv

@@ -333,7 +333,8 @@ module ControlDecode16(
 						wbSel,
 						wbRdEn,
 						csrCmd,
-						illegal
+						illegal,
+						(| brType)
 						};
 	
 	always @(*)
@@ -891,7 +892,8 @@ module ControlDecode32(
 						wbRdEn,
 						csrCmd,
 						illegal,
-                        simd_ena
+                        simd_ena,
+						(| brType)
 						};
 	
 	always @(*)
@@ -901,8 +903,8 @@ module ControlDecode32(
 						//         		     |   	    |        |        |         |      	    |       |     |         |       |      |     |     |		|			    |				|			|			|
 				`LUI      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_COPY_B	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
 				`AUIPC    :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_U, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
-				`JAL      :	localAllCtr = {`PC_ALU	, `A_PC,   `B_IMM, `IMM_J, `ALU_JAL   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
-				`JALR     :	localAllCtr = {`PC_ALU	, `A_RS1,  `B_IMM, `IMM_I, `ALU_JALR   	, `BR_XXX, `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
+				`JAL      :	localAllCtr = {`PC_ALU	, `A_PC,   `B_IMM, `IMM_J, `ALU_JAL   	, `BR_J  , `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
+				`JALR     :	localAllCtr = {`PC_ALU	, `A_RS1,  `B_IMM, `IMM_I, `ALU_JALR   	, `BR_J  , `Y, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
 				`BEQ      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BEQ   	, `BR_EQ , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
 				`BNE      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BNE   	, `BR_NE , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
 				`BLT      :	localAllCtr = {`PC_4  	, `A_PC,   `B_IMM, `IMM_B, `ALU_BLT   	, `BR_LT , `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};

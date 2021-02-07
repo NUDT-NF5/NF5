@@ -49,7 +49,7 @@ mul32 mul32_0(
     .c(mul_32_0)
 );
 
-mul32 mul32_1(
+/*mul32 mul32_1(
     .a(real_a[63:32]),
     .b(real_b[31:0]),
     .simd(1'b0),
@@ -65,7 +65,7 @@ mul32 mul32_2(
     .sign32(2'b0),
     .sign16(sign16),
     .c(mul_32_2)
-);
+);*/
 
 mul32 mul32_3(
     .a(real_a[63:32]),

@@ -35,7 +35,7 @@ module EXHazard(
     //EXHazard -> IDEX
     output reg [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs1Data,
     output reg [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs2Data,
-    output reg [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs3Data
+    output     [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs3Data
 );
     reg                               rs1Sel;
     reg                               rs2Sel;
@@ -43,8 +43,8 @@ module EXHazard(
 
     reg    [`SIMD_DATA_WIDTH - 1:0]   rs1_temp;
     reg    [`SIMD_DATA_WIDTH - 1:0]   rs2_temp;
-    reg    [`SIMD_DATA_WIDTH - 1:0]   rs1;
-    reg    [`SIMD_DATA_WIDTH - 1:0]   rs2;
+    wire   [`SIMD_DATA_WIDTH - 1:0]   rs1;
+    wire   [`SIMD_DATA_WIDTH - 1:0]   rs2;
 
     Mux #(
         .SEL_WIDTH(1),

@@ -61,9 +61,9 @@ module	TbAll;
 		end
 //Test Program  Chek
 //pass_pc_addr
-  parameter pass_pc=32'h000001a4 ;
+  parameter pass_pc=32'h0000028c ;
 //fail_pc_addr
-  parameter fail_pc=32'h00000190 ;
+  parameter fail_pc=32'h00000278 ;
 
 wire [31:0] ifidpc=i_Core.IFID_NowPC;
 reg  [31:0] count_pass;

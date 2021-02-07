@@ -14,6 +14,9 @@ module Core(
 
 	wire	[`ADDR_WIDTH - 1 : 0]			IFID_NowPC;
 	wire	[`INSTR_WIDTH - 1 : 0]			IFID_Instr;
+	wire                                    IFID_BpFlag;
+	wire    [`ADDR_WIDTH - 1 : 0]           BranchPredictor_PC;
+	wire                                    BP_BranchFlag;
 
 	wire	[`All_CTRL_WIDTH - 1 : 0]		Decode_AllCtr;
 	wire	[`RF_ADDR_WIDTH - 1 : 0]		Decode_RdAddr;
@@ -61,6 +64,7 @@ module Core(
 	wire    [2 - 1 : 0]                     IDEX_Fmt;
 	wire									IDEX_16BitFlag;
 	wire	[`ADDR_WIDTH - 1 : 0]			IDEX_NowPC;
+	wire                                    IDEX_BpFlag;
 				
 	wire	[`SIMD_DATA_WIDTH - 1 : 0]		RF_Rs1Data;
 	wire	[`SIMD_DATA_WIDTH - 1 : 0]		RF_Rs2Data;
@@ -139,6 +143,8 @@ module Core(
 		.clk(clk),
 		.rst_n(rst_n),
 		.Stall(Ctrl_Stall[0]),
+        .BranchPredictor_PC(BranchPredictor_PC),
+        .BP_BranchFlag(BP_BranchFlag),
 		.IFID_NowPC(IFID_NowPC),
 		.Fetch_NextPC(Fetch_NextPC),
 		.Ctrl_ExcpFlag(Csr_ExcpFlag),
@@ -149,6 +155,13 @@ module Core(
 		.Decode_16BitFlag(Decode_16BitFlag)
 
 	);
+
+	BranchPredictor i_BranchPredictor(
+		.Icache_Instr(Icache_Instr),
+		.Fetch_NextPC(Fetch_NextPC),
+		.BranchPredictor_PC(BranchPredictor_PC),
+		.BP_BranchFlag(BP_BranchFlag)
+	);
 	
 
   PipeStage3 #(
@@ -157,11 +170,11 @@ module Core(
 	i_IFID(
 		.clk(clk),
 		.rst_n(rst_n),
-		.rst_value(64'h00000000_00000013),//rst and flush with nop
+		.rst_value({64'h00000000_00000013, 1'b0}),//rst and flush with nop
 		.Stall(Ctrl_Stall[1]),
 		.Flush(Flush[0]),
-		.in( {Fetch_NextPC , Icache_Instr} ),
-		.out( {IFID_NowPC , IFID_Instr} )
+		.in( {Fetch_NextPC , Icache_Instr , BP_BranchFlag} ),
+		.out( {IFID_NowPC , IFID_Instr , IFID_BpFlag} )
 	);
 	
 	Decode i_Decode(
@@ -206,7 +219,8 @@ module Core(
                 Decode_Rm,
                 Decode_Fmt,
 				Decode_16BitFlag,
-				IFID_NowPC
+				IFID_NowPC,
+				IFID_BpFlag
 			} 
 		),
 		.out(
@@ -221,6 +235,7 @@ module Core(
 				IDEX_CsrCmd,
 				IDEX_CsrIllegal,
 				IDEX_SimdEN,
+				IDEX_IsBr,
 				IDEX_RdAddr,
 				IDEX_Rs1Addr,
 				IDEX_Rs2Addr,
@@ -231,7 +246,8 @@ module Core(
                 IDEX_Rm,
 				IDEX_Fmt,
 				IDEX_16BitFlag,
-				IDEX_NowPC
+				IDEX_NowPC,
+				IDEX_BpFlag
 			} 
 		)
 	);
@@ -312,6 +328,8 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		.rst_n(rst_n),
 		.simd_ena(IDEX_SimdEN),
 		.simd_ctl(IDEX_Rm[1:0]),
+		.IDEX_BpFlag(IDEX_BpFlag),
+		.IDEX_IsBr(IDEX_IsBr),
 		.EX_AluData(EX_AluData),
 		.EX_BranchFlag(EX_BranchFlag),
 		.EX_BranchPC(EX_BranchPC),

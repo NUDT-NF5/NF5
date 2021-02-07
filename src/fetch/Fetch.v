@@ -12,6 +12,8 @@ module Fetch(
 	input								clk,
 	input								rst_n,
 	input								Stall,
+	input       [`ADDR_WIDTH - 1 : 0]   BranchPredictor_PC,
+    input                               BP_BranchFlag,
 	//IFID <-> Fetch
 	input		[`ADDR_WIDTH - 1 : 0]	IFID_NowPC,
 	output	reg	[`ADDR_WIDTH - 1 : 0]	Fetch_NextPC,
@@ -34,6 +36,8 @@ module Fetch(
 			Fetch_NextPC <= Fetch_NextPC;
 		else if(EX_BranchFlag)
 			Fetch_NextPC <= EX_BranchPC;
+		else if(BP_BranchFlag)
+			Fetch_NextPC <= BranchPredictor_PC;
         else if(Ctrl_ExcpFlag)
 			Fetch_NextPC <= Ctrl_ExcpPC;
 		else if(Decode_16BitFlag)

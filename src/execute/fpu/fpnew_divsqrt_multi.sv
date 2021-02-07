@@ -9,7 +9,8 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-// Author: Stefan Mach <smach@iis.ee.ethz.ch>`include "../src/execute/fpu/common_cells/registers.svh"
+// Author: Stefan Mach <smach@iis.ee.ethz.ch>
+`include "../src/execute/fpu/common_cells/registers.svh"
 module fpnew_divsqrt_multi #(
   parameter fpnew_pkg::fmt_logic_t   FpFmtConfig  = '1,
   // FPU configuration

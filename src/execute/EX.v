@@ -29,6 +29,8 @@ module EX(
     input                               rst_n,
     input                               simd_ena,
     input  [`SIMD_WIDTH - 1:0]          simd_ctl,
+    input                               IDEX_BpFlag,
+    input                               IDEX_IsBr,
     //output
     output [`SIMD_DATA_WIDTH - 1:0]     EX_AluData,
     output                              EX_BranchFlag,
@@ -51,12 +53,15 @@ wire                                    alu_m_en;
 wire       [`SIMD_DATA_WIDTH - 1:0]     AluData_ic;
 wire       [`SIMD_DATA_WIDTH - 1:0]     AluData_m;
 
+wire                                    EX_Branch;
+wire       [`ADDR_WIDTH - 1:0]          EX_BranchPC_tmp;
+
 wire                                    fpu_vec_i = 1'b0;
 wire       [1:0]                        fpu_fmt_i; 
 wire       [2:0]                        fpu_rm_i;
 wire       [2:0]                        fpu_frm_i;
 wire       [`FPU_EXCEPTION_WIDTH - 1:0] fpu_exception;
-wire       [`SIMD_DATA_WIDTH - 1:0]     fpu_result;
+wire       [`DATA_WIDTH - 1:0]          fpu_result;
 wire                                    fpu_stall;
 wire                                    fpu_in_valid;
 wire                                    fpu_out_valid;
@@ -86,8 +91,8 @@ rv32ic_warp rv32ic  (
                      .IDEX_StType(IDEX_StType),
                      .Mem_DcacheEN(Mem_DcacheEN),
                      .EX_AluData(AluData_ic),
-                     .EX_BranchPC(EX_BranchPC),
-                     .EX_BranchFlag(EX_BranchFlag),
+                     .EX_BranchPC(EX_BranchPC_tmp),
+                     .EX_BranchFlag(EX_Branch),
                      .alu_ic_en(alu_ic_en),
                      .EX_LdStFlag(EX_LdStFlag)
 );
@@ -133,7 +138,7 @@ ex_out       alu_out(
                      .issue_AluData_1(64'b0),
                      .issue_AluData_m_0(AluData_m),
                      .issue_AluData_m_1(64'b0),
-                     .FpuData(fpu_result),
+                     .FpuData({32'b0, fpu_result}),
                      .alu_ic_en_0(alu_ic_en),
                      .alu_ic_en_1(1'b0),
                      .alu_m_en_0(alu_m_en),
@@ -147,5 +152,7 @@ ex_out       alu_out(
 assign EX_FpuReady = fpu_en;
 assign EX_StallReq = div_start && (~div_ready) || fpu_stall;
 assign fpu_en = fpu_in_valid && fpu_out_valid;
+assign EX_BranchFlag = EX_Branch ^ IDEX_BpFlag && IDEX_IsBr;
+assign EX_BranchPC = (EX_Branch && EX_BranchFlag) ? EX_BranchPC_tmp : IDEX_NowPC + 32'd4;
 
 endmodule // EX
