@@ -1,0 +1,189 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sat Mar 13 08:47:38 2021
+[*]
+[dumpfile] "/home/zenk/NF5_SIMD_FULL/NF5/vcs-project/test.vcd"
+[dumpfile_mtime] "Sat Mar 13 08:44:49 2021"
+[dumpfile_size] 2310011
+[savefile] "/home/zenk/NF5_SIMD_FULL/NF5/vcs-project/1.gtkw"
+[timestart] 96440
+[size] 1920 1001
+[pos] -1 -1
+*-11.000000 397130 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TbAll.
+[treeopen] TbAll.i_Core.
+[treeopen] TbAll.i_Core.i_EX.rv32ic.
+[sst_width] 240
+[signals_width] 246
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+TbAll.i_Core.i_IFID.clk
+TbAll.i_Core.i_IFID.rst_n
+@200
+-IF-ID
+@28
+TbAll.i_Core.i_IFID.Flush
+TbAll.i_Core.i_IFID.Stall
+@22
+TbAll.i_Core.i_IFID.in[64:0]
+TbAll.i_Core.i_IFID.out[64:0]
+TbAll.i_Core.i_IFID.rst_value[64:0]
+@200
+-ID-EX
+@28
+TbAll.i_Core.i_IDEX.Flush
+TbAll.i_Core.i_IDEX.Stall
+@22
+TbAll.i_Core.i_IDEX.in[131:0]
+@c00022
+TbAll.i_Core.i_IDEX.out[131:0]
+@28
+(0)TbAll.i_Core.i_IDEX.out[131:0]
+(1)TbAll.i_Core.i_IDEX.out[131:0]
+(2)TbAll.i_Core.i_IDEX.out[131:0]
+(3)TbAll.i_Core.i_IDEX.out[131:0]
+(4)TbAll.i_Core.i_IDEX.out[131:0]
+(5)TbAll.i_Core.i_IDEX.out[131:0]
+(6)TbAll.i_Core.i_IDEX.out[131:0]
+(7)TbAll.i_Core.i_IDEX.out[131:0]
+(8)TbAll.i_Core.i_IDEX.out[131:0]
+(9)TbAll.i_Core.i_IDEX.out[131:0]
+(10)TbAll.i_Core.i_IDEX.out[131:0]
+(11)TbAll.i_Core.i_IDEX.out[131:0]
+(12)TbAll.i_Core.i_IDEX.out[131:0]
+(13)TbAll.i_Core.i_IDEX.out[131:0]
+(14)TbAll.i_Core.i_IDEX.out[131:0]
+(15)TbAll.i_Core.i_IDEX.out[131:0]
+(16)TbAll.i_Core.i_IDEX.out[131:0]
+(17)TbAll.i_Core.i_IDEX.out[131:0]
+(18)TbAll.i_Core.i_IDEX.out[131:0]
+(19)TbAll.i_Core.i_IDEX.out[131:0]
+(20)TbAll.i_Core.i_IDEX.out[131:0]
+(21)TbAll.i_Core.i_IDEX.out[131:0]
+(22)TbAll.i_Core.i_IDEX.out[131:0]
+(23)TbAll.i_Core.i_IDEX.out[131:0]
+(24)TbAll.i_Core.i_IDEX.out[131:0]
+(25)TbAll.i_Core.i_IDEX.out[131:0]
+(26)TbAll.i_Core.i_IDEX.out[131:0]
+(27)TbAll.i_Core.i_IDEX.out[131:0]
+(28)TbAll.i_Core.i_IDEX.out[131:0]
+(29)TbAll.i_Core.i_IDEX.out[131:0]
+(30)TbAll.i_Core.i_IDEX.out[131:0]
+(31)TbAll.i_Core.i_IDEX.out[131:0]
+(32)TbAll.i_Core.i_IDEX.out[131:0]
+(33)TbAll.i_Core.i_IDEX.out[131:0]
+(34)TbAll.i_Core.i_IDEX.out[131:0]
+(35)TbAll.i_Core.i_IDEX.out[131:0]
+(36)TbAll.i_Core.i_IDEX.out[131:0]
+(37)TbAll.i_Core.i_IDEX.out[131:0]
+(38)TbAll.i_Core.i_IDEX.out[131:0]
+(39)TbAll.i_Core.i_IDEX.out[131:0]
+(40)TbAll.i_Core.i_IDEX.out[131:0]
+(41)TbAll.i_Core.i_IDEX.out[131:0]
+(42)TbAll.i_Core.i_IDEX.out[131:0]
+(43)TbAll.i_Core.i_IDEX.out[131:0]
+(44)TbAll.i_Core.i_IDEX.out[131:0]
+(45)TbAll.i_Core.i_IDEX.out[131:0]
+(46)TbAll.i_Core.i_IDEX.out[131:0]
+(47)TbAll.i_Core.i_IDEX.out[131:0]
+(48)TbAll.i_Core.i_IDEX.out[131:0]
+(49)TbAll.i_Core.i_IDEX.out[131:0]
+(50)TbAll.i_Core.i_IDEX.out[131:0]
+(51)TbAll.i_Core.i_IDEX.out[131:0]
+(52)TbAll.i_Core.i_IDEX.out[131:0]
+(53)TbAll.i_Core.i_IDEX.out[131:0]
+(54)TbAll.i_Core.i_IDEX.out[131:0]
+(55)TbAll.i_Core.i_IDEX.out[131:0]
+(56)TbAll.i_Core.i_IDEX.out[131:0]
+(57)TbAll.i_Core.i_IDEX.out[131:0]
+(58)TbAll.i_Core.i_IDEX.out[131:0]
+(59)TbAll.i_Core.i_IDEX.out[131:0]
+(60)TbAll.i_Core.i_IDEX.out[131:0]
+(61)TbAll.i_Core.i_IDEX.out[131:0]
+(62)TbAll.i_Core.i_IDEX.out[131:0]
+(63)TbAll.i_Core.i_IDEX.out[131:0]
+(64)TbAll.i_Core.i_IDEX.out[131:0]
+(65)TbAll.i_Core.i_IDEX.out[131:0]
+(66)TbAll.i_Core.i_IDEX.out[131:0]
+(67)TbAll.i_Core.i_IDEX.out[131:0]
+(68)TbAll.i_Core.i_IDEX.out[131:0]
+(69)TbAll.i_Core.i_IDEX.out[131:0]
+(70)TbAll.i_Core.i_IDEX.out[131:0]
+(71)TbAll.i_Core.i_IDEX.out[131:0]
+(72)TbAll.i_Core.i_IDEX.out[131:0]
+(73)TbAll.i_Core.i_IDEX.out[131:0]
+(74)TbAll.i_Core.i_IDEX.out[131:0]
+(75)TbAll.i_Core.i_IDEX.out[131:0]
+(76)TbAll.i_Core.i_IDEX.out[131:0]
+(77)TbAll.i_Core.i_IDEX.out[131:0]
+(78)TbAll.i_Core.i_IDEX.out[131:0]
+(79)TbAll.i_Core.i_IDEX.out[131:0]
+(80)TbAll.i_Core.i_IDEX.out[131:0]
+(81)TbAll.i_Core.i_IDEX.out[131:0]
+(82)TbAll.i_Core.i_IDEX.out[131:0]
+(83)TbAll.i_Core.i_IDEX.out[131:0]
+(84)TbAll.i_Core.i_IDEX.out[131:0]
+(85)TbAll.i_Core.i_IDEX.out[131:0]
+(86)TbAll.i_Core.i_IDEX.out[131:0]
+(87)TbAll.i_Core.i_IDEX.out[131:0]
+(88)TbAll.i_Core.i_IDEX.out[131:0]
+(89)TbAll.i_Core.i_IDEX.out[131:0]
+(90)TbAll.i_Core.i_IDEX.out[131:0]
+(91)TbAll.i_Core.i_IDEX.out[131:0]
+(92)TbAll.i_Core.i_IDEX.out[131:0]
+(93)TbAll.i_Core.i_IDEX.out[131:0]
+(94)TbAll.i_Core.i_IDEX.out[131:0]
+(95)TbAll.i_Core.i_IDEX.out[131:0]
+(96)TbAll.i_Core.i_IDEX.out[131:0]
+(97)TbAll.i_Core.i_IDEX.out[131:0]
+(98)TbAll.i_Core.i_IDEX.out[131:0]
+(99)TbAll.i_Core.i_IDEX.out[131:0]
+(100)TbAll.i_Core.i_IDEX.out[131:0]
+(101)TbAll.i_Core.i_IDEX.out[131:0]
+(102)TbAll.i_Core.i_IDEX.out[131:0]
+(103)TbAll.i_Core.i_IDEX.out[131:0]
+(104)TbAll.i_Core.i_IDEX.out[131:0]
+(105)TbAll.i_Core.i_IDEX.out[131:0]
+(106)TbAll.i_Core.i_IDEX.out[131:0]
+(107)TbAll.i_Core.i_IDEX.out[131:0]
+(108)TbAll.i_Core.i_IDEX.out[131:0]
+(109)TbAll.i_Core.i_IDEX.out[131:0]
+(110)TbAll.i_Core.i_IDEX.out[131:0]
+(111)TbAll.i_Core.i_IDEX.out[131:0]
+(112)TbAll.i_Core.i_IDEX.out[131:0]
+(113)TbAll.i_Core.i_IDEX.out[131:0]
+(114)TbAll.i_Core.i_IDEX.out[131:0]
+(115)TbAll.i_Core.i_IDEX.out[131:0]
+(116)TbAll.i_Core.i_IDEX.out[131:0]
+(117)TbAll.i_Core.i_IDEX.out[131:0]
+(118)TbAll.i_Core.i_IDEX.out[131:0]
+(119)TbAll.i_Core.i_IDEX.out[131:0]
+(120)TbAll.i_Core.i_IDEX.out[131:0]
+(121)TbAll.i_Core.i_IDEX.out[131:0]
+(122)TbAll.i_Core.i_IDEX.out[131:0]
+(123)TbAll.i_Core.i_IDEX.out[131:0]
+(124)TbAll.i_Core.i_IDEX.out[131:0]
+(125)TbAll.i_Core.i_IDEX.out[131:0]
+(126)TbAll.i_Core.i_IDEX.out[131:0]
+(127)TbAll.i_Core.i_IDEX.out[131:0]
+(128)TbAll.i_Core.i_IDEX.out[131:0]
+(129)TbAll.i_Core.i_IDEX.out[131:0]
+(130)TbAll.i_Core.i_IDEX.out[131:0]
+(131)TbAll.i_Core.i_IDEX.out[131:0]
+@1401200
+-group_end
+@200
+-EX-MEM
+@28
+TbAll.i_Core.i_EXMem.Flush
+TbAll.i_Core.i_EXMem.IDEX_LdType[2:0]
+TbAll.i_Core.i_EXMem.IDEX_StType[2:0]
+TbAll.i_Core.i_EXMem.Stall
+@22
+TbAll.i_Core.i_EXMem.in[177:0]
+TbAll.i_Core.i_EXMem.out[177:0]
+@201
+-MEM-WB
+[pattern_trace] 1
+[pattern_trace] 0

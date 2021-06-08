@@ -161,7 +161,7 @@ module Decode(
 	always @(*)
 		if(Decode_16BitFlag)
 			begin
-				Decode_AllCtr	 = {allCtr16, 1'b0};
+				Decode_AllCtr	 = allCtr16;
 				Decode_RdAddr	 = rdAddr16;
 				Decode_Imm		 = imm16;
 				Decode_ImmSel	 = immSel16;
@@ -334,6 +334,7 @@ module ControlDecode16(
 						wbRdEn,
 						csrCmd,
 						illegal,
+						1'b0,
 						(| brType)
 						};
 	
@@ -351,7 +352,7 @@ module ControlDecode16(
 				//`C_FSW      		:	localAllCtr = {`A_RS1,  `B_IMM, `CL	, 	`ALU_ADD   	, `BR_XXX,	`ST_SW , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_SHORT	};
 				`C_NOP      		:	localAllCtr = {`A_XXX,  `B_XXX, `CXX, 	`ALU_XXX   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_XXX, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_XXX		};
 				`C_ADDI     		:	localAllCtr = {`A_RS1,  `B_IMM, `CI	, 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_LONG	};
-				`C_JAL      		:	localAllCtr = {`A_PC ,  `B_IMM, `CJ	, 	`ALU_JAL   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED  	};
+				`C_JAL      		:	localAllCtr = {`A_PC ,  `B_IMM, `CJ	, 	`ALU_JAL   	, `BR_J,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED  	};
 				`C_LI       		:	localAllCtr = {`A_RS1,  `B_IMM, `CI , 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_ADDI16SP 		:	localAllCtr = {`A_RS1,  `B_IMM, `CI , 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_LUI      		:	localAllCtr = {`A_PC ,  `B_IMM, `CI , 	`ALU_COPY_B , `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_LONG	};
@@ -362,17 +363,17 @@ module ControlDecode16(
 				`C_XOR      		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_XOR   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_SHORT	};
 				`C_OR       		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_OR   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_SHORT	};
 				`C_AND      		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_AND   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_SHORT	};
-				`C_J        		:	localAllCtr = {`A_PC ,  `B_IMM, `CJ	, 	`ALU_JAL   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED  	};
+				`C_J        		:	localAllCtr = {`A_PC ,  `B_IMM, `CJ	, 	`ALU_JAL   	, `BR_J,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED  	};
 				`C_BEQZ     		:	localAllCtr = {`A_PC ,  `B_IMM, `CB , 	`ALU_BEQ   	, `BR_EQ ,	`ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_BNEZ     		:	localAllCtr = {`A_PC ,  `B_IMM, `CB , 	`ALU_BNE   	, `BR_NE ,	`ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_SLLI     		:	localAllCtr = {`A_RS1,  `B_IMM, `CI , 	`ALU_SLL   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_LONG	};
 				//`C_FLDSP    		:	localAllCtr = {`A_RS1,  `B_IMM, `CL	, 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_LW , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_SHORT	};
 				`C_LWSP     		:	localAllCtr = {`A_RS1,  `B_IMM, `CSS, 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_LW , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				//`C_FLWSP    		:	localAllCtr = {`A_RS1,  `B_IMM, `CXX, 	`ALU_XXX   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_FENCE,	`FLUSH_XXX,		`IS_16BIT,	`RF_XXX		};
-				`C_JR       		:	localAllCtr = {`A_RS1,  `B_IMM, `CXX, 	`ALU_JALR   , `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
+				`C_JR       		:	localAllCtr = {`A_RS1,  `B_IMM, `CXX, 	`ALU_JALR   , `BR_J,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_MV       		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_ADD    , `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_EBREAK   		:	localAllCtr = {`A_XXX,  `B_XXX, `CXX, 	`ALU_XXX	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_XXX		};
-				`C_JALR     		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_JALR   , `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
+				`C_JALR     		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_JALR   , `BR_J,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
 				`C_ADD      		:	localAllCtr = {`A_RS1,  `B_RS2, `CXX, 	`ALU_ADD   	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_LONG	};
 				//`C_FSDSP    		:	localAllCtr = {`A_RS1,  `B_IMM, `CXX, 	`ALU_CSR  	, `BR_XXX,	`ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_C, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_XXX		};
 				`C_SWSP     		:	localAllCtr = {`A_RS1,  `B_IMM, `CSS, 	`ALU_ADD   	, `BR_XXX,	`ST_SW , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_16BIT,	`RF_FIXED	};
@@ -566,6 +567,7 @@ module InstrTypeDecode32(
 								`FUNCT3_3   :	iEncode = `LD;
 								`FUNCT3_4   :	iEncode = `LBU;
 								`FUNCT3_5   :	iEncode = `LHU;
+								`FUNCT3_6   :   iEncode = `LWH;
 								default		:	iEncode = `UNKNOWN;
 							endcase
 			`OP_STORE	: 
@@ -574,6 +576,7 @@ module InstrTypeDecode32(
 								`FUNCT3_1   :	iEncode = `SH;
 								`FUNCT3_2   :	iEncode = `SW;
 								`FUNCT3_3   :	iEncode = `SD;
+								`FUNCT3_4   :   iEncode = `SWH;
 								default		:	iEncode = `UNKNOWN;
 							endcase
 			`OP_IMM_ALU	:
@@ -826,8 +829,15 @@ module InstrTypeDecode32(
 								`SIMD_SRA    : iEncode = `S_SRA;
 								`SIMD_MV_S_I : iEncode = `S_MV_S_I;
 								`SIMD_MV_I_S : iEncode = `S_MV_I_S;
+								`SIMD_SHUFFLE: iEncode = `SHUFFLE;
 								default    : iEncode = `UNKNOWN;
 						    endcase
+			`OP_I_SIMD  :
+			                case(funct3)
+								`FUNCT3_0 : iEncode = `SHUFFLE_SET;
+								`FUNCT3_1 : iEncode = `MASK_SET;
+								default   : iEncode = `UNKNOWN;
+							endcase
 			`OP_ZERO	:   iEncode = `UNKNOWN;
 			default		:	iEncode = `UNKNOWN;
 		endcase
@@ -1013,17 +1023,22 @@ module ControlDecode32(
                 `FCVT_DW  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
                 `FCVT_DWU : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
 
-				`S_ADD    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_SUB    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SUB   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_MUL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULH   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_UMUL   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MUL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_SRL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_SLL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`S_SRA    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_ADD    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_ADD   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_SUB    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SUB   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_MUL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MULH   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_UMUL   : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_MUL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_SRL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_SLL    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SLL   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
+				`S_SRA    : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SRA   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
 				`S_MV_S_I : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SMVSI 	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
 				`S_MV_I_S : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SMVIS 	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      funct2};
-				`SD       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SB , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
-				`LD       :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LB , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
+				`SD       :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SD , `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      2'b0};
+				`LD       :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LD , `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,      2'b0};
+				`SWH      :	localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_S, `ALU_ADD   	, `BR_XXX, `N, `ST_SWH, `LD_XXX, `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
+				`LWH      :	localAllCtr = {`PC_0  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_ADD   	, `BR_XXX, `Y, `ST_XXX, `LD_LWH, `WB_MEM, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,      2'b0};
+				`SHUFFLE  : localAllCtr = {`PC_4  	, `A_RS1,  `B_RS2, `IMM_X, `ALU_SHUFFLE  , `BR_XXX, `Y, `ST_XXX, `LD_XXX , `WB_ALU, `Y, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b1,    2'b0};
+				`SHUFFLE_SET : localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_SHUFFLE_SET , `BR_XXX, `Y, `ST_XXX, `LD_XXX , `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT, 1'b0,    2'b0};
+				`MASK_SET : localAllCtr = {`PC_4  	, `A_RS1,  `B_IMM, `IMM_I, `ALU_MASK_SET , `BR_XXX, `Y, `ST_XXX, `LD_XXX , `WB_ALU, `N, `CSR_N, `N,	`STALL_XXX,		`FLUSH_XXX,		`IS_32BIT,	   1'b0,    2'b0};
 				default:	localAllCtr = {`PC_4  	, `A_XXX,  `B_XXX, `IMM_X, `ALU_XXX   	, `BR_XXX, `N, `ST_XXX, `LD_XXX, `WB_ALU, `N, `CSR_N, `Y,	`STALL_XXX,		`FLUSH_ILLEGAL,	`IS_XXBIT,	   1'b1,      funct2};
 		endcase
 endmodule

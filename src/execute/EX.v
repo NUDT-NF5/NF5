@@ -90,6 +90,8 @@ rv32ic_warp rv32ic  (
                      .IDEX_LdType(IDEX_LdType),
                      .IDEX_StType(IDEX_StType),
                      .Mem_DcacheEN(Mem_DcacheEN),
+                     .clk(clk),
+                     .rst_n(rst_n),
                      .EX_AluData(AluData_ic),
                      .EX_BranchPC(EX_BranchPC_tmp),
                      .EX_BranchFlag(EX_Branch),
@@ -153,6 +155,7 @@ assign EX_FpuReady = fpu_en;
 assign EX_StallReq = div_start && (~div_ready) || fpu_stall;
 assign fpu_en = fpu_in_valid && fpu_out_valid;
 assign EX_BranchFlag = EX_Branch ^ IDEX_BpFlag && IDEX_IsBr;
-assign EX_BranchPC = (EX_Branch && EX_BranchFlag) ? EX_BranchPC_tmp : IDEX_NowPC + 32'd4;
+assign EX_BranchPC = (EX_Branch && EX_BranchFlag) ? EX_BranchPC_tmp : 
+                                 (IDEX_16BitFlag) ? IDEX_NowPC + 32'd2 : IDEX_NowPC + 32'd4;
 
 endmodule // EX

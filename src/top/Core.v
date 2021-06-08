@@ -85,8 +85,8 @@ module Core(
     wire           							EXMem_WbSel;
     wire    [`LD_TYPE_WIDTH - 1:0]          EXMem_StType;
     wire    [`ST_TYPE_WIDTH - 1:0]          EXMem_LdType;
-    wire	[`FUNCT3_WIDTH - 1 : 0]	        EXMEM_Rm;
-    wire                                    EXMEM_SimdEN;
+    wire	[`FUNCT3_WIDTH - 1 : 0]	        EXMem_Rm;
+    wire                                    EXMem_SimdEN;
 
     wire                          		 	Mem_LdEn;        
     wire                          		 	Mem_DcacheEn;    
@@ -94,6 +94,8 @@ module Core(
     wire  	[1:0]      			  			Mem_DcacheWidth; 
     wire  	[`ADDR_WIDTH-1  :0]     		Mem_DcacheAddr;
 	wire									Mem_DcacheSign;   
+	wire 									rd_high;	
+	wire 									wr_high;	
 
 	wire  	[`SIMD_DATA_WIDTH-1  :0]        Dcache_DataRd;
 	wire  	[`DATA_WIDTH-1  :0]      		Icache_Instr;
@@ -257,7 +259,7 @@ wire 						  mask_ena;
 wire [`FUNCT3_WIDTH - 1:0]    funct3;
 wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs1;
 wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
-
+wire wEN1 = IDEX_WbRdEn && ~EX_StallReq && (IDEX_LdType == `LD_XXX);
 	RegFile i_RegFile(
 		.clk(clk),
 		.rst_n(rst_n),
@@ -269,17 +271,18 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		.rData2(RF_Rs2Data),
 		.rAddr3(IDEX_Rs3Addr),
 		.rData3(RF_Rs3Data),
-        .horizontal(MemWb_Rm[2]),
-        .simd_ctl(MemWb_Rm[1:0]),
-		.rd_high(1'b0),
-		.wEN1(IDEX_WbRdEn),
+        .horizontal(1'b0),
+        .simd_ctl(2'b0),
+		.rd_high(rd_high),
+		.wEN1(wEN1),
 		.wAddr1(IDEX_RdAddr),
 		.wData1(EX_AluData),
         .simd_ena1(IDEX_SimdEN),
 		.wEN2(EXMem_RdWrtEn),
 		.wAddr2(EXMem_RdAddr),
 		.wData2(Dcache_DataRd),
-        .simd_ena2(EXMem_SimdEN)
+        .simd_ena2(EXMem_SimdEN),
+		.wr_high(wr_high)
 	);
 
 	EXHazard i_EXHazard(
@@ -293,13 +296,15 @@ wire [`SIMD_DATA_WIDTH - 1:0] reorgnaized_rs2;
 		.mask_ena(IDEX_Fmt[0]),
 		.simd_ena(IDEX_SimdEN),
 		.funct3(IDEX_Rm),
+		.IDEX_StType(IDEX_StType),
 		.EXMem_RdAddr(EXMem_RdAddr),
 		.EXMem_AluData(EXMem_AluData),
 		.Dcache_DataRd(Dcache_DataRd),
 		.Mem_LdEN(Mem_LdEn),
 		.EXHazard_Rs1Data(EXHazard_Rs1Data),
 		.EXHazard_Rs2Data(EXHazard_Rs2Data),
-		.EXHazard_Rs3Data(EXHazard_Rs3Data)
+		.EXHazard_Rs3Data(EXHazard_Rs3Data),
+		.rd_high(rd_high)
 	);
 
 	EX i_EX (
@@ -414,8 +419,8 @@ wire [31:0] EXMEM_NowPC;
 				EXMem_RdWrtEn,
 				EXMem_WbSel,
                 EXMEM_NowPC,
-                EXMEM_SimdEN,
-                EXMEM_Rm
+                EXMem_SimdEN,
+                EXMem_Rm
 			} 
 		)
 	);
@@ -430,7 +435,9 @@ wire [31:0] EXMEM_NowPC;
 		.Mem_DcacheSign(Mem_DcacheSign),  
 		.Mem_DcacheWidth(Mem_DcacheWidth), 
 		.Mem_DcacheAddr(Mem_DcacheAddr),
-        .Csr_Memflush(Csr_Memflush)//new   
+        .Csr_Memflush(Csr_Memflush),//new 
+		.rd_high(),
+		.wr_high(wr_high)
     ); 	
 	
 	Dcache i_Dcache(

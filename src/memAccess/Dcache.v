@@ -84,7 +84,7 @@ always@(posedge clk or negedge rst_n)
         2'b10:     data[addr][sel_byte+:'d32] <= EXMem_Rs2Data['d32-1:0];
         2'b11: begin
                    data[addr][sel_byte+:'d32]   <= EXMem_Rs2Data['d32-1:0];
-                   data[addr+1][sel_byte+:'d32] <= EXMem_Rs2Data['d32-1:0];
+                   data[addr+1][sel_byte+:'d32] <= EXMem_Rs2Data[63:32];
         end
         default:   data[addr] <= data[addr];
 	    endcase

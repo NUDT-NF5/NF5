@@ -20,8 +20,8 @@ wire [3:0]   mask;
 wire [3:0]   carry;
 wire [63:0]  s_temp;
 
-assign mask = (simd_ctl[0] && simd_ena) ? 4'b1010 :
-              (simd_ctl[1] && simd_ena) ? 4'b0    :
+assign mask = (simd_ctl[0] && simd_ena) ? 4'b1011 :
+              (simd_ctl[1] && simd_ena) ? 4'b0001 :
                                           4'b1111 ;
 
 assign carry = {c_temp[2:0], ci};

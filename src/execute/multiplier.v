@@ -76,7 +76,7 @@ mul32 mul32_3(
     .c(mul_32_3)
 );
 
-genvar i;
+/*genvar i;
 generate
     for (i = 0; i < 32; i = i + 1) begin : layer0_0
         csa adder_layer0_0(
@@ -112,11 +112,11 @@ wallace_out(
     .op2({mul_32_3[63:32], wallace_layer0_1, wallace_layer0_0[31:1]}),
     .s(c_temp)
 );
-
-assign wallace_out_temp = {c_temp, wallace_layer0_0[0], mul_32_0[31:0]};
+*/
+//assign wallace_out_temp = {c_temp, wallace_layer0_0[0], mul_32_0[31:0]};
 assign mul64_out = simd_ena ? {mul_32_3, mul_32_0} : 
-                   convert  ? ~wallace_out_temp + 1 :
-                              wallace_out_temp;
+                   convert  ? ~mul_32_0 + 1 :
+                              mul_32_0;
 
 endmodule
 

@@ -32,7 +32,8 @@ module RegFile
 	input								wEN2,
 	input	[`RF_ADDR_WIDTH - 1 : 0]	wAddr2,
 	input	[`SIMD_DATA_WIDTH - 1 : 0]	wData2,
-	input 								simd_ena2
+	input 								simd_ena2,
+	input                               wr_high
 );
 	reg     [`DATA_WIDTH - 1 : 0]       regFiles [0 : `RF_NUMBER*2 - 1];
 
@@ -51,13 +52,13 @@ module RegFile
 	wire   wEn2   = wEN2;
 
     assign rData1 = simd_ena1 ? {regFiles[true_rAddr1_h], regFiles[true_rAddr1]} : 
-                    rd_high   ? {32'b0, regFiles[true_rAddr1_h]}                :
+                    //rd_high   ? {32'b0, regFiles[true_rAddr1_h]}                :
                                 {32'b0, regFiles[true_rAddr1]};
 	assign rData2 = simd_ena1 ? {regFiles[true_rAddr2_h], regFiles[true_rAddr2]} : 
                     rd_high   ? {32'b0, regFiles[true_rAddr2_h]}                :
                                 {32'b0, regFiles[true_rAddr2]};
     assign rData3 = simd_ena1 ? {regFiles[true_rAddr3_h], regFiles[true_rAddr3]} : 
-                    rd_high   ? {32'b0, regFiles[true_rAddr3_h]}                :
+                    //rd_high   ? {32'b0, regFiles[true_rAddr3_h]}                :
                                 {32'b0, regFiles[true_rAddr3]};
 
 	integer i;
@@ -69,6 +70,9 @@ module RegFile
 			if(simd_ena2)begin
 				regFiles[true_wAddr2]   <= wData2[`DATA_WIDTH - 1 : 0];
 				regFiles[true_wAddr_h2] <= wData2[`DATA_WIDTH+:`DATA_WIDTH];
+			end
+			else if(wr_high)begin
+				regFiles[true_wAddr_h2] <= wData2[`DATA_WIDTH - 1:0];
 			end
 			else begin
 				regFiles[true_wAddr2] <= wData2[`DATA_WIDTH - 1 : 0];
@@ -92,7 +96,11 @@ module RegFile
 				regFiles[true_wAddr2]   <= wData2[`DATA_WIDTH - 1 : 0];
 				regFiles[true_wAddr_h2] <= wData2[`DATA_WIDTH+:`DATA_WIDTH];
 			end
-			else
+			else if(wr_high)begin
+				regFiles[true_wAddr_h2] <= wData2[`DATA_WIDTH - 1:0];
+			end
+			else begin
 				regFiles[true_wAddr2] <= wData2[`DATA_WIDTH - 1 : 0];
+			end
 
 endmodule

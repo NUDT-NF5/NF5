@@ -19,11 +19,15 @@ module alu_ic_dispatcher(
     input       [2:0]                    comparator_result,
     input       [2:0]                    ucomparator_result,
     input       [`SIMD_DATA_WIDTH - 1:0] shift_result,
+    input       [`SIMD_DATA_WIDTH - 1:0] shuffle_result,
 
     input       [`DATA_WIDTH - 1:0]      Csr_RdData,
     input       [`LD_TYPE_WIDTH - 1:0]   IDEX_LdType,
     input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
     input                                Mem_DcacheEN,
+
+    input                                clk,
+    input                                rst_n,
 
     output reg  [`SIMD_DATA_WIDTH - 1:0] arithmetic_s1,
     output reg  [`SIMD_DATA_WIDTH - 1:0] arithmetic_s2,
@@ -36,7 +40,10 @@ module alu_ic_dispatcher(
     output reg  [`SIMD_DATA_WIDTH - 1:0] shift_s1,
     output reg  [4:0]                    shift_s2,
     output reg  [2:0]                    shift_type,
-
+    output reg  [`SIMD_DATA_WIDTH - 1:0] shuffle_rs1,
+    output reg  [`SIMD_DATA_WIDTH - 1:0] shuffle_rs2,
+    output reg  [`DATA_WIDTH - 1:0]      shuffle_ctl,
+    output reg                           shuffle_ctl_en,
 
     output reg  [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
     output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
@@ -210,6 +217,44 @@ always @(*) begin
     endcase
 end
 
+//shuffle unit
+always @(*) begin
+    shuffle_ctl    = 32'b0;
+    shuffle_ctl_en = 1'b0;
+    shuffle_rs1     = 64'b0;
+    shuffle_rs2     = 64'b0;
+    case (IDEX_AluOp)
+        `ALU_SHUFFLE : begin
+            shuffle_rs1 = s1;
+            shuffle_rs2 = s2;
+        end
+        `ALU_SHUFFLE_SET : begin
+            shuffle_ctl = s2[`DATA_WIDTH - 1:0];
+            shuffle_ctl_en = 1'b1;
+        end
+        default : begin
+            shuffle_ctl    = 32'b0;
+            shuffle_ctl_en = 1'b0;
+            shuffle_rs1     = 64'b0;
+            shuffle_rs2     = 64'b0;
+        end
+    endcase
+end
+
+//mask unit
+reg [5:0] mask;
+always @(posedge clk or negedge rst_n) begin
+    if(~rst_n)
+        mask = 6'b0;
+    else if(IDEX_AluOp == `ALU_MASK_SET)
+        mask = s2[5:0];
+end
+
+wire [63:0] mask_ext_rev = {{16{~mask[3]}}, {16{~mask[2]}},
+                            {16{~mask[1]}}, {16{~mask[0]}}};
+wire [63:0] mask_ext = {{16{mask[3]}}, {16{mask[2]}},
+                        {16{mask[1]}}, {16{mask[0]}}};
+
 //AluData output selection
 always @(*) begin
     case (IDEX_AluOp)
@@ -270,15 +315,25 @@ always @(*) begin
             alu_ic_en = 1'b1;
         end
         `ALU_CSR : begin
-            EX_AluData = Csr_RdData;
+            EX_AluData = {32'b0, Csr_RdData};
+            alu_ic_en = 1'b1;
+        end
+        `ALU_SHUFFLE : begin
+            EX_AluData = shuffle_result;
             alu_ic_en = 1'b1;
         end
         default : begin
-            EX_AluData    = 32'b0;
+            EX_AluData    = 64'b0;
             alu_ic_en = 1'b0;
         end
     endcase
 end
+
+assign EX_AluData_Final = (mask[5:4] == 2'b0) ? EX_AluData & mask_ext_rev :
+                          (mask[5:4] == 2'b11) ? EX_AluData | mask_ext    :
+                          (mask[5]) ? (EX_AluData & mask_ext_rev) | (s2 & mask_ext) :
+                          (mask[4]) ? (EX_AluData & mask_ext_rev) | (s1 & mask_ext) :
+                          EX_AluData;
 
 //BranchFlag output selection
 always @(*) begin

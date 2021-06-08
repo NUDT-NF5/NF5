@@ -29,6 +29,7 @@
 ../src/execute/fpu/common_cells/lzc.sv
 ../src/execute/EXHazard.v
 ../src/execute/fpu_warp.sv
+../src/execute/ShuffleUnit.v
 ../src/execute/rv32m_warp.v
 ../src/execute/adder32.v
 ../src/execute/multiplier.v

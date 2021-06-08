@@ -149,7 +149,7 @@ always @(*) begin
                     2'b01:
                         EX_AluData = {mul_result[64+:32], mul_result[0+:32]};
                     2'b10:
-                        EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
+                        EX_AluData = {mul_result[96+:16], mul_result[64+:16], mul_result[32+:16],mul_result[0+:16]};
                     default:
                         EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[0+:`DATA_WIDTH]};
                 endcase
@@ -163,7 +163,7 @@ always @(*) begin
                     2'b01:
                         EX_AluData = {mul_result[64+:32], mul_result[0+:32]};
                     2'b10:
-                        EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
+                        EX_AluData = {mul_result[96+:16], mul_result[64+:16], mul_result[32+:16],mul_result[0+:16]};
                     default:
                         EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase
@@ -177,7 +177,7 @@ always @(*) begin
                     2'b01:
                         EX_AluData = {mul_result[64+:32], mul_result[0+:32]};
                     2'b10:
-                        EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
+                        EX_AluData = {mul_result[96+:16], mul_result[64+:16], mul_result[32+:16],mul_result[0+:16]};
                     default:
                         EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase
@@ -191,7 +191,7 @@ always @(*) begin
                     2'b01:
                         EX_AluData = {mul_result[64+:32], mul_result[0+:32]};
                     2'b10:
-                        EX_AluData = {mul_result[0+:16], mul_result[32+:16], mul_result[64+:16], mul_result[96+:16]};
+                        EX_AluData = {mul_result[96+:16], mul_result[64+:16], mul_result[32+:16],mul_result[0+:16]};
                     default:
                         EX_AluData = {{(`SIMD_DATA_WIDTH - `DATA_WIDTH){1'b0}}, mul_result[`DATA_WIDTH+:`DATA_WIDTH]};
                 endcase

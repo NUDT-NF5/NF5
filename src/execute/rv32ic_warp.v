@@ -14,6 +14,9 @@ module rv32ic_warp(
     input       [`ST_TYPE_WIDTH - 1:0]   IDEX_StType,
     input                                Mem_DcacheEN,
 
+    input                                clk,
+    input                                rst_n,
+
     output      [`SIMD_DATA_WIDTH - 1:0] EX_AluData,
     output      [`ADDR_WIDTH - 1:0]      EX_BranchPC,
     output                               EX_BranchFlag,
@@ -46,6 +49,13 @@ wire            [4:0]                    shift_s2;
 wire            [2:0]                    shift_type;
 wire            [`SIMD_DATA_WIDTH - 1:0] shift_result;
 
+//shuffle
+wire            [`SIMD_DATA_WIDTH - 1:0] shuffle_rs1;
+wire            [`SIMD_DATA_WIDTH - 1:0] shuffle_rs2;
+wire            [`DATA_WIDTH - 1:0]      shuffle_ctl;
+wire                                     shuffle_ctl_en;
+wire            [`SIMD_DATA_WIDTH - 1:0] shuffle_result;
+
 alu_ic_dispatcher idp0(
                      .s1(s1),
                      .s2(s2), 
@@ -58,10 +68,13 @@ alu_ic_dispatcher idp0(
                      .comparator_result(comparator_result), 
                      .ucomparator_result(ucomparator_result), 
                      .shift_result(shift_result), 
+                     .shuffle_result(shuffle_result),
                      .Csr_RdData(Csr_RdData), 
                      .IDEX_LdType(IDEX_LdType), 
                      .IDEX_StType(IDEX_StType), 
                      .Mem_DcacheEN(Mem_DcacheEN), 
+                     .clk(clk),
+                     .rst_n(rst_n),
                      .arithmetic_s1(arithmetic_s1), 
                      .arithmetic_s2(arithmetic_s2), 
                      .arithop_sp(arithop_sp), 
@@ -73,6 +86,10 @@ alu_ic_dispatcher idp0(
                      .shift_s1(shift_s1), 
                      .shift_s2(shift_s2), 
                      .shift_type(shift_type), 
+                     .shuffle_rs1(shuffle_rs1),
+                     .shuffle_rs2(shuffle_rs2),
+                     .shuffle_ctl(shuffle_ctl),
+                     .shuffle_ctl_en(shuffle_ctl_en),
                      .EX_AluData(EX_AluData), 
                      .EX_BranchPC(EX_BranchPC),
                      .EX_BranchFlag(EX_BranchFlag), 
@@ -105,5 +122,14 @@ shift alu_shift     (.shift_s1(shift_s1),
                      .simd_ena(simd_ena),
                      .simd_ctl(simd_ctl),
                      .shift_result(shift_result));
+
+ShuffleUnit shuffle (.rs1(shuffle_rs1),
+                     .rs2(shuffle_rs2),
+                     .clk(clk),
+                     .rst_n(rst_n),
+                     .shuffle_ctl(shuffle_ctl),
+                     .shuffle_ctl_en(shuffle_ctl_en),
+                     .shuffle_result(shuffle_result)
+);
 
 endmodule

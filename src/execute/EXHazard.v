@@ -22,6 +22,7 @@ module EXHazard(
     input                             mask_ena,
     input                             simd_ena,
     input  [`FUNCT3_WIDTH - 1 : 0]    funct3,
+    input  [`ST_TYPE_WIDTH - 1 : 0]   IDEX_StType, 
     
     //EXMem -> EXHazard
     input  [`RF_ADDR_WIDTH - 1 : 0]   EXMem_RdAddr,
@@ -35,7 +36,9 @@ module EXHazard(
     //EXHazard -> IDEX
     output reg [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs1Data,
     output reg [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs2Data,
-    output     [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs3Data
+    output     [`SIMD_DATA_WIDTH - 1 : 0] EXHazard_Rs3Data,
+
+    output                            rd_high
 );
     reg                               rs1Sel;
     reg                               rs2Sel;
@@ -116,12 +119,12 @@ always @*
     if(simd_ena && funct3[2])  //horizontal operation
         case(funct3[1:0])
             `SIMD16 : begin
-                rs1_temp = {rs1[63:48], rs2[63:48], rs1[31:16], rs2[31:16]};
-                rs2_temp = {rs1[47:32], rs2[47:32], rs1[15:0],  rs2[15:0]};
+                rs1_temp = {rs2[63:48], rs2[31:16], rs1[63:48], rs1[31:16]};
+                rs2_temp = {rs2[47:32], rs2[15:0],  rs1[47:32], rs1[15:0]};
             end
             `SIMD32 : begin
-                rs1_temp = {rs1[63:32], rs2[63:32]};
-                rs2_temp = {rs1[31:0],  rs2[31:0]};
+                rs1_temp = {rs2[63:32], rs1[63:32]};
+                rs2_temp = {rs2[31:0],  rs1[31:0]};
             end
             default : begin
                 rs1_temp = rs1;
@@ -155,5 +158,7 @@ always @*
         EXHazard_Rs1Data = rs1_temp;
         EXHazard_Rs2Data = rs2_temp;
     end
+
+assign rd_high = (IDEX_StType == `ST_SWH) ? 1 : 0;
 
 endmodule
